@@ -585,17 +585,46 @@
         function editHalaqah(namaLama) { let n = prompt("Ubah Nama Kelas:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { dbP[n.trim()] = dbP[namaLama]; delete dbP[namaLama]; renderTabelAdmin(); postCRUD('crud_edit', 'Kelas', namaLama, [n.trim()]); } }
         function editSantri(halaqah, namaLama) { let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); if(n && n.trim() !== "" && n !== namaLama) { let idx = dbP[halaqah].indexOf(namaLama); if(idx > -1) dbP[halaqah][idx] = n.trim(); renderTabelSantriAdmin(); postCRUD('crud_edit', 'Murid', halaqah + "_" + namaLama, [halaqah, n.trim()]); } }
 
+        // =========================================================
+        // --- FIX: RENDER TABEL ADMIN DENGAN PENGAMAN TANDA PETIK ---
+        // =========================================================
         function renderTabelAdmin() {
             let g = '', h = '';
-            dAkun.forEach(n => g += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editGuru('${n}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${n}','Guru')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`);
-            for(let n in dbP) h += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editHalaqah('${n}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${n}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`;
+            
+            // Render Tabel Guru (Perbaikan Utama)
+            dAkun.forEach(n => {
+                // FIX: Escape tanda petik tunggal agar tidak merusak JavaScript onClick
+                const escapedName = n.replace(/'/g, "\\'");
+                g += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editGuru('${escapedName}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${escapedName}','Guru')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`;
+            });
+            
+            // Render Tabel Kelas (Perbaikan untuk Robustness)
+            for(let n in dbP) {
+                // FIX: Escape tanda petik tunggal
+                const escapedHalaqah = n.replace(/'/g, "\\'");
+                h += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`;
+            }
+            
             document.getElementById('tabel-guru').innerHTML = g || '<p style="color:var(--text-mute); text-align:center; font-size:13px; font-weight:700;">Kosong</p>'; 
             document.getElementById('tabel-halaqah').innerHTML = h || '<p style="color:var(--text-mute); text-align:center; font-size:13px; font-weight:700;">Kosong</p>';
-            renderTabelSantriAdmin(); renderHalaqahDropdowns();
+            
+            renderTabelSantriAdmin(); // Merender murid
+            renderHalaqahDropdowns(); // Mengupdate dropdown pilihan kelas
         }
+
+        // =========================================================
+        // --- FIX: RENDER TABEL SANTRI DENGAN PENGAMAN TANDA PETIK ---
+        // =========================================================
         function renderTabelSantriAdmin() {
             let h = document.getElementById('admin-pilih-halaqah').value, s = ''; if(!h) return;
-            (dbP[h] || []).forEach(n => s += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editSantri('${h}','${n}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${h}_${n}','Murid')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`);
+            (dbP[h] || []).forEach(n => {
+                // FIX: Escape tanda petik tunggal untuk Kelas, Nama, dan ID Hapus
+                const escapedHalaqah = h.replace(/'/g, "\\'");
+                const escapedNamaLama = n.replace(/'/g, "\\'");
+                const escapedDeleteId = `${escapedHalaqah}_${escapedNamaLama}`;
+
+                s += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editSantri('${escapedHalaqah}','${escapedNamaLama}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${escapedDeleteId}','Murid')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`;
+            });
             document.getElementById('tabel-santri').innerHTML = s || '<p style="color:var(--text-mute); text-align:center; font-size:13px; font-weight:700;">Kosong</p>';
         }
 
