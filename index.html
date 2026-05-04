@@ -187,7 +187,6 @@
             
             <button onclick="bukaPortalOrtu()" style="background: linear-gradient(135deg, var(--gold-accent), #B45309); color: white; border: none; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">👨‍👩‍👧‍👦 Pantau Hafalan Anak</button>
             
-            <!-- TOMBOL ADMIN DIPERBAIKI AGAR 100% BISA DIKLIK -->
             <button type="button" onclick="bukaModalAdminLogin()" style="background: transparent; box-shadow: none; border: 2px dashed #CBD5E1; color: #64748B; margin-top: 30px; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; width: 100%; padding: 18px; border-radius: 16px;">
                 ⚙️ Akses Administrator Pusat
             </button>
@@ -226,8 +225,9 @@
         <div class="card">
             <div class="section-title">Database Kelas</div>
             <div class="flex-row">
-                <input type="text" id="nama-halaqah-baru" placeholder="Ketik nama kelas..." style="margin:0;">
-                <button id="btn-tambah-kelas" onclick="tambahHalaqah()" style="width: 65px; margin:0; font-size:20px;">+</button>
+                <!-- FITUR INPUT MASAL UNTUK KELAS DITAMBAHKAN DI SINI -->
+                <textarea id="nama-halaqah-baru" placeholder="Ketik atau COPY-PASTE nama kelas (1 baris 1 kelas)..." style="margin:0; height:80px;"></textarea>
+                <button id="btn-tambah-kelas" onclick="tambahHalaqah()" style="width: 65px; margin:0; align-self: stretch; font-size:20px;">+</button>
             </div>
             <div id="tabel-halaqah" class="list-container" style="margin-top:20px;"></div>
         </div>
@@ -450,7 +450,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- JAVASCRIPT UTAMA (KODE SUDAH DIBERSIHKAN DARI DUPLIKASI DAN DIOPTIMALKAN) -->
+    <!-- JAVASCRIPT UTAMA -->
     <!-- ========================================================================= -->
     <script>
         // ⚠️ MASUKKAN URL GOOGLE SCRIPT ANTUM DI BAWAH INI
@@ -510,41 +510,41 @@
             else { document.getElementById('login-page').classList.remove('hidden'); }
         }
 
+        // --- TARIK DATA ---
         function tarikDataServer(asal) {
             fetch(scriptURL).then(r => r.json()).then(d => {
-                dProg = d.progres || {}; dRiw = d.riwayat || []; dAkun = d.guru || [];
+                dProg = d.progres || {}; dRiw = d.riwayat || []; 
+                dAkun = d.guru || []; 
                 dbP = {}; (d.halaqah || []).forEach(h => dbP[h] = []);
                 (d.santri || []).forEach(s => { if(dbP[s.halaqah]) dbP[s.halaqah].push(s.nama); });
                 
                 renderLogins(); if(asal === 'admin') renderTabelAdmin();
                 document.getElementById('teks-loading').innerText = "Terverifikasi Aman!";
                 setTimeout(() => { document.getElementById('splash-screen').classList.add('fade-out'); setTimeout(()=> { document.getElementById('splash-screen').style.display = 'none'; cekSesiAplikasi(); }, 800); }, 300);
-            }).catch(e => { console.warn("Menjalankan Mode Offline"); });
+            }).catch(e => { console.warn("Menjalankan Mode Offline", e); });
         }
 
-        function renderLogins() { let s = document.getElementById('select-muhaffiz'); s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; dAkun.forEach(n => s.appendChild(new Option(n, n))); }
-        function renderHalaqahDropdowns() { ['muhaffiz-pilih-halaqah', 'ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'].forEach(id => { let s = document.getElementById(id); s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); }); }
+        // =========================================================
+        // --- FITUR KEAMANAN: SERVER-SIDE FETCH ---
+        // =========================================================
+        function postCRUD(act, sh, id, d, btnId) { 
+            let btn; let oldText = "";
+            if(btnId) { btn = document.getElementById(btnId); oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true; }
+            fetch(scriptURL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                body: JSON.stringify({action: act, sheetName: sh, id_lama: id, rowData: d, rowsData: d, token: SECRET_KEY})
+            }).finally(() => { if(btn){ btn.innerText = oldText; btn.disabled = false; }});
+        }
 
-        // =========================================================
-        // --- SISTEM KEAMANAN (SERVER-SIDE FETCH) ---
-        // =========================================================
-        function bukaModalAdminLogin() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
-        function tutupModalAdminLogin() { document.getElementById('modal-admin-login').classList.add('hidden'); }
-        
         function loginAdmin() { 
             let p = document.getElementById('admin-password').value;
-            if(!p) return alert("Masukkan sandi!");
-            
-            // JIKA VERCEL MEMBLOKIR CORS, KITA GUNAKAN SISTEM PINTAR BERLAPIS INI
-            if(p === '@lQur4nKu77') { 
-                localStorage.setItem('sesi_halaman', 'admin');
-                tutupModalAdminLogin(); 
-                document.getElementById('login-page').classList.add('hidden'); 
-                document.getElementById('admin-page').classList.remove('hidden'); 
-                renderTabelAdmin(); 
-            } else { 
-                alert("⛔ Sandi Admin Salah!"); 
-            } 
+            let btn = document.getElementById('btn-login-admin'); let old = btn.innerText; btn.innerText = "⏳ Verifikasi..."; btn.disabled = true;
+            fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: "login_admin", sandi: p, token: SECRET_KEY }) })
+            .then(r => r.json()).then(res => {
+                if(res.result === 'sukses') { localStorage.setItem('sesi_halaman', 'admin'); tutupModalAdminLogin(); document.getElementById('login-page').classList.add('hidden'); document.getElementById('admin-page').classList.remove('hidden'); renderTabelAdmin(); } 
+                else { alert("⛔ Sandi Admin Salah!"); }
+            }).catch(e => { alert("⚠️ Gagal koneksi ke server untuk verifikasi sandi."); }).finally(() => { btn.innerText = old; btn.disabled = false; });
         }
 
         function loginMuhaffiz() {
@@ -552,77 +552,82 @@
             if(!n) return alert("Pilih nama Anda!");
             let btn = document.getElementById('btn-login-guru'); let old = btn.innerText; btn.innerText = "⏳ Memeriksa Sandi..."; btn.disabled = true;
             
-            fetch(scriptURL, { method: 'POST', body: JSON.stringify({ action: "login_guru", nama: n, sandi: p, token: SECRET_KEY }) })
+            fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: "login_guru", nama: n, sandi: p, token: SECRET_KEY }) })
             .then(r => r.json()).then(res => {
-                if(res.result === 'sukses') {
-                    guruAktif = n; localStorage.setItem('sesi_halaman', 'muhaffiz'); localStorage.setItem('sesi_user', n);
-                    document.getElementById('login-page').classList.add('hidden'); document.getElementById('muhaffiz-page').classList.remove('hidden');
-                    document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; renderHalaqahDropdowns();
-                } else { alert("⛔ Sandi Guru Salah!"); }
+                if(res.result === 'sukses') { guruAktif = n; localStorage.setItem('sesi_halaman', 'muhaffiz'); localStorage.setItem('sesi_user', n); document.getElementById('login-page').classList.add('hidden'); document.getElementById('muhaffiz-page').classList.remove('hidden'); document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; renderHalaqahDropdowns(); } 
+                else { alert("⛔ Sandi Guru Salah!"); }
             }).catch(e => {
-                // FALLBACK CERDAS: Jika browser menolak CORS, sistem otomatis pakai standar keamanan lokal
                 if(p === 'guru123') { 
-                    guruAktif = n; localStorage.setItem('sesi_halaman', 'muhaffiz'); localStorage.setItem('sesi_user', n);
-                    document.getElementById('login-page').classList.add('hidden'); document.getElementById('muhaffiz-page').classList.remove('hidden');
-                    document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; renderHalaqahDropdowns();
+                    guruAktif = n; localStorage.setItem('sesi_halaman', 'muhaffiz'); localStorage.setItem('sesi_user', n); document.getElementById('login-page').classList.add('hidden'); document.getElementById('muhaffiz-page').classList.remove('hidden'); document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; renderHalaqahDropdowns();
                 } else { alert("⛔ Sandi Guru Salah / Gagal Konek Server!"); }
             }).finally(() => { btn.innerText = old; btn.disabled = false; });
         }
 
-        function postCRUD(act, sh, id, d, btnId) { 
-            let btn; let oldText = "";
-            if(btnId) { btn = document.getElementById(btnId); oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true; }
-            fetch(scriptURL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({action: act, sheetName: sh, id_lama: id, rowData: d, rowsData: d, token: SECRET_KEY})
-            }).finally(() => { if(btn){ btn.innerText = oldText; btn.disabled = false; }});
+        function prosesGantiSandi() { 
+            let sLama = document.getElementById('input-sandi-lama').value, sBaru = document.getElementById('input-sandi-baru').value, sKon = document.getElementById('input-sandi-konfirmasi').value; 
+            if(sBaru.length < 5 || sBaru !== sKon) return alert("Sandi baru tidak valid / tidak cocok!"); 
+            let btn = document.getElementById('btn-proses-sandi'); let old = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+            fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: "ganti_sandi", nama: guruAktif, sandiBaru: sBaru, token: SECRET_KEY }) }).then(() => { alert("Sandi berhasil diperbarui!"); tutupModalGantiSandi(); }).finally(() => { btn.innerText = old; btn.disabled = false; }); 
         }
 
-        // --- CRUD ADMIN ---
+        // --- CRUD ADMIN DENGAN PERBAIKAN BATCH INPUT KELAS ---
         function tambahGuru() { let n = document.getElementById('nama-muhaffiz-baru').value.trim(); if(!n) return alert("⚠️ Nama tidak boleh kosong!"); if(dAkun.includes(n)) return alert("⚠️ Guru ini sudah ada!"); dAkun.push(n); document.getElementById('nama-muhaffiz-baru').value = ''; renderTabelAdmin(); postCRUD('crud_tambah', 'Guru', '', [n, 'guru123'], 'btn-tambah-guru'); }
-        function tambahHalaqah() { let n = document.getElementById('nama-halaqah-baru').value.trim(); if(!n) return alert("⚠️ Nama Kelas tidak boleh kosong!"); if(dbP[n]) return alert("⚠️ Kelas sudah ada!"); dbP[n] = []; document.getElementById('nama-halaqah-baru').value = ''; renderTabelAdmin(); postCRUD('crud_tambah', 'Kelas', '', [n], 'btn-tambah-kelas'); }
+        
+        function tambahHalaqah() { 
+            let d = document.getElementById('nama-halaqah-baru').value.trim(); 
+            if(!d) return alert("⚠️ Nama Kelas tidak boleh kosong!"); 
+            
+            let lines = d.split('\n'); 
+            let arr = [];
+            let added = false;
+            
+            lines.forEach(n => { 
+                let nm = n.trim(); 
+                if(nm !== "" && !dbP[nm]) { 
+                    arr.push([nm]); 
+                    dbP[nm] = []; // Update UI Lokal
+                    added = true;
+                } 
+            });
+            
+            if(arr.length > 0) { 
+                document.getElementById('nama-halaqah-baru').value = ''; 
+                renderTabelAdmin(); 
+                postCRUD('crud_tambah_batch', 'Kelas', '', arr, 'btn-tambah-kelas'); 
+            } else if (!added && lines.length > 0) {
+                alert("⚠️ Kelas sudah ada atau input tidak valid!");
+            }
+        }
+
         function tambahSantri() { let h = document.getElementById('admin-pilih-halaqah').value, d = document.getElementById('data-santri-baru').value.trim(); if(!h || !d) return alert("⚠️ Pilih Kelas dan ketik nama murid!"); let lines = d.split('\n'); let arr = []; lines.forEach(n => { let nm = n.trim(); if(nm !== "" && (!dbP[h] || !dbP[h].includes(nm))) { arr.push([h, nm]); if(!dbP[h]) dbP[h] = []; dbP[h].push(nm); } }); if(arr.length > 0) { document.getElementById('data-santri-baru').value = ''; renderTabelSantriAdmin(); postCRUD('crud_tambah_batch', 'Murid', '', arr, 'btn-tambah-murid'); } }
+        
         function hapusMaster(id, sh) { if(confirm("Hapus data ini permanen?")) { if(sh === 'Guru') { let i = dAkun.indexOf(id); if(i>-1) dAkun.splice(i,1); } if(sh === 'Kelas') delete dbP[id]; if(sh === 'Murid') { let parts = id.split('_'); let idx = dbP[parts[0]].indexOf(parts[1]); if(idx > -1) dbP[parts[0]].splice(idx, 1); } renderTabelAdmin(); postCRUD('crud_hapus', sh, id, []); } }
+        
         function editGuru(namaLama) { let n = prompt("Ubah Nama Guru:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { let i = dAkun.indexOf(namaLama); if(i>-1) dAkun[i] = n.trim(); renderTabelAdmin(); postCRUD('crud_edit', 'Guru', namaLama, [n.trim()]); } }
         function editHalaqah(namaLama) { let n = prompt("Ubah Nama Kelas:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { dbP[n.trim()] = dbP[namaLama]; delete dbP[namaLama]; renderTabelAdmin(); postCRUD('crud_edit', 'Kelas', namaLama, [n.trim()]); } }
         function editSantri(halaqah, namaLama) { let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); if(n && n.trim() !== "" && n !== namaLama) { let idx = dbP[halaqah].indexOf(namaLama); if(idx > -1) dbP[halaqah][idx] = n.trim(); renderTabelSantriAdmin(); postCRUD('crud_edit', 'Murid', halaqah + "_" + namaLama, [halaqah, n.trim()]); } }
 
-        // =========================================================
-        // --- FIX: RENDER TABEL ADMIN DENGAN PENGAMAN TANDA PETIK ---
-        // =========================================================
         function renderTabelAdmin() {
             let g = '', h = '';
-            
-            // Render Tabel Guru (Perbaikan Utama)
             dAkun.forEach(n => {
-                // FIX: Escape tanda petik tunggal agar tidak merusak JavaScript onClick
                 const escapedName = n.replace(/'/g, "\\'");
                 g += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editGuru('${escapedName}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${escapedName}','Guru')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`;
             });
-            
-            // Render Tabel Kelas (Perbaikan untuk Robustness)
             for(let n in dbP) {
-                // FIX: Escape tanda petik tunggal
                 const escapedHalaqah = n.replace(/'/g, "\\'");
                 h += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`;
             }
-            
             document.getElementById('tabel-guru').innerHTML = g || '<p style="color:var(--text-mute); text-align:center; font-size:13px; font-weight:700;">Kosong</p>'; 
             document.getElementById('tabel-halaqah').innerHTML = h || '<p style="color:var(--text-mute); text-align:center; font-size:13px; font-weight:700;">Kosong</p>';
-            
-            renderTabelSantriAdmin(); // Merender murid
-            renderHalaqahDropdowns(); // Mengupdate dropdown pilihan kelas
+            renderTabelSantriAdmin(); renderHalaqahDropdowns();
         }
 
-        // =========================================================
-        // --- FIX: RENDER TABEL SANTRI DENGAN PENGAMAN TANDA PETIK ---
-        // =========================================================
         function renderTabelSantriAdmin() {
             let h = document.getElementById('admin-pilih-halaqah').value, s = ''; if(!h) return;
             (dbP[h] || []).forEach(n => {
-                // FIX: Escape tanda petik tunggal untuk Kelas, Nama, dan ID Hapus
                 const escapedHalaqah = h.replace(/'/g, "\\'");
                 const escapedNamaLama = n.replace(/'/g, "\\'");
                 const escapedDeleteId = `${escapedHalaqah}_${escapedNamaLama}`;
-
                 s += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editSantri('${escapedHalaqah}','${escapedNamaLama}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7; padding:8px 12px;">✏️</button><button onclick="hapusMaster('${escapedDeleteId}','Murid')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; padding:8px 12px;">🗑️</button></div></div>`;
             });
             document.getElementById('tabel-santri').innerHTML = s || '<p style="color:var(--text-mute); text-align:center; font-size:13px; font-weight:700;">Kosong</p>';
@@ -633,7 +638,10 @@
         function setJuzUI(str, isOrtu) { let p = isOrtu ? 'o-j-' : 'm-j-'; for(let i=1; i<=30; i++) { let el = document.getElementById(p+i); if(el) el.classList.remove('aktif'); } let arr = (str && str !== "-") ? str.split(',').map(Number) : []; arr.forEach(n => { let el = document.getElementById(p+n); if(el) el.classList.add('aktif'); }); if(!isOrtu) { selJuz = arr; document.getElementById('total-juz-teks').innerText = arr.length; document.getElementById('input-juz-hidden').value = arr.join(','); } }
         function updateMateriUI() { let a = document.getElementById('input-surah').value, b = document.getElementById('input-surah-akhir').value; document.getElementById('wadah-ayat').style.display = (a && b && a!==b) ? 'none' : 'grid'; if(a) { let aw = document.getElementById('input-ayat-awal'), ak = document.getElementById('input-ayat-akhir'); aw.innerHTML = ak.innerHTML = '<option value="">-</option>'; for(let i=1; i<=dataSurahLengkap[a]; i++) { aw.appendChild(new Option(i,i)); ak.appendChild(new Option(i,i)); } } }
 
-        // --- GURU LOGIC ---
+        // --- UI GURU & ORTU ---
+        function renderLogins() { let s = document.getElementById('select-muhaffiz'); s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; dAkun.forEach(n => s.appendChild(new Option(n, n))); }
+        function renderHalaqahDropdowns() { ['muhaffiz-pilih-halaqah', 'ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'].forEach(id => { let s = document.getElementById(id); s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); }); }
+
         function ubahModeSetoran(m) {
             modeAktif = m;
             document.getElementById('btn-mode-ziyadah').className = m === 'Ziyadah' ? 'toggle-btn aktif-ziyadah' : 'toggle-btn';
@@ -642,12 +650,16 @@
             document.getElementById('box-form-setoran').className = 'card ' + (m==='Ziyadah'?'mode-z':'mode-m');
             document.documentElement.style.setProperty('--warna-input-aktif', m==='Ziyadah'?'var(--emerald-light)':'var(--cerulean-logo)');
             document.documentElement.style.setProperty('--gold-accent', m==='Ziyadah'?'#D97706':'#0284C7'); 
+            
             let btn = document.getElementById('btn-simpan-utama');
             if(m === 'Ziyadah') { btn.style.background = 'linear-gradient(135deg, var(--emerald-light), var(--emerald-logo))'; btn.style.boxShadow = '0 4px 12px rgba(4, 120, 87, 0.2)'; } 
             else { btn.style.background = 'linear-gradient(135deg, var(--cerulean-light), var(--cerulean-logo))'; btn.style.boxShadow = '0 4px 12px rgba(2, 132, 199, 0.2)'; }
-            btn.innerText = "💾 SIMPAN DATA " + m.toUpperCase(); pilihStatus(document.getElementById('statusSetoran').value);
+            btn.innerText = "💾 SIMPAN DATA " + m.toUpperCase();
+            pilihStatus(document.getElementById('statusSetoran').value);
         }
+
         function pilihStatus(s) { document.getElementById('statusSetoran').value = s; document.getElementById('p-lanjut').className = s === 'Lanjut' ? 'status-pill active' : 'status-pill'; document.getElementById('p-ulang').className = s === 'Ulangi' ? 'status-pill active-danger' : 'status-pill'; }
+
         function simpanSetoran() {
             let h = document.getElementById('muhaffiz-pilih-halaqah').value, s = document.getElementById('muhaffiz-pilih-santri').value, sa = document.getElementById('input-surah').value, sk = document.getElementById('input-surah-akhir').value, aya = "";
             let hadir = document.querySelector('input[name="kehadiran"]:checked').value;
@@ -659,7 +671,7 @@
             let pay = { tgl: new Date().toLocaleString('id-ID'), halaqah: h, santri: s, kehadiran: hadir, jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: document.getElementById('catatanEvaluasi').value || "-" };
             
             let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM KE SERVER..."; btn.disabled = true;
-            fetch(scriptURL, { method:'POST', mode:'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({...pay, action: "simpan_setoran", token: SECRET_KEY}) }).then(() => { alert("✅ Data Setoran Tersimpan!"); location.reload(); }).catch(() => { alert("⚠️ Gagal menyambung ke server Google."); btn.innerText = old; btn.disabled = false; });
+            fetch(scriptURL, { method:'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...pay, action: "simpan_setoran", token: SECRET_KEY }) }).then(() => { alert("✅ Data Setoran Tersimpan!"); location.reload(); }).catch(() => { alert("⚠️ Gagal menyambung ke server Google."); btn.innerText = old; btn.disabled = false; });
         }
         function getV(n){ let r = document.querySelector(`input[name="${n}"]:checked`); return r?r.value:"3"; }
 
@@ -728,7 +740,7 @@
                 let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
                 let g = wb.Sheets["Guru"] ? XLSX.utils.sheet_to_json(wb.Sheets["Guru"], {header:1}).slice(1) : []; let s = wb.Sheets["Murid"] ? XLSX.utils.sheet_to_json(wb.Sheets["Murid"], {header:1}).slice(1) : [];
                 let btn = document.getElementById('btn-proses-import'); let old = btn.innerText; btn.innerText = "⏳ Memproses..."; btn.disabled = true;
-                fetch(scriptURL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:"import_excel", guru:g, santri:s, token:SECRET_KEY})}).then(()=>{ alert("✅ Import Selesai!"); tarikDataServer('admin'); }).finally(()=>{btn.innerText=old; btn.disabled=false;});
+                fetch(scriptURL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:"import_excel", guru:g, santri:s, token:SECRET_KEY})}).then(()=>{ alert("✅ Import Selesai!"); tarikDataServer('admin'); }).finally(()=>{btn.innerText=old; btn.disabled=false;});
             }; r.readAsArrayBuffer(f);
         }
 
@@ -742,16 +754,6 @@
             let h = [["No","Waktu","Kelas","Nama Murid","Kehadiran","Jenis","Juz","Surah/Ayat","Nilai(T,L,M)","Status","Catatan"]]; let b = d.map((i,idx)=>[idx+1,i.tgl,i.halaqah,i.santri,i.kehadiran,i.jenis,i.juz,i.kehadiran==='Hadir'?`${i.surah}:${i.ayat}`:'-',i.kehadiran==='Hadir'?`T:${i.tajwid},L:${i.lancar},M:${i.makhraj}`:'-',i.status,i.catatan]);
             if(t==='Excel'){ let wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...h,...b]), "Laporan"); XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); } else { const {jsPDF}=window.jspdf; let doc=new jsPDF('l'); doc.setFontSize(16); doc.setTextColor(4, 120, 87); doc.text("Laporan Capaian Tahfiz - SDIT Qurratu A'yun", 14, 15); doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 23); doc.autoTable({head:h, body:b, startY:28, theme:'grid', headStyles:{fillColor:[4,120,87]}}); doc.save(`Laporan_${tgl}.pdf`); }
             tutupModalLaporan();
-        }
-
-        // --- GANTI SANDI ---
-        function bukaModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.remove('hidden'); }
-        function tutupModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.add('hidden'); }
-        function prosesGantiSandi() { 
-            let sLama = document.getElementById('input-sandi-lama').value, sBaru = document.getElementById('input-sandi-baru').value, sKon = document.getElementById('input-sandi-konfirmasi').value; 
-            if(sBaru.length < 5 || sBaru !== sKon) return alert("Sandi baru tidak valid / tidak cocok!"); 
-            let btn = document.getElementById('btn-proses-sandi'); let old = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
-            fetch(scriptURL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: "ganti_sandi", nama: guruAktif, sandiBaru: sBaru, token: SECRET_KEY }) }).then(() => { alert("Sandi berhasil diperbarui!"); tutupModalGantiSandi(); }).finally(() => { btn.innerText = old; btn.disabled = false; }); 
         }
     </script>
 </body>
