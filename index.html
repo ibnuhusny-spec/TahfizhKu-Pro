@@ -251,7 +251,6 @@
         <div class="card" style="border: 2px solid var(--emerald-logo); background: #F0FDF4;">
             <div class="section-title" style="color: var(--emerald-logo);">Import Data Massal</div>
             <p style="font-size: 13px; color: var(--text-mute); font-weight: 600; margin-bottom: 15px;">Solusi cepat untuk memasukkan puluhan nama Guru & Murid sekaligus menggunakan Microsoft Excel.</p>
-            <!-- TOMBOL UNDUH DIBUAT SANGAT JELAS -->
             <button onclick="unduhTemplate()" style="background: #ECFDF5; color: #047857; border: 2px solid #059669; margin-bottom: 15px; border-radius:12px; font-weight:900;">📥 1. Unduh Template Excel</button>
             <label>2. Unggah Template yang sudah diisi:</label>
             <input type="file" id="file-import-excel" accept=".xlsx, .xls">
@@ -719,13 +718,14 @@
             document.getElementById('kartuPrestasi').style.display = 'none'; setJuzUI("", false);
         }
 
+        // --- BUGFIX: TEKS SURAH TERPOTONG RAPI ---
         function tampilkanKartuPrestasi() {
             let s = document.getElementById('muhaffiz-pilih-santri').value, p = dProg[s];
             document.getElementById('kartuPrestasi').style.display = s ? 'block' : 'none';
             if(p) { 
                 setJuzUI(p.juz, false);
                 document.getElementById('infoTotalJuz').innerText = (p.juz && p.juz !== "-" ? p.juz.split(',').length : "0");
-                document.getElementById('infoSurah').innerText = p.surah + " (" + p.ayat + ")";
+                document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8;">(Ayat: ${p.ayat})</span>`;
             } else { setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; }
             
             let h = '';
@@ -813,13 +813,15 @@
             list.innerHTML = html;
         }
 
+        // --- BUGFIX: TEKS SURAH TERPOTONG RAPI ---
         function tampilkanDataOrtu() {
             let s = document.getElementById('ortu-pilih-santri').value, p = dProg[s], h = '';
             document.getElementById('ortu-kartuPrestasi').style.display = s ? 'block' : 'none';
+            
             if(p) { 
                 setJuzUI(p.juz, true); 
                 document.getElementById('ortu-infoJuz').innerText = (p.juz && p.juz !== "-" ? p.juz.split(',').length : "0"); 
-                document.getElementById('ortu-infoSurah').innerText = p.surah; 
+                document.getElementById('ortu-infoSurah').innerHTML = p.surah + `<br><span style="font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8;">(Ayat: ${p.ayat})</span>`; 
             } else {
                 setJuzUI("", true); 
                 document.getElementById('ortu-infoJuz').innerText = "0"; 
@@ -857,9 +859,9 @@
         // --- IMPORT EXCEL ---
         function unduhTemplate() {
             let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Kelas","Nama Murid"],["Kelas 1A","Ahmad Zaid"],["Kelas 1A","Budi"],["Kelas 2B","Fatimah"]]), "Murid");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Nama Guru","Sandi"],["Ustadz Fulan","guru123"]]), "Guru");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Kelas","Nama Murid"],["Kelas 1A","Ahmad Zaid"]]), "Murid");
-            XLSX.writeFile(wb, "Template_QurratuAyun.xlsx");
+            XLSX.writeFile(wb, "Template_SDIT_QurratuAyun.xlsx");
         }
         function prosesImportExcel() {
             let f = document.getElementById('file-import-excel').files[0]; if(!f) return alert("Pilih file Excel!");
