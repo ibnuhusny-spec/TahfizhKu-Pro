@@ -1107,6 +1107,42 @@
             }
         }
 
+    function renderHalaqahDropdowns() { 
+            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
+            
+            let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
+            idsGuru.forEach(id => { 
+                let s = document.getElementById(id); 
+                if(s) { 
+                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
+                    for(let h in dbP) {
+                        let gurunya = dbKelasGuru[h] || '';
+                        if(!isGuru || gurunya.includes(guruAktif)) {
+                            s.appendChild(new Option(h, h)); 
+                        }
+                    }
+                }
+            }); 
+
+            let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
+            idsBebas.forEach(id => { 
+                let s = document.getElementById(id); 
+                if(s) { 
+                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
+                    for(let h in dbP) s.appendChild(new Option(h, h)); 
+                }
+            }); 
+            
+            let sSiar = document.getElementById('siar-pilih-kelas');
+            if(sSiar && isGuru) {
+                sSiar.innerHTML = '<option value="GLOBAL">SEMUA KELAS (GLOBAL)</option>';
+                for(let h in dbP) {
+                    let gurunya = dbKelasGuru[h] || '';
+                    if(gurunya.includes(guruAktif)) sSiar.appendChild(new Option(h, h)); 
+                }
+            }
+        }
+    
         async function tambahGuru() { 
             let n = document.getElementById('nama-muhaffiz-baru').value.trim(); 
             if(!n) return alert("⚠️ Nama kosong!"); 
