@@ -8,7 +8,7 @@
     <script>
         window.onerror = function(msg) {
             var loading = document.getElementById('teks-loading');
-            if(loading) loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:14px;">🚨 ERROR KODE!<br>Ada masalah pada mesin JavaScript.</span>';
+            if(loading) loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:14px;">🚨 ERROR KODE!<br>Terdapat crash di sistem JavaScript.</span>';
         };
     </script>
 
@@ -21,6 +21,7 @@
         body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--ivory-bg); background-image: radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%); background-attachment: fixed; margin: 0; padding: 20px; color: var(--text-dark); line-height: 1.6; transition: background 0.5s ease; padding-bottom: 90px; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
+        /* SPLASH & CARDS */
         #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--white); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; }
         #splash-screen.fade-out { opacity: 0; visibility: hidden; }
         .splash-logo { width: 150px; height: 150px; object-fit: contain; animation: breathing 3s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));}
@@ -31,6 +32,7 @@
         .section-title { font-size: 18px; font-weight: 800; color: var(--emerald-logo); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .section-title::before { content: ''; display: block; width: 4px; height: 18px; background: var(--emerald-logo); border-radius: 10px; }
 
+        /* FORM ELEMENTS */
         label { font-size: 13px; font-weight: 700; color: var(--text-mute); text-transform: uppercase; margin-bottom: 6px; display: block; }
         input, select, textarea { width: 100%; padding: 14px 18px; margin-bottom: 15px; background: #F8FAFC; border: 2px solid #F1F5F9; border-radius: 16px; box-sizing: border-box; font-size: 15px; color: var(--text-dark); font-weight: 600; outline: none; }
         input:focus, select:focus, textarea:focus { border-color: var(--emerald-light); background: var(--white); box-shadow: 0 0 0 4px rgba(5,150,105,0.15); }
@@ -39,6 +41,7 @@
         button:disabled { filter: grayscale(100%); cursor: not-allowed; }
         .btn-danger { background: #FFFFFF; color: #EF4444; border: 2px solid #FEE2E2; box-shadow: none; }
 
+        /* JUZ & RATING */
         .grid-juz-30 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-bottom: 20px; }
         .juz-btn { background: #F1F5F9; color: #94A3B8; border-radius: 10px; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border: 1px solid #E2E8F0; }
         .mode-z .juz-btn.aktif { background: var(--emerald-light); color: white; border-color: var(--emerald-logo); }
@@ -59,6 +62,7 @@
         .status-pill.active { background: #ECFDF5; color: var(--emerald-logo); border-color: var(--emerald-light); box-shadow: 0 4px 10px rgba(4,120,87,0.1); }
         .status-pill.active-danger { background: #FEF2F2; color: #EF4444; border-color: #FCA5A5; box-shadow: 0 4px 10px rgba(239,68,68,0.1); }
 
+        /* TABS BAWAH & LIST */
         .tab-content { display: none; animation: slideUp 0.3s ease; } .tab-content.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -71,12 +75,13 @@
         .list-card { padding: 15px; background: #F8FAFC; border-radius: 16px; margin-bottom: 10px; border-left: 5px solid var(--emerald-logo); display:flex; justify-content:space-between; align-items:center; border-right: 1px solid #F1F5F9; border-top: 1px solid #F1F5F9; border-bottom: 1px solid #F1F5F9;}
         .history-meta { font-size: 11px; color: var(--text-mute); font-weight: 700; text-transform: uppercase; margin-bottom:4px; }
         
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.8); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
         .modal-content { background: var(--white); padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
         .btn-kecil { padding: 8px 12px; font-size: 13px; width: auto; border-radius: 10px; margin:0; }
         .hidden { display: none !important; }
 
-        /* BUKU PENGHUBUNG CHAT UI PERBAIKAN */
+        /* BUKU PENGHUBUNG (CHAT) UI */
         .chat-box { height: 350px; overflow-y: auto; background: #F8FAFC; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 15px; border: 1px solid #E2E8F0; margin-bottom:15px; scroll-behavior: smooth;}
         .chat-bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; position: relative; line-height: 1.5; font-weight: 600; word-wrap: break-word;}
         .chat-me { align-self: flex-end; background: var(--emerald-light); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(5,150,105,0.15);}
@@ -305,12 +310,12 @@
             <div class="card">
                 <div class="section-title">💬 Buku Penghubung</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
-                    <select id="chat-guru-santri" onchange="renderChat('Guru')"><option value="">-- Murid --</option></select>
+                    <select id="chat-guru-pilih-halaqah" onchange="updateDropdownSantriModul('chat-guru')"></select>
+                    <select id="chat-guru-pilih-santri" onchange="renderChat('Guru')"><option value="">-- Murid --</option></select>
                 </div>
                 <div class="chat-box" id="chat-box-guru"></div>
                 <div style="display:flex; gap:10px; align-items: stretch;">
-                    <textarea id="input-pesan-guru" placeholder="Ketik pesan untuk Orang Tua di sini..." style="margin:0; resize:none; flex:1;" rows="2"></textarea>
+                    <textarea id="input-pesan-guru" placeholder="Ketik pesan panjang di sini..." style="margin:0; resize:none; flex:1;" rows="2"></textarea>
                     <button id="btn-kirim-guru" onclick="kirimPesan('Guru')" style="width:80px; margin:0; padding:12px;">Kirim</button>
                 </div>
             </div>
@@ -392,12 +397,12 @@
     <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 
     <script>
-        // KUNCI PERMANEN SUPABASE ANTUM
-        const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co';
+        const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
         const REQ_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' };
 
         const dataSurahLengkap = {"Al-Fatihah":7,"Al-Baqarah":286,"Ali 'Imran":200,"An-Nisa'":176,"Al-Ma'idah":120,"Al-An'am":165,"Al-A'raf":206,"Al-Anfal":75,"At-Taubah":129,"Yunus":109,"Hud":123,"Yusuf":111,"Ar-Ra'd":43,"Ibrahim":52,"Al-Hijr":99,"An-Nahl":128,"Al-Isra'":111,"Al-Kahf":110,"Maryam":98,"Taha":135,"Al-Anbiya'":112,"Al-Hajj":78,"Al-Mu'minun":118,"An-Nur":64,"Al-Furqan":77,"Asy-Syu'ara'":227,"An-Naml":93,"Al-Qasas":88,"Al-'Ankabut":69,"Ar-Rum":60,"Luqman":34,"As-Sajdah":30,"Al-Ahzab":73,"Saba'":54,"Fatir":45,"Yasin":83,"As-Saffat":182,"Sad":88,"Az-Zumar":75,"Gafir":85,"Fussilat":54,"Asy-Syura":53,"Az-Zukhruf":89,"Ad-Dukhan":59,"Al-Jasiyah":37,"Al-Ahqaf":35,"Muhammad":38,"Al-Fath":29,"Al-Hujurat":18,"Qaf":45,"Az-Zariyat":60,"At-Tur":49,"An-Najm":62,"Al-Qamar":55,"Ar-Rahman":78,"Al-Waqi'ah":96,"Al-Hadid":29,"Al-Mujadilah":22,"Al-Hasyr":24,"Al-Mumtahanah":13,"As-Saff":14,"Al-Jumu'ah":11,"Al-Munafiqun":11,"At-Tagabun":18,"At-Talaq":12,"At-Tahrim":12,"Al-Mulk":30,"Al-Qalam":52,"Al-Haqqah":52,"Al-Ma'arij":44,"Nuh":28,"Al-Jinn":28,"Al-Muzzammil":20,"Al-Muddassir":56,"Al-Qiyamah":40,"Al-Insan":31,"Al-Mursalat":50,"An-Naba'":40,"An-Nazi'at":46,"'Abasa":42,"At-Takwir":29,"Al-Infitar":19,"Al-Mutaffifin":36,"Al-Insyiqaq":25,"Al-Buruj":22,"At-Tariq":17,"Al-A'la":19,"Al-Gasyiyah":26,"Al-Fajr":30,"Al-Balad":20,"Asy-Syams":15,"Al-Lail":21,"Ad-Duha":11,"Asy-Syarh":8,"At-Tin":8,"Al-'Alaq":19,"Al-Qadr":5,"Al-Bayyinah":8,"Az-Zalzalah":8,"Al-'Adiyat":11,"Al-Qari'ah":11,"At-Takasur":8,"Al-'Asr":3,"Al-Humazah":9,"Al-Fil":5,"Quraisy":4,"Al-Ma'un":7,"Al-Kausar":3,"Al-Kafirun":6,"An-Nasr":3,"Al-Lahab":5,"Al-Ikhlas":4,"Al-Falaq":5,"An-Nas":6};
+        
         let dbP = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dPesan = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
 
         // PENGAMAN LOCAL STORAGE
@@ -447,7 +452,6 @@
             doc.save(`Sertifikat_${nama}_${juz}Juz.pdf`);
         }
 
-        // --- SISTEM WALLPAPER & BATAL BINTANG ---
         function bukaModalWallpaper() { document.getElementById('modal-wallpaper').classList.remove('hidden'); }
         function tutupModalWallpaper() { document.getElementById('modal-wallpaper').classList.add('hidden'); }
         function setWallpaper(bg) { if(bg === '') { document.body.style.background = 'var(--ivory-bg)'; document.body.style.backgroundImage = 'radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%)'; removeSafeStorage('wp'); } else { document.body.style.background = bg; document.body.style.backgroundSize = 'cover'; document.body.style.backgroundAttachment = 'fixed'; setSafeStorage('wp', bg); } }
@@ -462,7 +466,7 @@
             else { document.getElementById('login-page').classList.remove('hidden'); }
         }
 
-        // --- RAW FETCH API (BEBAS LIBRARY) ---
+        // --- RAW FETCH API ---
         async function tarikDataServer() {
             try {
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc'];
@@ -502,7 +506,7 @@
 
         function renderLogins() { let s = document.getElementById('select-muhaffiz'); s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; dAkun.forEach(n => s.appendChild(new Option(n, n))); }
         function renderHalaqahDropdowns() { 
-            let ids = ['muhaffiz-pilih-halaqah', 'ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
+            let ids = ['muhaffiz-pilih-halaqah', 'ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-pilih-halaqah'];
             ids.forEach(id => { 
                 let s = document.getElementById(id); 
                 if(s) { s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); }
@@ -510,9 +514,8 @@
         }
 
         function updateDropdownSantriModul(prefix) {
-            let h = document.getElementById(prefix+'-pilih-halaqah') ? document.getElementById(prefix+'-pilih-halaqah').value : document.getElementById(prefix+'-kelas').value;
-            let sId = document.getElementById(prefix+'-pilih-santri') ? prefix+'-pilih-santri' : prefix+'-santri';
-            let s = document.getElementById(sId);
+            let h = document.getElementById(prefix+'-pilih-halaqah').value;
+            let s = document.getElementById(prefix+'-pilih-santri');
             s.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
             if(h && dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n, n))); 
             
@@ -525,8 +528,8 @@
         function renderChat(role) {
             let s, h;
             if(role === 'Guru') {
-                h = document.getElementById('chat-guru-kelas').value;
-                s = document.getElementById('chat-guru-santri').value;
+                h = document.getElementById('chat-guru-pilih-halaqah').value;
+                s = document.getElementById('chat-guru-pilih-santri').value;
             } else {
                 h = document.getElementById('ortu-pilih-halaqah').value;
                 s = document.getElementById('ortu-pilih-santri').value;
@@ -544,13 +547,13 @@
             }
 
             filteredPesan.forEach(p => {
-                let isMyMessage = p.pengirim === role;
+                let isMyMessage = (p.pengirim === role);
                 let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
                 // Escape newline to <br> so it renders correctly in HTML
-                let safeMsg = p.isi_pesan.replace(/\n/g, '<br>');
+                let msgStr = p.isi_pesan ? p.isi_pesan.toString().replace(/\n/g, '<br>') : "";
                 html += `
                     <div class="chat-bubble ${bubbleClass}">
-                        ${safeMsg}
+                        ${msgStr}
                         <span class="chat-meta">${p.waktu} • ${p.pengirim}</span>
                     </div>
                 `;
@@ -563,8 +566,8 @@
         async function kirimPesan(role) {
             let h, s, msgInput;
             if(role === 'Guru') {
-                h = document.getElementById('chat-guru-kelas').value;
-                s = document.getElementById('chat-guru-santri').value;
+                h = document.getElementById('chat-guru-pilih-halaqah').value;
+                s = document.getElementById('chat-guru-pilih-santri').value;
                 msgInput = document.getElementById('input-pesan-guru');
             } else {
                 h = document.getElementById('ortu-pilih-halaqah').value;
@@ -578,7 +581,9 @@
             if(!msg) return alert("Pesan tidak boleh kosong!");
 
             let btn = document.getElementById('btn-kirim-' + role.toLowerCase());
-            let oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+            let oldText = btn.innerText; 
+            btn.innerText = "⏳"; 
+            btn.disabled = true;
 
             let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
@@ -588,16 +593,17 @@
 
                 if(!res.ok) {
                     let errObj = await res.json();
-                    throw new Error(errObj.message || errObj.details || "Database error");
+                    throw new Error(errObj.message || "Database Error");
                 }
-
+                
                 dPesan.push(pay);
                 msgInput.value = '';
                 renderChat(role);
             } catch(e) {
-                alert("GAGAL MENGIRIM!\n\nPesan Error Supabase:\n" + e.message + "\n\nPastikan antum sudah menjalankan 'ALTER TABLE pesan DISABLE ROW LEVEL SECURITY;' di menu SQL.");
+                alert("GAGAL MENGIRIM!\nError: " + e.message);
             } finally {
-                btn.innerText = oldText; btn.disabled = false;
+                btn.innerText = oldText; 
+                btn.disabled = false;
             }
         }
 
@@ -755,12 +761,11 @@
         
         function updateSantriOrtu() { 
             let h = document.getElementById('ortu-pilih-halaqah').value, s = document.getElementById('ortu-pilih-santri'); 
-            s.innerHTML='<option value="">-- Pilih Ananda --</option>'; (dbP[h]||[]).forEach(n => s.appendChild(new Option(n,n))); 
-            document.getElementById('ortu-kartuPrestasi').style.display = 'none'; document.getElementById('list-ortu-quran').innerHTML = ''; 
+            s.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
+            if (dbP[h]) { dbP[h].forEach(n => s.appendChild(new Option(n,n))); }
+            document.getElementById('ortu-kartuPrestasi').style.display = 'none'; 
+            document.getElementById('list-ortu-quran').innerHTML = ''; 
             if(h) renderLeaderboard(h); else document.getElementById('ortu-leaderboard').style.display = 'none'; 
-            
-            let sc = document.getElementById('chat-ortu-santri'); 
-            if(sc) { sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; (dbP[h]||[]).forEach(n => sc.appendChild(new Option(n,n))); document.getElementById('chat-ortu-kelas').value = h; }
             document.getElementById('chat-box-ortu').innerHTML = '';
         }
 
@@ -784,8 +789,7 @@
             let s = document.getElementById('ortu-pilih-santri').value, p = dProg[s], h = ''; document.getElementById('ortu-kartuPrestasi').style.display = s ? 'block' : 'none';
             let ws = document.getElementById('wadah-sertif-ortu'); ws.innerHTML = '';
             
-            let sc = document.getElementById('chat-ortu-santri');
-            if(sc) { sc.value = s; renderChat('Ortu'); }
+            renderChat('Ortu');
 
             if(p) { 
                 setJuzUI(p.juz, true); 
