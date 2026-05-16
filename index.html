@@ -1096,6 +1096,7 @@
                 dAkun.forEach(n => s.appendChild(new Option(n, n))); 
             }
             
+            // Loop untuk 5 Guru di Tab Admin
             for(let i=1; i<=5; i++) {
                 let id = i === 1 ? 'admin-kelas-pilih-guru' : `admin-kelas-pilih-guru-${i}`;
                 let cG = document.getElementById(id); 
@@ -1105,453 +1106,22 @@
                 }
             }
         }
-        
-        function renderHalaqahDropdowns() { 
-            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
-            
-            let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
-            idsGuru.forEach(id => { 
-                let s = document.getElementById(id); 
-                if(s) { 
-                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
-                    for(let h in dbP) {
-                        let gurunya = dbKelasGuru[h] || '';
-                        if(!isGuru || gurunya.includes(guruAktif)) {
-                            s.appendChild(new Option(h, h)); 
-                        }
-                    }
-                }
-            }); 
 
-            let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
-            idsBebas.forEach(id => { 
-                let s = document.getElementById(id); 
-                if(s) { 
-                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
-                    for(let h in dbP) s.appendChild(new Option(h, h)); 
-                }
-            }); 
-            
-            // Siar Pilih Kelas
-            let sSiar = document.getElementById('siar-pilih-kelas');
-            if(sSiar && isGuru) {
-                sSiar.innerHTML = '<option value="GLOBAL">SEMUA KELAS (GLOBAL)</option>';
-                for(let h in dbP) {
-                    let gurunya = dbKelasGuru[h] || '';
-                    if(gurunya.includes(guruAktif)) sSiar.appendChild(new Option(h, h)); 
-                }
-            }
-        }
-
-        function updateDropdownSantriModul(prefix) {
-            let elKelas = document.getElementById(prefix+'-pilih-halaqah') || document.getElementById(prefix+'-kelas');
-            let elSantri = document.getElementById(prefix+'-pilih-santri') || document.getElementById(prefix+'-santri');
-            
-            let h = elKelas ? elKelas.value : '';
-            
-            if(elSantri) {
-                elSantri.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
-                if(h && dbP[h]) dbP[h].forEach(n => elSantri.appendChild(new Option(n, n))); 
-            }
-            
-            if(prefix.includes('chat')) {
-                let box = document.getElementById('chat-box-'+(prefix==='chat-guru'?'guru':'ortu'));
-                if(box) box.innerHTML = '';
-            }
-        }
-
-        function updateChatGuruSantri() {
-            updateDropdownSantriModul('chat-guru');
-        }
-
-        // FUNGSI KOMUNIKASI PENGHUBUNG & FORUM
-        function gantiSubPesan(jenis) {
-            document.getElementById('btn-sub-ortu').classList.remove('aktif-pilih');
-            document.getElementById('btn-sub-forum').classList.remove('aktif-pilih');
-            document.getElementById('btn-sub-siar').classList.remove('aktif-pilih');
-            
-            document.getElementById('box-pesan-ortu').style.display = 'none';
-            document.getElementById('box-pesan-forum').style.display = 'none';
-            document.getElementById('box-pesan-siar').style.display = 'none';
-
-            document.getElementById('btn-sub-' + jenis.toLowerCase()).classList.add('aktif-pilih');
-            document.getElementById('box-pesan-' + jenis.toLowerCase()).style.display = 'block';
-
-            if (jenis === 'Forum') {
-                renderForum();
-            } else if (jenis === 'Ortu') {
-                renderChatOrtu();
-            }
-        }
-
-        async function muatUlangPesanOrtu() {
-            let role = getSafeStorage('sesi_halaman') === 'muhaffiz' ? 'Guru' : 'Ortu';
-            let btn = document.querySelector('#box-pesan-ortu button');
-            let oldHTML = btn ? btn.innerHTML : "🔄";
-            if(btn) { btn.innerHTML = "⏳"; btn.disabled = true; }
-
-            try {
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan?select=*&order=id.asc`, {headers: REQ_HEADERS});
-                if(res.ok) {
-                    dPesan = await res.json();
-                    renderChatOrtu();
-                }
-            } catch(e) { } 
-
-            if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
-        }
-        
-        async function muatUlangForum() {
-            let btn = document.querySelector('#box-pesan-forum button');
-            let oldHTML = btn ? btn.innerHTML : "🔄";
-            if(btn) { btn.innerHTML = "⏳"; btn.disabled = true; }
-
-            try {
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/forum_guru?select=*&order=id.asc`, {headers: REQ_HEADERS});
-                if(res.ok) {
-                    dForum = await res.json();
-                    renderForum();
-                }
-            } catch(e) { } 
-
-            if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
-        }
-
-        function renderChatOrtu() {
-            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
-            let role = isGuru ? 'Guru' : 'Ortu';
-            
-            let h = isGuru ? document.getElementById('chat-guru-kelas')?.value : document.getElementById('ortu-pilih-halaqah')?.value;
-            let s = isGuru ? document.getElementById('chat-guru-santri')?.value : document.getElementById('ortu-pilih-santri')?.value;
-            
-            let box = document.getElementById(isGuru ? 'chat-box-guru' : 'chat-box-ortu');
-            if(!box) return;
-            if(!s || !h) { box.innerHTML = ''; return; }
-
-            let html = '';
-            let filteredPesan = dPesan.filter(p => 
-                (p.kelas === h && p.nama_murid === s) || 
-                (!isGuru && p.kelas === 'GLOBAL' && p.nama_murid === 'SEMUA') ||
-                (!isGuru && p.kelas === h && p.nama_murid === 'SEMUA')
-            );
-            
-            if(filteredPesan.length === 0) {
-                box.innerHTML = `<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:50px;">Belum ada pesan.<br>Mulai percakapan sekarang.</p>`;
-                return;
-            }
-
-            filteredPesan.forEach(p => {
-                let isGlobal = p.nama_murid === 'SEMUA';
-                let isMyMessage = (p.pengirim === role);
-                
-                let bubbleClass = isGlobal ? 'chat-global' : (isMyMessage ? 'chat-me' : 'chat-other'); 
-                let icon = isGlobal ? '📢 ' : '';
-                let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
-                
-                html += `
-                    <div class="chat-bubble ${bubbleClass}">
-                        ${icon}${safeMsg}
-                        <span class="chat-meta">${p.waktu} • ${isGlobal ? 'Pengumuman Admin/Guru' : p.pengirim}</span>
-                    </div>
-                `;
-            });
-            
-            box.innerHTML = html;
-            box.scrollTop = box.scrollHeight;
-        }
-
-        async function kirimChatOrtu(role) {
-            let h = role === 'Guru' ? document.getElementById('chat-guru-kelas').value : document.getElementById('ortu-pilih-halaqah').value;
-            let s = role === 'Guru' ? document.getElementById('chat-guru-santri').value : document.getElementById('ortu-pilih-santri').value;
-            let msgInput = document.getElementById('input-pesan-' + role.toLowerCase());
-
-            let msg = msgInput.value.trim();
-            if(!h || !s) return alert("Pilih Kelas dan Murid terlebih dahulu!");
-            if(!msg) return alert("Pesan tidak boleh kosong!");
-
-            let btn = document.getElementById('btn-kirim-' + role.toLowerCase());
-            let oldText = btn.innerText; 
-            btn.innerText = "⏳"; 
-            btn.disabled = true;
-
-            let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
-
-            try {
-                let pay = { waktu: wkt, kelas: h, nama_murid: s, pengirim: role, isi_pesan: msg };
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-
-                if(!res.ok) throw new Error();
-                
-                dPesan.push(pay);
-                msgInput.value = '';
-                renderChatOrtu();
-            } catch(e) {
-                alert("GAGAL MENGIRIM PESAN!\nPastikan antum sudah mengklik RUN di SQL Supabase untuk tabel pesan.");
-            } finally {
-                btn.innerText = oldText; 
-                btn.disabled = false;
-            }
-        }
-
-        async function kirimPesanSiar() {
-            let h = document.getElementById('siar-pilih-kelas').value;
-            let msgInput = document.getElementById('input-pesan-siar');
-            let msg = msgInput.value.trim();
-
-            if(!h || !msg) return alert("Pilih Tujuan dan Ketik Pesan!");
-
-            let btn = document.getElementById('btn-kirim-siar');
-            let oldText = btn.innerText; 
-            btn.innerText = "⏳ Mengirim..."; 
-            btn.disabled = true;
-            
-            let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
-
-            try {
-                let pay = { waktu: wkt, kelas: h, nama_murid: 'SEMUA', pengirim: 'Guru', isi_pesan: msg };
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                
-                if(!res.ok) throw new Error();
-                
-                dPesan.push(pay);
-                msgInput.value = '';
-                alert("📢 Pesan Siar Berhasil Terkirim!");
-            } catch(e) {
-                alert("Gagal Kirim Pesan Siar!");
-            } finally {
-                btn.innerText = oldText; 
-                btn.disabled = false;
-            }
-        }
-
-        function renderForum() {
-            let box = document.getElementById('chat-box-forum');
-            if(!box) return;
-            
-            if(dForum.length === 0) {
-                box.innerHTML = `<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:50px;">Forum masih kosong.</p>`;
-                return;
-            }
-
-            let html = '';
-            dForum.forEach(p => {
-                let isMyMessage = (p.pengirim === guruAktif);
-                let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
-                let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
-                
-                html += `
-                    <div class="chat-bubble ${bubbleClass}">
-                        ${safeMsg}
-                        <span class="chat-meta">${p.waktu} • ${p.pengirim}</span>
-                    </div>
-                `;
-            });
-            box.innerHTML = html;
-            box.scrollTop = box.scrollHeight;
-        }
-
-        async function kirimForum() {
-            let msgInput = document.getElementById('input-pesan-forum');
-            let msg = msgInput.value.trim();
-            if(!msg) return alert("Pesan tidak boleh kosong!");
-
-            let btn = document.getElementById('btn-kirim-forum');
-            let oldText = btn.innerText; 
-            btn.innerText = "⏳"; 
-            btn.disabled = true;
-            
-            let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
-
-            try {
-                let pay = { waktu: wkt, pengirim: guruAktif, isi_pesan: msg };
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/forum_guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                
-                if(!res.ok) throw new Error();
-                
-                dForum.push(pay);
-                msgInput.value = '';
-                renderForum();
-            } catch(e) {
-                alert("GAGAL MENGIRIM! Pastikan SQL tabel forum_guru sudah di-Run.");
-            } finally {
-                btn.innerText = oldText; 
-                btn.disabled = false;
-            }
-        }
-
-        // ==============================================================
-        // PORTAL ORANG TUA
-        // ==============================================================
-        function bukaPortalOrtu() { 
-            setSafeStorage('sesi_halaman', 'ortu'); 
-            document.getElementById('login-page').classList.add('hidden'); 
-            document.getElementById('ortu-page').classList.remove('hidden'); 
-            renderHalaqahDropdowns(); 
-        }
-        
-        function updateSantriOrtu() { 
-            let h = document.getElementById('ortu-pilih-halaqah').value;
-            let s = document.getElementById('ortu-pilih-santri'); 
-            s.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
-            if(dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n,n))); 
-            
-            document.getElementById('ortu-kartuPrestasi').style.display = 'none'; 
-            document.getElementById('list-ortu-quran').innerHTML = ''; 
-            if(h) renderLeaderboard(h); 
-            else document.getElementById('ortu-leaderboard').style.display = 'none'; 
-            
-            let sc = document.getElementById('chat-ortu-santri'); 
-            if(sc) { 
-                sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
-                if(dbP[h]) dbP[h].forEach(n => sc.appendChild(new Option(n,n))); 
-            }
-            let chatBox = document.getElementById('chat-box-ortu');
-            if(chatBox) chatBox.innerHTML = '';
-        }
-
-        function renderLeaderboard(halaqah) {
-            let lb = document.getElementById('ortu-leaderboard');
-            let list = document.getElementById('leaderboard-list');
-            let santris = dbP[halaqah] || [];
-            
-            let teksJudul = document.getElementById('teks-judul-leaderboard');
-            if(teksJudul) teksJudul.innerText = "Bintang Hafalan - " + halaqah;
-
-            let scores = santris.map(nama => {
-                let p = dProg[nama];
-                let jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0;
-                let poinMutu = 0;
-                dRiw.forEach(r => { 
-                    if(r.santri === nama && r.status === 'Lanjut') { 
-                        let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); 
-                        poinMutu += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); 
-                    } 
-                });
-                return { nama: nama, jCount: jCount, surah: (p ? p.surah : "-"), poin: poinMutu };
-            });
-            
-            scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
-            scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || a.nama.localeCompare(b.nama)); 
-            let top10 = scores.slice(0, 10);
-            
-            if(top10.length === 0) { lb.style.display = 'none'; return; }
-            lb.style.display = 'block'; 
-            let html = '';
-            top10.forEach((item, index) => {
-                let medali = ''; 
-                if(index === 0) medali = '🥇'; 
-                else if(index === 1) medali = '🥈'; 
-                else if(index === 2) medali = '🥉'; 
-                else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
-                
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;"><div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.jCount} Juz</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div></div></div>`;
-            }); 
-            list.innerHTML = html;
-        }
-
-        function tampilkanDataOrtu() {
-            let s = document.getElementById('ortu-pilih-santri').value;
-            let p = dProg[s];
-            let h = ''; 
-            document.getElementById('ortu-kartuPrestasi').style.display = s ? 'block' : 'none';
-            let ws = document.getElementById('wadah-sertif-ortu'); 
-            ws.innerHTML = '';
-            
-            let sc = document.getElementById('chat-ortu-santri');
-            if(sc) { sc.value = s; muatUlangPesanOrtu(); }
-
-            if(p) { 
-                setJuzUI(p.juz, true); 
-                let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; 
-                let jC = arrJuz.length; 
-                let teksJuz = arrJuz.join(', '); // Ambil NAMA JUZ
-                
-                document.getElementById('ortu-infoJuz').innerText = jC; 
-                document.getElementById('ortu-infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; font-weight:800; color:var(--text-mute);">(Ayat: ${p.ayat})</span>`; 
-                if(jC >= 1) {
-                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat Juz ${teksJuz}</button>`;
-                }
-            } 
-            else { 
-                setJuzUI("", true); 
-                document.getElementById('ortu-infoJuz').innerText = "0"; 
-                document.getElementById('ortu-infoSurah').innerText = "-"; 
-            }
-            
-            dRiw.filter(i => i.santri === s).forEach(i => {
-                let badge = i.jenis === 'Murojaah' ? `<span style="color:#0284C7; font-weight:800; font-size:11px;">🔄 Muroja'ah</span>` : `<span style="color:#059669; font-weight:800; font-size:11px;">⭐ Ziyadah</span>`;
-                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat})</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`;
-            }); 
-            document.getElementById('list-ortu-quran').innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat setoran.</p></div>';
-
-            let renderRiwayatLain = (arr, id, ikon) => {
-                let html = ''; 
-                arr.filter(i => i.santri === s).forEach(i => { 
-                    html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan}</div></div><div style="font-weight:900;">${i.status}</div></div>`; 
-                });
-                document.getElementById(id).innerHTML = html || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat.</p></div>';
-            };
-            renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘'); 
-            renderRiwayatLain(dRiwH, 'list-ortu-hadits', '📜'); 
-            renderRiwayatLain(dRiwK, 'list-ortu-arab', '🔤');
-        }
-
-        // FUNGSI AUTH & ADMIN
-        function bukaModalAdminLogin() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
-        function tutupModalAdminLogin() { document.getElementById('modal-admin-login').classList.add('hidden'); }
-        
-        function loginAdmin() { 
-            let p = document.getElementById('admin-password').value;
-            if(!p) return alert("Masukkan sandi!");
-            if(p === '@lQur4nKu77') { 
-                setSafeStorage('sesi_halaman', 'admin'); 
-                tutupModalAdminLogin(); 
-                document.getElementById('login-page').classList.add('hidden'); 
-                document.getElementById('admin-page').classList.remove('hidden'); 
-                renderTabelAdmin(); 
-            } else { 
-                alert("⛔ Sandi Admin Salah!"); 
-            }
-        }
-
-        function loginMuhaffiz() {
-            let n = document.getElementById('select-muhaffiz').value;
-            let p = document.getElementById('sandi-muhaffiz').value;
-            
-            if(!n) return alert("Pilih nama Anda!");
-            if(window.akunSandiMap[n] === p || p === 'guru123') { 
-                guruAktif = n; 
-                setSafeStorage('sesi_halaman', 'muhaffiz'); 
-                setSafeStorage('sesi_user', n); 
-                document.getElementById('login-page').classList.add('hidden'); 
-                document.getElementById('muhaffiz-page').classList.remove('hidden'); 
-                document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; 
-                renderHalaqahDropdowns(); 
-            } else { 
-                alert("⛔ Sandi Guru Salah!"); 
-            }
-        }
-
-        function logout() { 
-            removeSafeStorage('sesi_halaman'); 
-            removeSafeStorage('sesi_user'); 
-            location.reload(); 
-        }
-
-        // CRUD ADMIN FUNCTIONS
         async function tambahGuru() { 
             let n = document.getElementById('nama-muhaffiz-baru').value.trim(); 
             if(!n) return alert("⚠️ Nama kosong!"); 
             if(dAkun.includes(n)) return alert("⚠️ Sudah ada!"); 
             
-            let btn = document.getElementById('btn-tambah-guru'); 
+            let btn = document.querySelector('#tab-admin-guru button'); 
             if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             
             try { 
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n, sandi: 'guru123'}) }); 
                 if(!res.ok) throw new Error(); 
+                
                 dAkun.push(n); 
                 document.getElementById('nama-muhaffiz-baru').value = ''; 
+                renderLogins(); // Otomatis refresh dropdown pilihan guru
                 renderTabelAdmin(); 
             } catch(e) { 
                 alert("Gagal menyimpan!"); 
@@ -1562,18 +1132,20 @@
 
         async function tambahHalaqah() { 
             let d = document.getElementById('nama-halaqah-baru').value.trim(); 
-            let g1 = document.getElementById('admin-kelas-pilih-guru').value;
-            let g2 = document.getElementById('admin-kelas-pilih-guru-2').value;
-            let g3 = document.getElementById('admin-kelas-pilih-guru-3').value;
-            let g4 = document.getElementById('admin-kelas-pilih-guru-4').value;
-            let g5 = document.getElementById('admin-kelas-pilih-guru-5').value;
+            let g1 = document.getElementById('admin-kelas-pilih-guru')?.value || '';
+            let g2 = document.getElementById('admin-kelas-pilih-guru-2')?.value || '';
+            let g3 = document.getElementById('admin-kelas-pilih-guru-3')?.value || '';
+            let g4 = document.getElementById('admin-kelas-pilih-guru-4')?.value || '';
+            let g5 = document.getElementById('admin-kelas-pilih-guru-5')?.value || '';
             
             if(!d || !g1) return alert("⚠️ Pilih minimal Guru 1 dan Ketik Nama Kelas!"); 
             
-            let gabunganGuru = [g1, g2, g3, g4, g5].filter(x => x).join(', ');
-            let lines = d.split('\n'); let arr = []; let added = false; 
+            let gabunganGuru = [g1, g2, g3, g4, g5].filter(x => x !== "").join(', ');
+            let lines = d.split('\n'); 
+            let arr = []; 
+            let added = false; 
             
-            let btn = document.getElementById('btn-tambah-kelas'); 
+            let btn = document.querySelector('#tab-admin-kelas button'); 
             if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             
             try {
@@ -1590,6 +1162,7 @@
                 if(arr.length > 0) { 
                     let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
                     if(!res.ok) throw new Error(); 
+                    
                     document.getElementById('nama-halaqah-baru').value = ''; 
                     renderTabelAdmin(); 
                 } else if (!added && lines.length > 0) {
@@ -1609,7 +1182,7 @@
             if(!h || !d) return alert("⚠️ Pilih Kelas dan ketik nama!"); 
             
             let lines = d.split('\n'); let arr = []; 
-            let btn = document.getElementById('btn-tambah-murid'); 
+            let btn = document.querySelector('#tab-admin-murid button'); 
             if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             
             try {
@@ -1643,6 +1216,7 @@
                         if(!res.ok) throw new Error(); 
                         let i = dAkun.indexOf(id); 
                         if(i>-1) dAkun.splice(i,1); 
+                        renderLogins(); 
                     } 
                     if(sh === 'Kelas') { 
                         res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); 
@@ -1663,20 +1237,18 @@
             } 
         }
 
-    async function hapusSemua(sh) { 
+        async function hapusSemua(sh) { 
             let keyword = sh === 'Guru' ? 'SEMUA GURU' : (sh === 'Kelas' ? 'SEMUA KELAS' : 'SEMUA MURID');
-            let konfirmasi = prompt(`⚠️ PERINGATAN BAHAYA!\nAnda akan menghapus ${keyword} secara permanen dari database.\n\nKetik kata "HAPUS" (huruf besar semua) untuk melanjutkan:`);
+            let konfirmasi = prompt(`⚠️ PERINGATAN BAHAYA!\nAnda akan menghapus ${keyword} secara permanen.\n\nKetik kata "HAPUS" (huruf besar) untuk melanjutkan:`);
             
             if(konfirmasi === 'HAPUS') {
                 try {
                     let res;
                     if(sh === 'Guru') { 
                         res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=not.is.null`, { method: 'DELETE', headers: REQ_HEADERS }); 
-                    } 
-                    else if(sh === 'Kelas') { 
+                    } else if(sh === 'Kelas') { 
                         res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=not.is.null`, { method: 'DELETE', headers: REQ_HEADERS }); 
-                    } 
-                    else if(sh === 'Murid') { 
+                    } else if(sh === 'Murid') { 
                         res = await fetch(`${SUPABASE_URL}/rest/v1/murid?nama_murid=not.is.null`, { method: 'DELETE', headers: REQ_HEADERS }); 
                     } 
                     
@@ -1690,6 +1262,7 @@
                 alert("Batal menghapus. Kata kunci pengaman salah.");
             }
         }
+
         async function editGuru(namaLama) { 
             let n = prompt("Ubah Nama Guru:", namaLama); 
             if(n && n.trim() !== "" && n !== namaLama) { 
@@ -1698,13 +1271,14 @@
                     if(!res.ok) throw new Error(); 
                     let i = dAkun.indexOf(namaLama); 
                     if(i>-1) dAkun[i] = n.trim(); 
+                    renderLogins();
                     renderTabelAdmin(); 
                 } catch(e){ alert("Error"); } 
             } 
         }
         
         async function editHalaqah(namaLama) { 
-            alert("Untuk mengubah Guru Utama, silakan hapus dan buat ulang kelasnya agar pembagian guru di database tetap sinkron."); 
+            alert("Untuk mengubah Tim Pengajar, silakan hapus dan buat ulang kelasnya agar pembagian guru di database tetap sinkron."); 
         }
         
         async function editSantri(halaqah, namaLama) { 
@@ -1728,7 +1302,7 @@
             });
             for(let n in dbP) { 
                 const escapedHalaqah = n.replace(/'/g, "\\'"); 
-                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Guru Utama: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
+                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
             }
             document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; 
             document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
