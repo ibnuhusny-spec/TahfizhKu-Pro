@@ -8,7 +8,10 @@
     <script>
         window.onerror = function(msg, url, line) {
             var loading = document.getElementById('teks-loading');
-            if(loading) loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:12px;">🚨 ERROR KODE: ' + msg + ' (Baris: ' + line + ')</span>';
+            if(loading) {
+                loading.style.display = 'block';
+                loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:12px;">🚨 ERROR KODE: ' + msg + ' (Baris: ' + line + ')</span>';
+            }
             return false;
         };
     </script>
@@ -22,11 +25,36 @@
         body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--ivory-bg); background-image: radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%); background-attachment: fixed; margin: 0; padding: 20px; color: var(--text-dark); line-height: 1.6; transition: background 0.5s ease; padding-bottom: 90px; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--white); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; }
+        /* ==============================================================
+           CINEMATIC SPLASH SCREEN 
+           ============================================================== */
+        #splash-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #050505; /* Hitam Sinematik */
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 9999; 
+            /* Memudar keluar dengan sangat halus selama 1.5 detik */
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.5s; 
+        }
         #splash-screen.fade-out { opacity: 0; visibility: hidden; }
-        .splash-logo { width: 150px; height: 150px; object-fit: contain; animation: breathing 3s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));}
-        @keyframes breathing { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         
+        .splash-logo { 
+            width: 170px; height: 170px; object-fit: contain; 
+            opacity: 0; 
+            /* Masuk dengan fade-in, lalu bernapas berulang kali */
+            animation: fadeInLogo 1.5s ease-out forwards, cinematicBreathing 4s ease-in-out infinite alternate 1.5s; 
+        }
+
+        @keyframes fadeInLogo { 
+            0% { opacity: 0; transform: scale(0.85); filter: drop-shadow(0 0 0px rgba(255,255,255,0)); } 
+            100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 15px rgba(255,255,255,0.1)); } 
+        }
+        @keyframes cinematicBreathing { 
+            0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255,255,255,0.1)); } 
+            100% { transform: scale(1.08); filter: drop-shadow(0 0 40px rgba(255,255,255,0.25)); } 
+        }
+        /* ============================================================== */
+
         .container { max-width: 600px; margin: 0 auto; }
         .card { background: var(--white); border-radius: 24px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--white); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
         .section-title { font-size: 18px; font-weight: 800; color: var(--emerald-logo); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
@@ -89,9 +117,8 @@
 <body>
 
     <div id="splash-screen">
-        <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23047857\' stroke-width=\'2\'><path d=\'M12 2L2 22h20L12 2z\'/></svg>'">
-        <h1 style="color:var(--emerald-logo); font-weight:900; margin-bottom:5px; text-align:center;">SDIT Qurratu A'yun<br>Al-Islami</h1>
-        <div style="font-size: 13px; color: var(--text-mute); margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;" id="teks-loading">Memuat Database...</div>
+        <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23ffffff\' stroke-width=\'2\'><path d=\'M12 2L2 22h20L12 2z\'/></svg>'">
+        <div style="font-size: 13px; margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display:none;" id="teks-loading">Memuat Database...</div>
     </div>
 
     <div id="login-page" class="container hidden">
@@ -311,7 +338,7 @@
             <div class="card">
                 <div class="section-title" style="justify-content:space-between; align-items:center;">
                     <span style="display:flex; align-items:center; gap:10px;">💬 Buku Penghubung</span>
-                    <button id="btn-refresh-guru" onclick="muatUlangPesan('Guru')" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Tarik Pesan</button>
+                    <button id="btn-refresh-guru" onclick="muatUlangPesan('Guru')" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Tarik Pesan Baru</button>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                     <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
@@ -413,12 +440,10 @@
         
         let dbP = {}, dbKelasGuru = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dPesan = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
 
-        // PENGAMAN LOCAL STORAGE
         function getSafeStorage(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
         function setSafeStorage(key, val) { try { localStorage.setItem(key, val); } catch(e) { } }
         function removeSafeStorage(key) { try { localStorage.removeItem(key); } catch(e) { } }
 
-        // FUNGSI ANTI-PECAH UNTUK COPY-PASTE PANJANG
         function escapeHTML(str) {
             if(!str) return "";
             return String(str).replace(/[&<>'"]/g, function(tag) {
@@ -427,35 +452,7 @@
             });
         }
 
-        // FUNGSI UI YANG SEMPAT HILANG
-        function bukaModalWallpaper() { document.getElementById('modal-wallpaper').classList.remove('hidden'); }
-        function tutupModalWallpaper() { document.getElementById('modal-wallpaper').classList.add('hidden'); }
-        function setWallpaper(bg) { 
-            if(bg === '') { 
-                document.body.style.background = 'var(--ivory-bg)'; 
-                document.body.style.backgroundImage = 'radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%)'; 
-                removeSafeStorage('wp'); 
-            } else { 
-                document.body.style.background = bg; 
-                document.body.style.backgroundSize = 'cover'; 
-                document.body.style.backgroundAttachment = 'fixed'; 
-                setSafeStorage('wp', bg); 
-            } 
-        }
-        function uploadWallpaper(e) { 
-            let f = e.target.files[0]; 
-            if(f){ 
-                let r = new FileReader(); 
-                r.onload = (ev) => { setWallpaper(`url('${ev.target.result}')`); }; 
-                r.readAsDataURL(f); 
-            } 
-        }
-        function clearRating(nama) { 
-            let els = document.getElementsByName(nama); 
-            for(let i=0; i<els.length; i++) els[i].checked = false; 
-        }
-
-        // INIT SAAT APLIKASI DIBUKA
+        // TAMPILAN AWAL SINEMATIK
         window.onload = () => {
             let wp = getSafeStorage('wp'); if(wp) setWallpaper(wp);
             
@@ -492,14 +489,10 @@
             else { document.getElementById('login-page').classList.remove('hidden'); }
         }
 
-        // ==============================================================
-        // MESIN DATABASE (ANTI-BADAI: Tidak akan crash jika error 404)
-        // ==============================================================
         async function tarikDataServer() {
             try {
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc'];
                 
-                // Ambil data satu per satu, jika tabel tidak ada (Error), beri array kosong []
                 const responses = await Promise.all(endpoints.map(ep => 
                     fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS})
                     .then(res => res.ok ? res.json() : [])
@@ -507,30 +500,15 @@
                 ));
                 
                 const [rG, rK, rM, rS, rA, rH, rKo, rP] = responses;
-                
-                // Pelindung Utama: Pastikan tipe data adalah Array
                 const safe = arr => Array.isArray(arr) ? arr : [];
 
-                window.akunSandiMap = {}; 
-                dAkun = [];
-                safe(rG).forEach(g => { 
-                    if(g.nama_guru) {
-                        dAkun.push(g.nama_guru); 
-                        window.akunSandiMap[g.nama_guru] = g.sandi; 
-                    }
-                });
+                window.akunSandiMap = {}; dAkun = [];
+                safe(rG).forEach(g => { if(g.nama_guru) { dAkun.push(g.nama_guru); window.akunSandiMap[g.nama_guru] = g.sandi; } });
 
                 dbP = {}; dbKelasGuru = {};
-                safe(rK).forEach(k => { 
-                    if(k.nama_kelas) {
-                        dbP[k.nama_kelas] = []; 
-                        dbKelasGuru[k.nama_kelas] = k.nama_guru || ''; 
-                    }
-                });
+                safe(rK).forEach(k => { if(k.nama_kelas) { dbP[k.nama_kelas] = []; dbKelasGuru[k.nama_kelas] = k.nama_guru || ''; } });
                 
-                safe(rM).forEach(m => { 
-                    if(m.kelas && dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); 
-                });
+                safe(rM).forEach(m => { if(m.kelas && dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); });
 
                 dRiw = safe(rS).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
                 dRiwA = safe(rA).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
@@ -547,22 +525,24 @@
                 }
 
                 renderLogins(); 
-                document.getElementById('teks-loading').innerText = "Terhubung ke Supabase 🚀!";
+                
+                // Animasi Sinematik Ekstra (Tahan logo lebih lama lalu pudar)
+                let loading = document.getElementById('teks-loading');
+                if(loading) loading.innerText = "Selesai Memuat 🚀";
                 setTimeout(() => { 
                     document.getElementById('splash-screen').classList.add('fade-out'); 
-                    setTimeout(()=> { document.getElementById('splash-screen').style.display = 'none'; cekSesiAplikasi(); }, 800); 
-                }, 300);
+                    setTimeout(()=> { 
+                        document.getElementById('splash-screen').style.display = 'none'; 
+                        cekSesiAplikasi(); 
+                    }, 1500); 
+                }, 2500);
 
             } catch(e) {
-                // Jangan crash, biarkan masuk ke login
-                document.getElementById('teks-loading').innerText = "Offline Mode Aktif";
-                setTimeout(() => { document.getElementById('splash-screen').classList.add('fade-out'); setTimeout(()=> { document.getElementById('splash-screen').style.display = 'none'; cekSesiAplikasi(); }, 800); }, 300);
+                // Tembus Error
+                setTimeout(() => { document.getElementById('splash-screen').classList.add('fade-out'); setTimeout(()=> { document.getElementById('splash-screen').style.display = 'none'; cekSesiAplikasi(); }, 1500); }, 2500);
             }
         }
 
-        // ==============================================================
-        // MENGGAMBAR MENU (PRIVASI GURU UTAMA 1 & GURU UTAMA 2 AKTIF)
-        // ==============================================================
         function renderLogins() { 
             let s = document.getElementById('select-muhaffiz'); s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; dAkun.forEach(n => s.appendChild(new Option(n, n))); 
             let cG1 = document.getElementById('admin-kelas-pilih-guru'); if(cG1) { cG1.innerHTML = '<option value="">-- Guru Utama 1 --</option>'; dAkun.forEach(n => cG1.appendChild(new Option(n, n))); }
@@ -572,7 +552,6 @@
         function renderHalaqahDropdowns() { 
             let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
             
-            // Filter Kelas Khusus Guru (Hanya menampilkan kelas di mana guru tersebut terdaftar sebagai Utama 1 atau Utama 2)
             let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
             idsGuru.forEach(id => { 
                 let s = document.getElementById(id); 
@@ -587,7 +566,6 @@
                 }
             }); 
 
-            // Kelas Lengkap untuk Admin dan Ortu (Mereka bebas memilih)
             let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
             idsBebas.forEach(id => { 
                 let s = document.getElementById(id); 
@@ -608,12 +586,7 @@
             }
         }
 
-        // ==============================================================
-        // SISTEM CHAT BUBBLE & AUTO SYNC
-        // ==============================================================
-        function updateChatGuruSantri() {
-            updateDropdownSantriModul('chat-guru');
-        }
+        function updateChatGuruSantri() { updateDropdownSantriModul('chat-guru'); }
 
         async function muatUlangPesan(role) {
             let btn = document.getElementById('btn-refresh-' + role.toLowerCase());
@@ -622,10 +595,7 @@
             
             try {
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan?select=*&order=id.asc`, {headers: REQ_HEADERS});
-                if(res.ok) {
-                    dPesan = await res.json();
-                    renderChat(role);
-                }
+                if(res.ok) { dPesan = await res.json(); renderChat(role); }
             } catch(e) { } 
             
             if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
@@ -656,14 +626,8 @@
             filteredPesan.forEach(p => {
                 let isMyMessage = (p.pengirim === role);
                 let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
-                // Escape HTML + Mengubah ENTER (\n) jadi <br> agar teks panjang tetap rapi dan tidak disembunyikan browser
                 let safeMsg = escapeHTML(p.isi_pesan).replace(/\n/g, '<br>');
-                html += `
-                    <div class="chat-bubble ${bubbleClass}">
-                        ${safeMsg}
-                        <span class="chat-meta">${p.waktu} • ${p.pengirim}</span>
-                    </div>
-                `;
+                html += `<div class="chat-bubble ${bubbleClass}">${safeMsg}<span class="chat-meta">${p.waktu} • ${p.pengirim}</span></div>`;
             });
             
             box.innerHTML = html;
@@ -688,9 +652,7 @@
             if(!msg) return alert("Pesan tidak boleh kosong!");
 
             let btn = document.getElementById('btn-kirim-' + role.toLowerCase());
-            let oldText = btn.innerText; 
-            btn.innerText = "⏳"; 
-            btn.disabled = true;
+            let oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
 
             let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
@@ -698,26 +660,16 @@
                 let pay = { waktu: wkt, kelas: h, nama_murid: s, pengirim: role, isi_pesan: msg };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
 
-                if(!res.ok) throw new Error("Database Error");
+                if(!res.ok) throw new Error("Gagal");
                 
-                dPesan.push(pay);
-                msgInput.value = '';
-                renderChat(role);
+                dPesan.push(pay); msgInput.value = ''; renderChat(role);
             } catch(e) {
-                alert("GAGAL MENGIRIM!\nPastikan antum sudah menjalankan perintah SQL untuk menambahkan tabel 'pesan' di Supabase.");
-            } finally {
-                btn.innerText = oldText; 
-                btn.disabled = false;
-            }
+                alert("GAGAL MENGIRIM! Pastikan koneksi internet antum stabil.");
+            } finally { btn.innerText = oldText; btn.disabled = false; }
         }
 
-
-        // ==============================================================
-        // OTENTIKASI & LOGOUT
-        // ==============================================================
         function bukaModalAdminLogin() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
         function tutupModalAdminLogin() { document.getElementById('modal-admin-login').classList.add('hidden'); }
-        
         function loginAdmin() { 
             let p = document.getElementById('admin-password').value;
             if(!p) return alert("Masukkan sandi!");
@@ -732,9 +684,6 @@
 
         function logout() { removeSafeStorage('sesi_halaman'); removeSafeStorage('sesi_user'); location.reload(); }
 
-        // ==============================================================
-        // CRUD ADMIN
-        // ==============================================================
         async function tambahGuru() { 
             let n = document.getElementById('nama-muhaffiz-baru').value.trim(); 
             if(!n) return alert("⚠️ Nama kosong!"); if(dAkun.includes(n)) return alert("⚠️ Sudah ada!"); 
@@ -812,9 +761,6 @@
             document.getElementById('tabel-santri').innerHTML = s || '<p style="text-align:center;">Kosong</p>';
         }
 
-        // ==============================================================
-        // INPUT SETORAN
-        // ==============================================================
         function toggleJuz(n) { let i = selJuz.indexOf(n); if(i > -1) { selJuz.splice(i, 1); document.getElementById(`m-j-${n}`).classList.remove('aktif'); } else { selJuz.push(n); selJuz.sort((a,b)=>a-b); document.getElementById(`m-j-${n}`).classList.add('aktif'); } document.getElementById('total-juz-teks').innerText = selJuz.length; document.getElementById('input-juz-hidden').value = selJuz.join(','); }
         function setJuzUI(str, isOrtu) { let p = isOrtu ? 'o-j-' : 'm-j-'; for(let i=1; i<=30; i++) { let el = document.getElementById(p+i); if(el) el.classList.remove('aktif'); } let arr = (str && str !== "-") ? str.split(',').map(Number) : []; arr.forEach(n => { let el = document.getElementById(p+n); if(el) el.classList.add('aktif'); }); if(!isOrtu) { selJuz = arr; document.getElementById('total-juz-teks').innerText = arr.length; document.getElementById('input-juz-hidden').value = arr.join(','); } }
         function updateMateriUI() { let a = document.getElementById('input-surah').value, b = document.getElementById('input-surah-akhir').value; document.getElementById('wadah-ayat').style.display = (a && b && a!==b) ? 'none' : 'grid'; if(a) { let aw = document.getElementById('input-ayat-awal'), ak = document.getElementById('input-ayat-akhir'); aw.innerHTML = ak.innerHTML = '<option value="">-</option>'; for(let i=1; i<=dataSurahLengkap[a]; i++) { aw.appendChild(new Option(i,i)); ak.appendChild(new Option(i,i)); } } }
@@ -840,8 +786,7 @@
             try {
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error();
-                alert("✅ Data Setoran Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error(); alert("✅ Data Setoran Tersimpan!"); location.reload();
             } catch(e) { alert("⚠️ Gagal menyambung ke Supabase."); } finally { btn.innerText = old; btn.disabled = false; }
         }
         
@@ -852,8 +797,7 @@
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error();
-                alert("✅ Data Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error(); alert("✅ Data Tersimpan!"); location.reload();
             } catch(e) { alert("⚠️ Gagal menyimpan."); } finally { btn.innerText = old; btn.disabled = false; }
         }
 
@@ -875,9 +819,7 @@
             let h = ''; dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`; }); document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
 
-        // ==============================================================
-        // PORTAL ORANG TUA
-        // ==============================================================
+        // --- ORTU LOGIC ---
         function bukaPortalOrtu() { setSafeStorage('sesi_halaman', 'ortu'); document.getElementById('login-page').classList.add('hidden'); document.getElementById('ortu-page').classList.remove('hidden'); renderHalaqahDropdowns(); }
         
         function updateSantriOrtu() { 
@@ -937,7 +879,7 @@
             renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘'); renderRiwayatLain(dRiwH, 'list-ortu-hadits', '📜'); renderRiwayatLain(dRiwK, 'list-ortu-arab', '🔤');
         }
 
-        // --- EXCEL & IMPORT ---
+        // --- IMPORT EXCEL ---
         function unduhTemplate() { let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Kelas","Nama Murid"],["Kelas 1A","Ahmad Zaid"],["Kelas 1A","Budi"]]), "Murid"); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Nama Guru","Sandi"],["Ustadz Fulan","guru123"]]), "Guru"); XLSX.writeFile(wb, "Template_SDIT_QurratuAyun.xlsx"); }
         async function prosesImportExcel() {
             let f = document.getElementById('file-import-excel').files[0]; if(!f) return alert("Pilih file Excel!");
@@ -958,7 +900,6 @@
             }; r.readAsArrayBuffer(f);
         }
 
-        // --- LAPORAN ---
         function bukaModalLaporan() { document.getElementById('modal-laporan').classList.remove('hidden'); document.getElementById('tanggal-laporan').valueAsDate = new Date(); aturFormLaporan(); }
         function tutupModalLaporan() { document.getElementById('modal-laporan').classList.add('hidden'); }
         function aturFormLaporan() { let v = document.getElementById('jenis-laporan').value; document.getElementById('opsi-halaqah-laporan').className = v==='halaqah'||v==='santri'?'':'hidden'; document.getElementById('opsi-santri-laporan').className = v==='santri'?'':'hidden'; }
@@ -974,7 +915,6 @@
             tutupModalLaporan();
         }
 
-        function logout() { removeSafeStorage('sesi_halaman'); removeSafeStorage('sesi_user'); location.reload(); }
         function bukaModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.remove('hidden'); }
         function tutupModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.add('hidden'); }
         async function prosesGantiSandi() { 
