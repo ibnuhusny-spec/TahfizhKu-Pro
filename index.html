@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TahfizhKu Pro - SDIT Qurratu A'yun Al-Islami</title>
 
+    <script>
+        window.onerror = function(msg) {
+            var loading = document.getElementById('teks-loading');
+            if(loading) loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:14px;">🚨 ERROR KODE!<br>Ada masalah pada mesin JavaScript.</span>';
+        };
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
@@ -31,6 +38,7 @@
         input:focus, select:focus, textarea:focus { border-color: var(--emerald-light); background: var(--white); box-shadow: 0 0 0 4px rgba(5,150,105,0.15); }
         button { width: 100%; background: linear-gradient(135deg, var(--emerald-light), var(--emerald-logo)); color: white; border: none; font-weight: 800; padding: 16px; border-radius: 16px; font-size: 15px; cursor: pointer; text-transform: uppercase; transition: 0.2s; box-shadow: 0 4px 12px rgba(4,120,87,0.2); }
         button:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(4,120,87,0.3); }
+        button:disabled { filter: grayscale(100%); cursor: not-allowed; }
         .btn-danger { background: #FFFFFF; color: #EF4444; border: 2px solid #FEE2E2; box-shadow: none; }
 
         /* JUZ & RATING */
@@ -79,7 +87,7 @@
     <div id="splash-screen">
         <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23047857\' stroke-width=\'2\'><path d=\'M12 2L2 22h20L12 2z\'/></svg>'">
         <h1 style="color:var(--emerald-logo); font-weight:900; margin-bottom:5px; text-align:center;">SDIT Qurratu A'yun<br>Al-Islami</h1>
-        <div style="font-size: 13px; color: var(--text-mute); margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;" id="teks-loading">Menghubungkan ke Supabase...</div>
+        <div style="font-size: 13px; color: var(--text-mute); margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;" id="teks-loading">Konek ke Supabase 🚀...</div>
     </div>
 
     <div id="login-page" class="container hidden">
@@ -122,7 +130,10 @@
         <div id="tab-admin-guru" class="tab-content active">
             <div class="card">
                 <div class="section-title">Database Guru</div>
-                <div style="display:flex; gap:10px;"><input type="text" id="nama-muhaffiz-baru" placeholder="Ketik nama guru..." style="margin:0;"><button onclick="tambahGuru()" style="width:60px; margin:0; font-size:20px;">+</button></div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="nama-muhaffiz-baru" placeholder="Ketik nama guru..." style="margin:0;">
+                    <button id="btn-tambah-guru" onclick="tambahGuru()" style="width:60px; margin:0; font-size:20px;">+</button>
+                </div>
                 <label style="margin-top:8px; font-size:11px; text-transform:none;">Sandi bawaan: <b style="color:var(--emerald-logo);">guru123</b></label>
                 <div id="tabel-guru" style="margin-top:20px;"></div>
             </div>
@@ -131,7 +142,10 @@
         <div id="tab-admin-kelas" class="tab-content">
             <div class="card">
                 <div class="section-title">Database Kelas</div>
-                <div style="display:flex; gap:10px;"><textarea id="nama-halaqah-baru" placeholder="Ketik/Paste nama kelas masal..." style="margin:0; height:80px;"></textarea><button onclick="tambahHalaqah()" style="width:60px; margin:0; font-size:20px;">+</button></div>
+                <div style="display:flex; gap:10px;">
+                    <textarea id="nama-halaqah-baru" placeholder="Ketik/Paste nama kelas masal..." style="margin:0; height:80px;"></textarea>
+                    <button id="btn-tambah-kelas" onclick="tambahHalaqah()" style="width:60px; margin:0; font-size:20px;">+</button>
+                </div>
                 <div id="tabel-halaqah" style="margin-top:20px;"></div>
             </div>
         </div>
@@ -141,7 +155,10 @@
                 <div class="section-title">Database Murid</div>
                 <label>Pilih Kelas:</label><select id="admin-pilih-halaqah" onchange="renderTabelSantriAdmin()"></select>
                 <label style="margin-top:10px;">Paste Nama Murid Masal:</label>
-                <div style="display:flex; gap:10px;"><textarea id="data-santri-baru" placeholder="Satu baris satu nama..." style="margin:0; height:80px;"></textarea><button onclick="tambahSantri()" style="width:60px; margin:0; font-size:20px;">+</button></div>
+                <div style="display:flex; gap:10px;">
+                    <textarea id="data-santri-baru" placeholder="Satu baris satu nama..." style="margin:0; height:80px;"></textarea>
+                    <button id="btn-tambah-murid" onclick="tambahSantri()" style="width:60px; margin:0; font-size:20px;">+</button>
+                </div>
                 <div id="tabel-santri" style="margin-top:20px;"></div>
             </div>
         </div>
@@ -238,7 +255,7 @@
                     <div id="p-ulang" class="status-pill" onclick="pilihStatus('Ulangi')">🔄 HARUS ULANGI</div>
                 </div>
                 
-                <button onclick="simpanSetoran()" style="margin-top:25px;">💾 SIMPAN AL-QUR'AN</button>
+                <button id="btn-simpan-utama" onclick="simpanSetoran()" style="margin-top:25px;">💾 SIMPAN AL-QUR'AN</button>
             </div>
             <div class="section-title" style="justify-content:center; margin-top:30px;">Riwayat Input Terakhir</div>
             <div id="tempat-riwayat"></div>
@@ -324,6 +341,7 @@
                     <div style="background: #FFFBEB; padding: 15px; border-radius: 12px; border: 1px solid #FDE68A; text-align:center;"><span style="font-size: 10px; font-weight: 800; color: #B45309;">SURAH TERAKHIR</span><br><span id="ortu-infoSurah" style="font-size: 14px; font-weight: 900; color: var(--gold-accent); display:block; margin-top:5px; line-height:1.3;">-</span></div>
                 </div>
                 <div id="wadah-sertif-ortu"></div>
+                
                 <label style="color:var(--emerald-logo); margin-top:20px;">Peta Hafalan Juz:</label>
                 <div class="grid-juz-30" id="ortu-grid-juz-30" style="pointer-events: none;"></div>
             </div>
@@ -357,12 +375,17 @@
     <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 
     <script>
-        // URL & API KUNCI ASLI ANTUM:
-        const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co';
+        // ⚠️ 1. URL SUPABASE 
+        const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
+        
+        // ⚠️ 2. KUNCI API (ANON KEY) SUDAH DITANAMKAN:
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
+        
+        // Headers untuk Komunikasi Server
         const REQ_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' };
 
         const dataSurahLengkap = {"Al-Fatihah":7,"Al-Baqarah":286,"Ali 'Imran":200,"An-Nisa'":176,"Al-Ma'idah":120,"Al-An'am":165,"Al-A'raf":206,"Al-Anfal":75,"At-Taubah":129,"Yunus":109,"Hud":123,"Yusuf":111,"Ar-Ra'd":43,"Ibrahim":52,"Al-Hijr":99,"An-Nahl":128,"Al-Isra'":111,"Al-Kahf":110,"Maryam":98,"Taha":135,"Al-Anbiya'":112,"Al-Hajj":78,"Al-Mu'minun":118,"An-Nur":64,"Al-Furqan":77,"Asy-Syu'ara'":227,"An-Naml":93,"Al-Qasas":88,"Al-'Ankabut":69,"Ar-Rum":60,"Luqman":34,"As-Sajdah":30,"Al-Ahzab":73,"Saba'":54,"Fatir":45,"Yasin":83,"As-Saffat":182,"Sad":88,"Az-Zumar":75,"Gafir":85,"Fussilat":54,"Asy-Syura":53,"Az-Zukhruf":89,"Ad-Dukhan":59,"Al-Jasiyah":37,"Al-Ahqaf":35,"Muhammad":38,"Al-Fath":29,"Al-Hujurat":18,"Qaf":45,"Az-Zariyat":60,"At-Tur":49,"An-Najm":62,"Al-Qamar":55,"Ar-Rahman":78,"Al-Waqi'ah":96,"Al-Hadid":29,"Al-Mujadilah":22,"Al-Hasyr":24,"Al-Mumtahanah":13,"As-Saff":14,"Al-Jumu'ah":11,"Al-Munafiqun":11,"At-Tagabun":18,"At-Talaq":12,"At-Tahrim":12,"Al-Mulk":30,"Al-Qalam":52,"Al-Haqqah":52,"Al-Ma'arij":44,"Nuh":28,"Al-Jinn":28,"Al-Muzzammil":20,"Al-Muddassir":56,"Al-Qiyamah":40,"Al-Insan":31,"Al-Mursalat":50,"An-Naba'":40,"An-Nazi'at":46,"'Abasa":42,"At-Takwir":29,"Al-Infitar":19,"Al-Mutaffifin":36,"Al-Insyiqaq":25,"Al-Buruj":22,"At-Tariq":17,"Al-A'la":19,"Al-Gasyiyah":26,"Al-Fajr":30,"Al-Balad":20,"Asy-Syams":15,"Al-Lail":21,"Ad-Duha":11,"Asy-Syarh":8,"At-Tin":8,"Al-'Alaq":19,"Al-Qadr":5,"Al-Bayyinah":8,"Az-Zalzalah":8,"Al-'Adiyat":11,"Al-Qari'ah":11,"At-Takasur":8,"Al-'Asr":3,"Al-Humazah":9,"Al-Fil":5,"Quraisy":4,"Al-Ma'un":7,"Al-Kausar":3,"Al-Kafirun":6,"An-Nasr":3,"Al-Lahab":5,"Al-Ikhlas":4,"Al-Falaq":5,"An-Nas":6};
+        
         let dbP = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
 
         // PENGAMAN LOCAL STORAGE
@@ -370,9 +393,11 @@
         function setSafeStorage(key, val) { try { localStorage.setItem(key, val); } catch(e) { } }
         function removeSafeStorage(key) { try { localStorage.removeItem(key); } catch(e) { } }
 
+        // INISIALISASI
         window.onload = () => {
             let wp = getSafeStorage('wp'); if(wp) setWallpaper(wp);
             
+            // Set input tanggal hari ini
             let tzoffset = (new Date()).getTimezoneOffset() * 60000; 
             let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
             let ds = localISOTime.split('T')[0]; 
@@ -427,7 +452,7 @@
             else { document.getElementById('login-page').classList.remove('hidden'); }
         }
 
-        // --- RAW FETCH API (BEBAS LIBRARY) ---
+        // --- FETCH API LANGSUNG KE SUPABASE ---
         async function tarikDataServer() {
             try {
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc'];
@@ -486,46 +511,59 @@
         async function tambahGuru() { 
             let n = document.getElementById('nama-muhaffiz-baru').value.trim(); 
             if(!n) return alert("⚠️ Nama kosong!"); if(dAkun.includes(n)) return alert("⚠️ Sudah ada!"); 
-            let btn = document.getElementById('btn-tambah-guru'); btn.innerText = "⏳"; btn.disabled = true;
-            try { await fetch(`${SUPABASE_URL}/rest/v1/guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n, sandi: 'guru123'}) }); dAkun.push(n); document.getElementById('nama-muhaffiz-baru').value = ''; renderTabelAdmin(); } catch(e) { alert("Error!"); } finally { btn.innerText = "+"; btn.disabled = false; }
+            let btn = document.getElementById('btn-tambah-guru'); if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
+            try { 
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n, sandi: 'guru123'}) }); 
+                if(!res.ok) throw new Error();
+                dAkun.push(n); document.getElementById('nama-muhaffiz-baru').value = ''; renderTabelAdmin(); 
+            } catch(e) { alert("Gagal menyimpan ke database!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
         }
 
         async function tambahHalaqah() { 
             let d = document.getElementById('nama-halaqah-baru').value.trim(); 
             if(!d) return alert("⚠️ Nama Kelas kosong!"); 
             let lines = d.split('\n'); let arr = []; let added = false; 
-            let btn = document.getElementById('btn-tambah-kelas'); btn.innerText = "⏳"; btn.disabled = true;
+            let btn = document.getElementById('btn-tambah-kelas'); if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             try {
                 lines.forEach(n => { let nm = n.trim(); if(nm !== "" && !dbP[nm]) { arr.push({nama_kelas: nm}); dbP[nm] = []; added = true; } });
-                if(arr.length > 0) { await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); document.getElementById('nama-halaqah-baru').value = ''; renderTabelAdmin(); } else if (!added && lines.length > 0) alert("⚠️ Kelas sudah ada!");
-            } catch(e) { alert("Error!"); } finally { btn.innerText = "+"; btn.disabled = false; }
+                if(arr.length > 0) { 
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
+                    if(!res.ok) throw new Error();
+                    document.getElementById('nama-halaqah-baru').value = ''; renderTabelAdmin(); 
+                } else if (!added && lines.length > 0) alert("⚠️ Kelas sudah ada atau input tidak valid!");
+            } catch(e) { alert("Gagal menyimpan ke database!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
         }
 
         async function tambahSantri() { 
             let h = document.getElementById('admin-pilih-halaqah').value, d = document.getElementById('data-santri-baru').value.trim(); 
             if(!h || !d) return alert("⚠️ Pilih Kelas dan ketik nama!"); 
             let lines = d.split('\n'); let arr = []; 
-            let btn = document.getElementById('btn-tambah-murid'); btn.innerText = "⏳"; btn.disabled = true;
+            let btn = document.getElementById('btn-tambah-murid'); if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             try {
                 lines.forEach(n => { let nm = n.trim(); if(nm !== "" && (!dbP[h] || !dbP[h].includes(nm))) { arr.push({kelas: h, nama_murid: nm}); if(!dbP[h]) dbP[h] = []; dbP[h].push(nm); } }); 
-                if(arr.length > 0) { await fetch(`${SUPABASE_URL}/rest/v1/murid`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); document.getElementById('data-santri-baru').value = ''; renderTabelSantriAdmin(); }
-            } catch(e) { alert("Error!"); } finally { btn.innerText = "+"; btn.disabled = false; }
+                if(arr.length > 0) { 
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/murid`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
+                    if(!res.ok) throw new Error();
+                    document.getElementById('data-santri-baru').value = ''; renderTabelSantriAdmin(); 
+                }
+            } catch(e) { alert("Gagal menyimpan ke database!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
         }
 
         async function hapusMaster(id, sh) { 
             if(confirm("Hapus data ini permanen?")) { 
                 try {
-                    if(sh === 'Guru') { await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); let i = dAkun.indexOf(id); if(i>-1) dAkun.splice(i,1); } 
-                    if(sh === 'Kelas') { await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); delete dbP[id]; } 
-                    if(sh === 'Murid') { let parts = id.split('_'); await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(parts[0])}&nama_murid=eq.${encodeURIComponent(parts[1])}`, { method: 'DELETE', headers: REQ_HEADERS }); let idx = dbP[parts[0]].indexOf(parts[1]); if(idx > -1) dbP[parts[0]].splice(idx, 1); } 
+                    let res;
+                    if(sh === 'Guru') { res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); if(!res.ok) throw new Error(); let i = dAkun.indexOf(id); if(i>-1) dAkun.splice(i,1); } 
+                    if(sh === 'Kelas') { res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); if(!res.ok) throw new Error(); delete dbP[id]; } 
+                    if(sh === 'Murid') { let parts = id.split('_'); res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(parts[0])}&nama_murid=eq.${encodeURIComponent(parts[1])}`, { method: 'DELETE', headers: REQ_HEADERS }); if(!res.ok) throw new Error(); let idx = dbP[parts[0]].indexOf(parts[1]); if(idx > -1) dbP[parts[0]].splice(idx, 1); } 
                     renderTabelAdmin(); 
-                } catch(e) { alert("Gagal Menghapus!"); }
+                } catch(e) { alert("Gagal Menghapus dari database!"); }
             } 
         }
 
-        async function editGuru(namaLama) { let n = prompt("Ubah Nama Guru:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n.trim()}) }); let i = dAkun.indexOf(namaLama); if(i>-1) dAkun[i] = n.trim(); renderTabelAdmin(); } catch(e){ alert("Error"); } } }
-        async function editHalaqah(namaLama) { let n = prompt("Ubah Nama Kelas:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_kelas: n.trim()}) }); dbP[n.trim()] = dbP[namaLama]; delete dbP[namaLama]; renderTabelAdmin(); } catch(e){ alert("Error"); } } }
-        async function editSantri(halaqah, namaLama) { let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(halaqah)}&nama_murid=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_murid: n.trim()}) }); let idx = dbP[halaqah].indexOf(namaLama); if(idx > -1) dbP[halaqah][idx] = n.trim(); renderTabelSantriAdmin(); } catch(e){ alert("Error"); } } }
+        async function editGuru(namaLama) { let n = prompt("Ubah Nama Guru:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { let res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n.trim()}) }); if(!res.ok) throw new Error(); let i = dAkun.indexOf(namaLama); if(i>-1) dAkun[i] = n.trim(); renderTabelAdmin(); } catch(e){ alert("Gagal mengubah database!"); } } }
+        async function editHalaqah(namaLama) { let n = prompt("Ubah Nama Kelas:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_kelas: n.trim()}) }); if(!res.ok) throw new Error(); dbP[n.trim()] = dbP[namaLama]; delete dbP[namaLama]; renderTabelAdmin(); } catch(e){ alert("Gagal mengubah database!"); } } }
+        async function editSantri(halaqah, namaLama) { let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { let res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(halaqah)}&nama_murid=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_murid: n.trim()}) }); if(!res.ok) throw new Error(); let idx = dbP[halaqah].indexOf(namaLama); if(idx > -1) dbP[halaqah][idx] = n.trim(); renderTabelSantriAdmin(); } catch(e){ alert("Gagal mengubah database!"); } } }
 
         function renderTabelAdmin() {
             let g = '', h = '';
@@ -566,7 +604,8 @@
             let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM KE SUPABASE..."; btn.disabled = true;
             try {
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
-                await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                if(!res.ok) throw new Error();
                 alert("✅ Data Setoran Tersimpan!"); location.reload();
             } catch(e) { alert("⚠️ Gagal menyambung ke Supabase."); } finally { btn.innerText = old; btn.disabled = false; }
         }
@@ -576,7 +615,8 @@
             if(!h || !s) return alert("Pilih Kelas dan Murid!");
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
-                await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                if(!res.ok) throw new Error();
                 alert("✅ Data Tersimpan!"); location.reload();
             } catch(e) { alert("⚠️ Gagal menyimpan."); }
         }
@@ -594,7 +634,7 @@
                 if(jC >= 1) ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
             } else { setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; }
             
-            let h = ''; dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { h += `<div class="list-card history-card" style="border-left-color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}"><div><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`; }); document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
+            let h = ''; dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`; }); document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
 
         // --- ORTU LOGIC ---
