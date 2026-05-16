@@ -311,7 +311,7 @@
             <div class="card">
                 <div class="section-title" style="justify-content:space-between; align-items:center;">
                     <span style="display:flex; align-items:center; gap:10px;">💬 Buku Penghubung</span>
-                    <button id="btn-refresh-guru" onclick="muatUlangPesan('Guru')" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Tarik Pesan Baru</button>
+                    <button id="btn-refresh-guru" onclick="muatUlangPesan('Guru')" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Tarik Pesan</button>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                     <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
@@ -413,6 +413,7 @@
         
         let dbP = {}, dbKelasGuru = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dPesan = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
 
+        // PENGAMAN LOCAL STORAGE
         function getSafeStorage(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
         function setSafeStorage(key, val) { try { localStorage.setItem(key, val); } catch(e) { } }
         function removeSafeStorage(key) { try { localStorage.removeItem(key); } catch(e) { } }
@@ -426,6 +427,35 @@
             });
         }
 
+        // FUNGSI UI YANG SEMPAT HILANG
+        function bukaModalWallpaper() { document.getElementById('modal-wallpaper').classList.remove('hidden'); }
+        function tutupModalWallpaper() { document.getElementById('modal-wallpaper').classList.add('hidden'); }
+        function setWallpaper(bg) { 
+            if(bg === '') { 
+                document.body.style.background = 'var(--ivory-bg)'; 
+                document.body.style.backgroundImage = 'radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%)'; 
+                removeSafeStorage('wp'); 
+            } else { 
+                document.body.style.background = bg; 
+                document.body.style.backgroundSize = 'cover'; 
+                document.body.style.backgroundAttachment = 'fixed'; 
+                setSafeStorage('wp', bg); 
+            } 
+        }
+        function uploadWallpaper(e) { 
+            let f = e.target.files[0]; 
+            if(f){ 
+                let r = new FileReader(); 
+                r.onload = (ev) => { setWallpaper(`url('${ev.target.result}')`); }; 
+                r.readAsDataURL(f); 
+            } 
+        }
+        function clearRating(nama) { 
+            let els = document.getElementsByName(nama); 
+            for(let i=0; i<els.length; i++) els[i].checked = false; 
+        }
+
+        // INIT SAAT APLIKASI DIBUKA
         window.onload = () => {
             let wp = getSafeStorage('wp'); if(wp) setWallpaper(wp);
             
@@ -463,7 +493,7 @@
         }
 
         // ==============================================================
-        // MESIN DATABASE (ANTI-BADAI: Tidak akan crash jika error)
+        // MESIN DATABASE (ANTI-BADAI: Tidak akan crash jika error 404)
         // ==============================================================
         async function tarikDataServer() {
             try {
@@ -524,6 +554,7 @@
                 }, 300);
 
             } catch(e) {
+                // Jangan crash, biarkan masuk ke login
                 document.getElementById('teks-loading').innerText = "Offline Mode Aktif";
                 setTimeout(() => { document.getElementById('splash-screen').classList.add('fade-out'); setTimeout(()=> { document.getElementById('splash-screen').style.display = 'none'; cekSesiAplikasi(); }, 800); }, 300);
             }
@@ -805,11 +836,12 @@
             if(!h || !s || !sa) return alert("Lengkapi data!");
             if(sa && sk && sa !== sk) { sa = sa + " s/d " + sk; aya = "Penuh"; } else { let aw = document.getElementById('input-ayat-awal').value, ak = document.getElementById('input-ayat-akhir').value; if(!aw || !ak) return alert("Pilih ayat!"); aya = aw === ak ? aw : aw + "-" + ak; }
             
-            let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
+            let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM KE SUPABASE..."; btn.disabled = true;
             try {
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Setoran Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error();
+                alert("✅ Data Setoran Tersimpan!"); location.reload();
             } catch(e) { alert("⚠️ Gagal menyambung ke Supabase."); } finally { btn.innerText = old; btn.disabled = false; }
         }
         
@@ -820,7 +852,8 @@
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error();
+                alert("✅ Data Tersimpan!"); location.reload();
             } catch(e) { alert("⚠️ Gagal menyimpan."); } finally { btn.innerText = old; btn.disabled = false; }
         }
 
@@ -856,7 +889,7 @@
             if(h) renderLeaderboard(h); else document.getElementById('ortu-leaderboard').style.display = 'none'; 
             
             let sc = document.getElementById('chat-ortu-santri'); 
-            if(sc) { sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; if(dbP[h]) dbP[h].forEach(n => sc.appendChild(new Option(n,n))); }
+            if(sc) { sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; if(dbP[h]) dbP[h].forEach(n => sc.appendChild(new Option(n,n))); document.getElementById('chat-ortu-kelas').value = h; }
             document.getElementById('chat-box-ortu').innerHTML = '';
         }
 
@@ -935,6 +968,7 @@
             let d = dRiw.filter(i => (j==='halaqah'?i.halaqah===th : j==='santri'?(i.halaqah===th&&i.santri===ts):true)); if(d.length===0) return alert("Tidak ada data untuk dicetak!");
             let h = [["No","Waktu","Kelas","Nama Murid","Jenis","Juz","Surah/Ayat","Nilai(T,L,M)","Status"]]; 
             let b = d.map((i,idx)=>[idx+1,i.tgl,i.halaqah,i.santri,i.jenis,i.juz,`${i.surah}:${i.ayat}`,`T:${i.tajwid},L:${i.lancar},M:${i.makhraj}`,i.status]);
+            
             if(t==='Excel'){ let wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...h,...b]), "Laporan"); XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); } 
             else { const {jsPDF}=window.jspdf; let doc=new jsPDF('l'); doc.setFontSize(16); doc.setTextColor(4, 120, 87); doc.text("Laporan Capaian Tahfiz - SDIT Qurratu A'yun", 14, 15); doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 23); doc.autoTable({head:h, body:b, startY:28, theme:'grid', headStyles:{fillColor:[4,120,87]}}); doc.save(`Laporan_${tgl}.pdf`); }
             tutupModalLaporan();
