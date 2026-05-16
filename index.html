@@ -78,7 +78,16 @@
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.8); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
         .modal-content { background: var(--white); padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
+        .btn-kecil { padding: 8px 12px; font-size: 13px; width: auto; border-radius: 10px; margin:0; }
         .hidden { display: none !important; }
+
+        /* BUKU PENGHUBUNG (CHAT) UI */
+        .chat-box { height: 350px; overflow-y: auto; background: #F8FAFC; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 15px; border: 1px solid #E2E8F0; margin-bottom:15px; scroll-behavior: smooth;}
+        .chat-bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; position: relative; line-height: 1.5; font-weight: 600;}
+        .chat-guru { align-self: flex-end; background: var(--emerald-light); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(5,150,105,0.15);}
+        .chat-ortu { align-self: flex-start; background: var(--white); color: var(--text-dark); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+        .chat-meta { font-size: 10px; opacity: 0.8; margin-top: 6px; text-align: right; display: block; font-weight: 700; }
+        
         @media (max-width: 500px) { .grid-juz-30 { grid-template-columns: repeat(6, 1fr); } }
     </style>
 </head>
@@ -87,7 +96,7 @@
     <div id="splash-screen">
         <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23047857\' stroke-width=\'2\'><path d=\'M12 2L2 22h20L12 2z\'/></svg>'">
         <h1 style="color:var(--emerald-logo); font-weight:900; margin-bottom:5px; text-align:center;">SDIT Qurratu A'yun<br>Al-Islami</h1>
-        <div style="font-size: 13px; color: var(--text-mute); margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;" id="teks-loading">Konek ke Supabase 🚀...</div>
+        <div style="font-size: 13px; color: var(--text-mute); margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;" id="teks-loading">Menghubungkan ke Supabase...</div>
     </div>
 
     <div id="login-page" class="container hidden">
@@ -201,14 +210,14 @@
             <span id="nama-guru-aktif" style="font-size: 20px; font-weight: 900; margin-top:5px; display:block;"></span>
         </div>
         
-        <div class="card">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>Pilih Kelas</label><select id="muhaffiz-pilih-halaqah" onchange="updateDropdownSantri()"></select></div>
-                <div><label>Pilih Murid</label><select id="muhaffiz-pilih-santri" onchange="tampilkanKartuPrestasi()"><option value="">-- Murid --</option></select></div>
-            </div>
-        </div>
-
         <div id="tab-guru-quran" class="tab-content active">
+            <div class="card">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label>Pilih Kelas</label><select id="muhaffiz-pilih-halaqah" onchange="updateDropdownSantri()"></select></div>
+                    <div><label>Pilih Murid</label><select id="muhaffiz-pilih-santri" onchange="tampilkanKartuPrestasi()"><option value="">-- Murid --</option></select></div>
+                </div>
+            </div>
+
             <div id="kartuPrestasi" class="card" style="display:none; border:2px dashed #E2E8F0; padding:20px;">
                 <div class="section-title" style="font-size:15px; margin-bottom:15px;">Info Server Al-Qur'an</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -264,41 +273,60 @@
         <div id="tab-guru-aisar" class="tab-content">
             <div class="card">
                 <div class="section-title">📘 Bimbingan AISAR</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="aisar-pilih-halaqah" onchange="updateDropdownSantriModul('aisar')"></select>
+                    <select id="aisar-pilih-santri"><option value="">-- Murid --</option></select>
+                </div>
                 <label>Tanggal</label><input type="date" id="tgl-aisar">
                 <label>Jilid & Halaman</label><input type="text" id="in-aisar" placeholder="Contoh: Jilid 2 Hal 15">
                 <label>Status</label><select id="stat-aisar"><option value="Lanjut">Lanjut</option><option value="Ulang">Ulang</option></select>
                 <label>Catatan</label><textarea id="cat-aisar" placeholder="Pesan evaluasi..."></textarea>
-                <button onclick="simpanModulLain('aisar')">Simpan AISAR</button>
+                <button id="btn-simpan-aisar" onclick="simpanModulLain('aisar')">Simpan AISAR</button>
             </div>
         </div>
 
         <div id="tab-guru-hadits" class="tab-content">
             <div class="card">
                 <div class="section-title" style="color:var(--gold-accent)">📜 Hafalan Hadits</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="hadits-pilih-halaqah" onchange="updateDropdownSantriModul('hadits')"></select>
+                    <select id="hadits-pilih-santri"><option value="">-- Murid --</option></select>
+                </div>
                 <label>Tanggal</label><input type="date" id="tgl-hadits">
                 <label>Nama Hadits / Doa</label><input type="text" id="in-hadits" placeholder="Contoh: Hadits Menuntut Ilmu">
                 <label>Status</label><select id="stat-hadits"><option value="Sangat Lancar">Sangat Lancar</option><option value="Cukup">Cukup Lancar</option><option value="Ulang">Perlu Diulang</option></select>
                 <label>Catatan</label><textarea id="cat-hadits" placeholder="Pesan evaluasi..."></textarea>
-                <button style="background: linear-gradient(135deg, var(--gold-light), var(--gold-accent));" onclick="simpanModulLain('hadits')">Simpan Hadits</button>
+                <button id="btn-simpan-hadits" style="background: linear-gradient(135deg, var(--gold-light), var(--gold-accent));" onclick="simpanModulLain('hadits')">Simpan Hadits</button>
             </div>
         </div>
 
         <div id="tab-guru-arab" class="tab-content">
             <div class="card">
                 <div class="section-title" style="color:var(--cerulean-logo)">🔤 Kosakata Arab</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="kosakata-pilih-halaqah" onchange="updateDropdownSantriModul('kosakata')"></select>
+                    <select id="kosakata-pilih-santri"><option value="">-- Murid --</option></select>
+                </div>
                 <label>Tanggal</label><input type="date" id="tgl-kosakata">
                 <label>Materi / Kosakata</label><input type="text" id="in-kosakata" placeholder="Contoh: Anggota Tubuh (1-5)">
                 <label>Status</label><select id="stat-kosakata"><option value="Hafal">Sudah Hafal</option><option value="Proses">Sedang Dihafal</option></select>
                 <label>Catatan</label><textarea id="cat-kosakata" placeholder="Pesan evaluasi..."></textarea>
-                <button style="background: linear-gradient(135deg, var(--cerulean-light), var(--cerulean-logo));" onclick="simpanModulLain('kosakata')">Simpan Kosakata</button>
+                <button id="btn-simpan-kosakata" style="background: linear-gradient(135deg, var(--cerulean-light), var(--cerulean-logo));" onclick="simpanModulLain('kosakata')">Simpan Kosakata</button>
             </div>
         </div>
 
         <div id="tab-guru-penghubung" class="tab-content">
-            <div class="card" style="text-align:center; padding: 50px 20px; border: 2px dashed #047857;">
-                <span style="font-size:60px;">💬</span>
-                <h3 style="color:#047857; margin-bottom:10px;">Buku Penghubung</h3>
-                <p style="color:var(--text-mute); font-size:14px; font-weight:600; line-height:1.6;">Fasilitas komunikasi dengan Orang Tua akan segera hadir di update mendatang!</p>
+            <div class="card">
+                <div class="section-title">💬 Buku Penghubung</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="chat-guru-kelas" onchange="updateDropdownSantriModul('chat-guru')"></select>
+                    <select id="chat-guru-santri" onchange="renderChat('Guru')"><option value="">-- Murid --</option></select>
+                </div>
+                <div class="chat-box" id="chat-box-guru"></div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="input-pesan-guru" placeholder="Ketik pesan untuk Orang Tua..." style="margin:0;">
+                    <button onclick="kirimPesan('Guru')" style="width:80px; margin:0; padding:12px;">Kirim</button>
+                </div>
             </div>
         </div>
 
@@ -354,9 +382,13 @@
         <div id="tab-ortu-arab" class="tab-content"><div class="section-title" style="justify-content:center; color:var(--cerulean-logo);">Riwayat Kosakata Arab</div><div id="list-ortu-arab"></div></div>
         
         <div id="tab-ortu-penghubung" class="tab-content">
-            <div class="card" style="text-align:center; padding: 50px 20px; border: 2px dashed var(--cerulean-logo);">
-                <span style="font-size:60px;">💬</span><h3 style="color:var(--cerulean-logo); margin-bottom:10px;">Buku Penghubung</h3>
-                <p style="color:var(--text-mute); font-size:14px; font-weight:600; line-height:1.6;">Fasilitas pesan dengan Ustadz/ah sedang disiapkan!</p>
+            <div class="card">
+                <div class="section-title">💬 Buku Penghubung</div>
+                <div class="chat-box" id="chat-box-ortu"></div>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="input-pesan-ortu" placeholder="Tulis pesan untuk Ustadz/ah..." style="margin:0;">
+                    <button onclick="kirimPesan('Ortu')" style="width:80px; margin:0; padding:12px;">Kirim</button>
+                </div>
             </div>
         </div>
 
@@ -386,7 +418,7 @@
 
         const dataSurahLengkap = {"Al-Fatihah":7,"Al-Baqarah":286,"Ali 'Imran":200,"An-Nisa'":176,"Al-Ma'idah":120,"Al-An'am":165,"Al-A'raf":206,"Al-Anfal":75,"At-Taubah":129,"Yunus":109,"Hud":123,"Yusuf":111,"Ar-Ra'd":43,"Ibrahim":52,"Al-Hijr":99,"An-Nahl":128,"Al-Isra'":111,"Al-Kahf":110,"Maryam":98,"Taha":135,"Al-Anbiya'":112,"Al-Hajj":78,"Al-Mu'minun":118,"An-Nur":64,"Al-Furqan":77,"Asy-Syu'ara'":227,"An-Naml":93,"Al-Qasas":88,"Al-'Ankabut":69,"Ar-Rum":60,"Luqman":34,"As-Sajdah":30,"Al-Ahzab":73,"Saba'":54,"Fatir":45,"Yasin":83,"As-Saffat":182,"Sad":88,"Az-Zumar":75,"Gafir":85,"Fussilat":54,"Asy-Syura":53,"Az-Zukhruf":89,"Ad-Dukhan":59,"Al-Jasiyah":37,"Al-Ahqaf":35,"Muhammad":38,"Al-Fath":29,"Al-Hujurat":18,"Qaf":45,"Az-Zariyat":60,"At-Tur":49,"An-Najm":62,"Al-Qamar":55,"Ar-Rahman":78,"Al-Waqi'ah":96,"Al-Hadid":29,"Al-Mujadilah":22,"Al-Hasyr":24,"Al-Mumtahanah":13,"As-Saff":14,"Al-Jumu'ah":11,"Al-Munafiqun":11,"At-Tagabun":18,"At-Talaq":12,"At-Tahrim":12,"Al-Mulk":30,"Al-Qalam":52,"Al-Haqqah":52,"Al-Ma'arij":44,"Nuh":28,"Al-Jinn":28,"Al-Muzzammil":20,"Al-Muddassir":56,"Al-Qiyamah":40,"Al-Insan":31,"Al-Mursalat":50,"An-Naba'":40,"An-Nazi'at":46,"'Abasa":42,"At-Takwir":29,"Al-Infitar":19,"Al-Mutaffifin":36,"Al-Insyiqaq":25,"Al-Buruj":22,"At-Tariq":17,"Al-A'la":19,"Al-Gasyiyah":26,"Al-Fajr":30,"Al-Balad":20,"Asy-Syams":15,"Al-Lail":21,"Ad-Duha":11,"Asy-Syarh":8,"At-Tin":8,"Al-'Alaq":19,"Al-Qadr":5,"Al-Bayyinah":8,"Az-Zalzalah":8,"Al-'Adiyat":11,"Al-Qari'ah":11,"At-Takasur":8,"Al-'Asr":3,"Al-Humazah":9,"Al-Fil":5,"Quraisy":4,"Al-Ma'un":7,"Al-Kausar":3,"Al-Kafirun":6,"An-Nasr":3,"Al-Lahab":5,"Al-Ikhlas":4,"Al-Falaq":5,"An-Nas":6};
         
-        let dbP = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
+        let dbP = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dPesan = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
 
         // PENGAMAN LOCAL STORAGE
         function getSafeStorage(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
@@ -397,7 +429,6 @@
         window.onload = () => {
             let wp = getSafeStorage('wp'); if(wp) setWallpaper(wp);
             
-            // Set input tanggal hari ini
             let tzoffset = (new Date()).getTimezoneOffset() * 60000; 
             let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
             let ds = localISOTime.split('T')[0]; 
@@ -455,10 +486,11 @@
         // --- FETCH API LANGSUNG KE SUPABASE ---
         async function tarikDataServer() {
             try {
-                const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc'];
+                // Tambahkan 'pesan' ke endpoint
+                const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc'];
                 const responses = await Promise.all(endpoints.map(ep => fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS}).then(res => res.json())));
                 
-                const [rG, rK, rM, rS, rA, rH, rKo] = responses;
+                const [rG, rK, rM, rS, rA, rH, rKo, rP] = responses;
 
                 window.akunSandiMap = {}; dAkun = [];
                 (rG || []).forEach(g => { dAkun.push(g.nama_guru); window.akunSandiMap[g.nama_guru] = g.sandi; });
@@ -471,6 +503,7 @@
                 dRiwA = (rA || []).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
                 dRiwH = (rH || []).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
                 dRiwK = (rKo || []).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+                dPesan = (rP || []).map(r => ({waktu: r.waktu, kelas: r.kelas, nama_murid: r.nama_murid, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
 
                 dProg = {};
                 for(let i = dRiw.length-1; i >= 0; i--) {
@@ -490,7 +523,34 @@
         }
 
         function renderLogins() { let s = document.getElementById('select-muhaffiz'); s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; dAkun.forEach(n => s.appendChild(new Option(n, n))); }
-        function renderHalaqahDropdowns() { ['muhaffiz-pilih-halaqah', 'ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'].forEach(id => { let s = document.getElementById(id); s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); }); }
+        
+        // Memasukkan Dropdown ke semua tab inputan
+        function renderHalaqahDropdowns() { 
+            let arrId = [
+                'muhaffiz-pilih-halaqah', 'ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan',
+                'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah',
+                'chat-guru-kelas', 'chat-ortu-kelas'
+            ];
+            arrId.forEach(id => { 
+                let s = document.getElementById(id); 
+                if(s) {
+                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
+                    for(let h in dbP) s.appendChild(new Option(h, h)); 
+                }
+            }); 
+        }
+
+        function updateDropdownSantriModul(prefix) {
+            let h = document.getElementById(prefix+'-pilih-halaqah') ? document.getElementById(prefix+'-pilih-halaqah').value : document.getElementById(prefix+'-kelas').value;
+            let sId = document.getElementById(prefix+'-pilih-santri') ? prefix+'-pilih-santri' : prefix+'-santri';
+            let s = document.getElementById(sId);
+            s.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
+            if(h && dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n, n))); 
+            
+            if(prefix === 'chat-guru') {
+                document.getElementById('chat-box-guru').innerHTML = '';
+            }
+        }
 
         function bukaModalAdminLogin() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
         function tutupModalAdminLogin() { document.getElementById('modal-admin-login').classList.add('hidden'); }
@@ -611,14 +671,15 @@
         }
         
         async function simpanModulLain(modul) {
-            let h = document.getElementById('muhaffiz-pilih-halaqah').value, s = document.getElementById('muhaffiz-pilih-santri').value;
+            let h = document.getElementById(modul+'-pilih-halaqah').value, s = document.getElementById(modul+'-pilih-santri').value;
             if(!h || !s) return alert("Pilih Kelas dan Murid!");
+            let btn = document.getElementById('btn-simpan-'+modul); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
                 if(!res.ok) throw new Error();
                 alert("✅ Data Tersimpan!"); location.reload();
-            } catch(e) { alert("⚠️ Gagal menyimpan."); }
+            } catch(e) { alert("⚠️ Gagal menyimpan."); } finally { btn.innerText = old; btn.disabled = false; }
         }
 
         function getV(n){ let r = document.querySelector(`input[name="${n}"]:checked`); return r?r.value:"3"; }
@@ -630,12 +691,84 @@
             let ws = document.getElementById('wadah-sertif-guru'); ws.innerHTML = '';
             
             if(p) { 
-                setJuzUI(p.juz, false); let jC = (p.juz && p.juz !== "-") ? p.juz.split(',').length : 0; document.getElementById('infoTotalJuz').innerText = jC; document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
+                setJuzUI(p.juz, false); 
+                // PERBAIKAN BUG SERTIFIKAT: Hanya hitung jika juz tidak kosong
+                let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : [];
+                let jC = arrJuz.length; 
+                
+                document.getElementById('infoTotalJuz').innerText = jC; 
+                document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
+                
                 if(jC >= 1) ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
             } else { setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; }
             
-            let h = ''; dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`; }); document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
+            let h = ''; dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { h += `<div class="list-card history-card" style="border-left-color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}"><div><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`; }); document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
+
+        // --- SISTEM CHAT (BUKU PENGHUBUNG) ---
+        function renderChat(role) {
+            let prefix = role === 'Guru' ? 'chat-guru' : 'chat-ortu';
+            let s = document.getElementById(prefix+'-santri').value;
+            let h = document.getElementById(prefix+'-kelas').value;
+            let box = document.getElementById('chat-box-'+role.toLowerCase());
+            
+            if(!s || !h) { box.innerHTML = ''; return; }
+
+            let html = '';
+            let filteredPesan = dPesan.filter(p => p.kelas === h && p.nama_murid === s);
+            
+            if(filteredPesan.length === 0) {
+                box.innerHTML = `<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:50px;">Belum ada pesan.<br>Mulai percakapan sekarang.</p>`;
+                return;
+            }
+
+            filteredPesan.forEach(p => {
+                let isMyMessage = p.pengirim === role;
+                let bubbleClass = isMyMessage ? 'chat-guru' : 'chat-ortu'; // 'chat-guru' is green, 'chat-ortu' is white/grey
+                html += `
+                    <div class="chat-bubble ${bubbleClass}">
+                        ${p.isi_pesan}
+                        <span class="chat-meta">${p.waktu} • ${p.pengirim}</span>
+                    </div>
+                `;
+            });
+            
+            box.innerHTML = html;
+            // Scroll to bottom
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function kirimPesan(role) {
+            let prefix = role === 'Guru' ? 'chat-guru' : 'chat-ortu';
+            let h = document.getElementById(prefix+'-kelas').value;
+            let s = document.getElementById(prefix+'-santri').value;
+            let msgInput = document.getElementById('input-pesan-'+role.toLowerCase());
+            let msg = msgInput.value.trim();
+
+            if(!h || !s) return alert("Pilih Kelas dan Murid terlebih dahulu!");
+            if(!msg) return alert("Pesan tidak boleh kosong!");
+
+            let btn = event.target; let oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+            
+            // Format waktu standar Indonesia
+            let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+
+            try {
+                let pay = { waktu: wkt, kelas: h, nama_murid: s, pengirim: role, isi_pesan: msg };
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                if(!res.ok) throw new Error();
+                
+                // Tambahkan langsung ke memori lokal biar gak perlu reload
+                dPesan.push(pay);
+                msgInput.value = '';
+                renderChat(role);
+            } catch(e) {
+                alert("Gagal mengirim pesan! Periksa koneksi.");
+            } finally {
+                btn.innerText = oldText; btn.disabled = false;
+            }
+        }
+
 
         // --- ORTU LOGIC ---
         function bukaPortalOrtu() { setSafeStorage('sesi_halaman', 'ortu'); document.getElementById('login-page').classList.add('hidden'); document.getElementById('ortu-page').classList.remove('hidden'); renderHalaqahDropdowns(); }
@@ -645,6 +778,12 @@
             s.innerHTML='<option value="">-- Pilih Ananda --</option>'; (dbP[h]||[]).forEach(n => s.appendChild(new Option(n,n))); 
             document.getElementById('ortu-kartuPrestasi').style.display = 'none'; document.getElementById('list-ortu-quran').innerHTML = ''; 
             if(h) renderLeaderboard(h); else document.getElementById('ortu-leaderboard').style.display = 'none'; 
+            
+            // Update dropdown chat ortu juga
+            let sc = document.getElementById('chat-ortu-santri'); 
+            sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; (dbP[h]||[]).forEach(n => sc.appendChild(new Option(n,n)));
+            document.getElementById('chat-ortu-kelas').value = h;
+            document.getElementById('chat-box-ortu').innerHTML = '';
         }
 
         function renderLeaderboard(halaqah) {
@@ -666,9 +805,22 @@
         function tampilkanDataOrtu() {
             let s = document.getElementById('ortu-pilih-santri').value, p = dProg[s], h = ''; document.getElementById('ortu-kartuPrestasi').style.display = s ? 'block' : 'none';
             let ws = document.getElementById('wadah-sertif-ortu'); ws.innerHTML = '';
+            
+            // Sinkronisasi dropdown chat dengan dropdown utama ortu
+            let sc = document.getElementById('chat-ortu-santri');
+            if(sc) { sc.value = s; renderChat('Ortu'); }
+
             if(p) { 
-                setJuzUI(p.juz, true); let jC = (p.juz && p.juz !== "-") ? p.juz.split(',').length : 0; document.getElementById('ortu-infoJuz').innerText = jC; document.getElementById('ortu-infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; font-weight:800; color:var(--text-mute);">(Ayat: ${p.ayat})</span>`; 
-                if(jC >= 1) ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
+                setJuzUI(p.juz, true); 
+                // PERBAIKAN BUG SERTIFIKAT ORTU
+                let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : [];
+                let jC = arrJuz.length; 
+                
+                document.getElementById('ortu-infoJuz').innerText = jC; document.getElementById('ortu-infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; font-weight:800; color:var(--text-mute);">(Ayat: ${p.ayat})</span>`; 
+                
+                if(jC >= 1) {
+                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
+                }
             } 
             else { setJuzUI("", true); document.getElementById('ortu-infoJuz').innerText = "0"; document.getElementById('ortu-infoSurah').innerText = "-"; }
             
