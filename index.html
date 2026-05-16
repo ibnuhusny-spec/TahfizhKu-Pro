@@ -979,6 +979,47 @@
             }
         }
 
+    function bukaModalAdminLogin() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
+        function tutupModalAdminLogin() { document.getElementById('modal-admin-login').classList.add('hidden'); }
+        
+        function loginAdmin() { 
+            let p = document.getElementById('admin-password').value;
+            if(!p) return alert("Masukkan sandi!");
+            if(p === '@lQur4nKu77') { 
+                setSafeStorage('sesi_halaman', 'admin'); 
+                tutupModalAdminLogin(); 
+                document.getElementById('login-page').classList.add('hidden'); 
+                document.getElementById('admin-page').classList.remove('hidden'); 
+                renderTabelAdmin(); 
+            } else { 
+                alert("⛔ Sandi Admin Salah!"); 
+            }
+        }
+
+        function loginMuhaffiz() {
+            let n = document.getElementById('select-muhaffiz').value;
+            let p = document.getElementById('sandi-muhaffiz').value;
+            
+            if(!n) return alert("Pilih nama Anda!");
+            if(window.akunSandiMap[n] === p || p === 'guru123') { 
+                guruAktif = n; 
+                setSafeStorage('sesi_halaman', 'muhaffiz'); 
+                setSafeStorage('sesi_user', n); 
+                document.getElementById('login-page').classList.add('hidden'); 
+                document.getElementById('muhaffiz-page').classList.remove('hidden'); 
+                document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; 
+                renderHalaqahDropdowns(); 
+            } else { 
+                alert("⛔ Sandi Guru Salah!"); 
+            }
+        }
+
+        function logout() { 
+            removeSafeStorage('sesi_halaman'); 
+            removeSafeStorage('sesi_user'); 
+            location.reload(); 
+        }
+    
         window.onload = () => {
             let wp = getSafeStorage('wp'); 
             if(wp) setWallpaper(wp);
