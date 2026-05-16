@@ -30,10 +30,9 @@
            ============================================================== */
         #splash-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #050505; /* Hitam Sinematik */
+            background: #050505; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             z-index: 9999; 
-            /* Memudar keluar dengan sangat halus selama 1.5 detik */
             transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.5s; 
         }
         #splash-screen.fade-out { opacity: 0; visibility: hidden; }
@@ -41,7 +40,6 @@
         .splash-logo { 
             width: 170px; height: 170px; object-fit: contain; 
             opacity: 0; 
-            /* Masuk dengan fade-in, lalu bernapas berulang kali */
             animation: fadeInLogo 1.5s ease-out forwards, cinematicBreathing 4s ease-in-out infinite alternate 1.5s; 
         }
 
@@ -118,7 +116,7 @@
 
     <div id="splash-screen">
         <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23ffffff\' stroke-width=\'2\'><path d=\'M12 2L2 22h20L12 2z\'/></svg>'">
-        <div style="font-size: 13px; margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display:none;" id="teks-loading">Memuat Database...</div>
+        <div style="font-size: 13px; margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display:none;" id="teks-loading">Memuat...</div>
     </div>
 
     <div id="login-page" class="container hidden">
@@ -432,14 +430,20 @@
     <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 
     <script>
+        // KUNCI SUPABASE
         const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
-        const REQ_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' };
+        const REQ_HEADERS = { 
+            'apikey': SUPABASE_ANON_KEY, 
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 
+            'Content-Type': 'application/json' 
+        };
 
         const dataSurahLengkap = {"Al-Fatihah":7,"Al-Baqarah":286,"Ali 'Imran":200,"An-Nisa'":176,"Al-Ma'idah":120,"Al-An'am":165,"Al-A'raf":206,"Al-Anfal":75,"At-Taubah":129,"Yunus":109,"Hud":123,"Yusuf":111,"Ar-Ra'd":43,"Ibrahim":52,"Al-Hijr":99,"An-Nahl":128,"Al-Isra'":111,"Al-Kahf":110,"Maryam":98,"Taha":135,"Al-Anbiya'":112,"Al-Hajj":78,"Al-Mu'minun":118,"An-Nur":64,"Al-Furqan":77,"Asy-Syu'ara'":227,"An-Naml":93,"Al-Qasas":88,"Al-'Ankabut":69,"Ar-Rum":60,"Luqman":34,"As-Sajdah":30,"Al-Ahzab":73,"Saba'":54,"Fatir":45,"Yasin":83,"As-Saffat":182,"Sad":88,"Az-Zumar":75,"Gafir":85,"Fussilat":54,"Asy-Syura":53,"Az-Zukhruf":89,"Ad-Dukhan":59,"Al-Jasiyah":37,"Al-Ahqaf":35,"Muhammad":38,"Al-Fath":29,"Al-Hujurat":18,"Qaf":45,"Az-Zariyat":60,"At-Tur":49,"An-Najm":62,"Al-Qamar":55,"Ar-Rahman":78,"Al-Waqi'ah":96,"Al-Hadid":29,"Al-Mujadilah":22,"Al-Hasyr":24,"Al-Mumtahanah":13,"As-Saff":14,"Al-Jumu'ah":11,"Al-Munafiqun":11,"At-Tagabun":18,"At-Talaq":12,"At-Tahrim":12,"Al-Mulk":30,"Al-Qalam":52,"Al-Haqqah":52,"Al-Ma'arij":44,"Nuh":28,"Al-Jinn":28,"Al-Muzzammil":20,"Al-Muddassir":56,"Al-Qiyamah":40,"Al-Insan":31,"Al-Mursalat":50,"An-Naba'":40,"An-Nazi'at":46,"'Abasa":42,"At-Takwir":29,"Al-Infitar":19,"Al-Mutaffifin":36,"Al-Insyiqaq":25,"Al-Buruj":22,"At-Tariq":17,"Al-A'la":19,"Al-Gasyiyah":26,"Al-Fajr":30,"Al-Balad":20,"Asy-Syams":15,"Al-Lail":21,"Ad-Duha":11,"Asy-Syarh":8,"At-Tin":8,"Al-'Alaq":19,"Al-Qadr":5,"Al-Bayyinah":8,"Az-Zalzalah":8,"Al-'Adiyat":11,"Al-Qari'ah":11,"At-Takasur":8,"Al-'Asr":3,"Al-Humazah":9,"Al-Fil":5,"Quraisy":4,"Al-Ma'un":7,"Al-Kausar":3,"Al-Kafirun":6,"An-Nasr":3,"Al-Lahab":5,"Al-Ikhlas":4,"Al-Falaq":5,"An-Nas":6};
         
         let dbP = {}, dbKelasGuru = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dPesan = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
 
+        // FUNGSI UTILITIES
         function getSafeStorage(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
         function setSafeStorage(key, val) { try { localStorage.setItem(key, val); } catch(e) { } }
         function removeSafeStorage(key) { try { localStorage.removeItem(key); } catch(e) { } }
@@ -452,9 +456,82 @@
             });
         }
 
-        // TAMPILAN AWAL SINEMATIK
+        // FUNGSI TAMPILAN
+        function bukaModalWallpaper() { document.getElementById('modal-wallpaper').classList.remove('hidden'); }
+        function tutupModalWallpaper() { document.getElementById('modal-wallpaper').classList.add('hidden'); }
+        
+        function setWallpaper(bg) { 
+            if(bg === '') { 
+                document.body.style.background = 'var(--ivory-bg)'; 
+                document.body.style.backgroundImage = 'radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%)'; 
+                removeSafeStorage('wp'); 
+            } else { 
+                document.body.style.background = bg; 
+                document.body.style.backgroundSize = 'cover'; 
+                document.body.style.backgroundAttachment = 'fixed'; 
+                setSafeStorage('wp', bg); 
+            } 
+        }
+
+        function uploadWallpaper(e) { 
+            let f = e.target.files[0]; 
+            if(f){ 
+                let r = new FileReader(); 
+                r.onload = (ev) => { setWallpaper(`url('${ev.target.result}')`); }; 
+                r.readAsDataURL(f); 
+            } 
+        }
+
+        function clearRating(nama) { 
+            let els = document.getElementsByName(nama); 
+            for(let i=0; i<els.length; i++) els[i].checked = false; 
+        }
+
+        function switchAdmin(tab, btn) { 
+            document.querySelectorAll('#admin-page .tab-content').forEach(e => e.classList.remove('active')); 
+            document.getElementById('tab-admin-'+tab).classList.add('active'); 
+            document.querySelectorAll('#nav-admin .nav-item').forEach(e => e.classList.remove('active')); 
+            btn.classList.add('active'); 
+        }
+
+        function switchGuru(tab, btn) { 
+            document.querySelectorAll('#muhaffiz-page .tab-content').forEach(e => e.classList.remove('active')); 
+            document.getElementById('tab-guru-'+tab).classList.add('active'); 
+            document.querySelectorAll('#nav-guru .nav-item').forEach(e => e.classList.remove('active')); 
+            btn.classList.add('active'); 
+        }
+
+        function switchOrtu(tab, btn) { 
+            document.querySelectorAll('#ortu-page .tab-content').forEach(e => e.classList.remove('active')); 
+            document.getElementById('tab-ortu-'+tab).classList.add('active'); 
+            document.querySelectorAll('#nav-ortu .nav-item').forEach(e => e.classList.remove('active')); 
+            btn.classList.add('active'); 
+        }
+
+        function cekSesiAplikasi() {
+            let page = getSafeStorage('sesi_halaman'); 
+            let usr = getSafeStorage('sesi_user');
+            
+            if (page === 'admin') { 
+                document.getElementById('admin-page').classList.remove('hidden'); 
+                renderTabelAdmin(); 
+            } else if (page === 'muhaffiz') { 
+                guruAktif = usr; 
+                document.getElementById('muhaffiz-page').classList.remove('hidden'); 
+                document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + usr; 
+                renderHalaqahDropdowns(); 
+            } else if (page === 'ortu') { 
+                document.getElementById('ortu-page').classList.remove('hidden'); 
+                renderHalaqahDropdowns(); 
+            } else { 
+                document.getElementById('login-page').classList.remove('hidden'); 
+            }
+        }
+
+        // INIT SAAT APLIKASI DIBUKA
         window.onload = () => {
-            let wp = getSafeStorage('wp'); if(wp) setWallpaper(wp);
+            let wp = getSafeStorage('wp'); 
+            if(wp) setWallpaper(wp);
             
             let tzoffset = (new Date()).getTimezoneOffset() * 60000; 
             let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
@@ -462,33 +539,30 @@
             document.querySelectorAll('input[type="date"]').forEach(e => e.value = ds);
             
             ['tajwid', 'lancar', 'makhraj'].forEach(id => {
-                let h = ''; for(let i=5; i>=1; i--) h += `<input type="radio" id="s${i}${id}" name="${id}" value="${i}"><label for="s${i}${id}">★</label>`;
+                let h = ''; 
+                for(let i=5; i>=1; i--) h += `<input type="radio" id="s${i}${id}" name="${id}" value="${i}"><label for="s${i}${id}">★</label>`;
                 document.getElementById('stars-'+id).innerHTML = h;
             });
             
             let s1 = document.getElementById('input-surah'), s2 = document.getElementById('input-surah-akhir');
             s1.innerHTML = s2.innerHTML = '<option value="">-- Surah --</option>';
-            for(let k in dataSurahLengkap) { s1.appendChild(new Option(k,k)); s2.appendChild(new Option(k,k)); }
+            for(let k in dataSurahLengkap) { 
+                s1.appendChild(new Option(k,k)); 
+                s2.appendChild(new Option(k,k)); 
+            }
             
             let gM = '', gO = '';
-            for(let i=1; i<=30; i++){ gM += `<div class="juz-btn" id="m-j-${i}" onclick="toggleJuz(${i})">${i}</div>`; gO += `<div class="juz-btn" id="o-j-${i}">${i}</div>`; }
-            document.getElementById('muhaffiz-grid-juz-30').innerHTML = gM; document.getElementById('ortu-grid-juz-30').innerHTML = gO;
+            for(let i=1; i<=30; i++){ 
+                gM += `<div class="juz-btn" id="m-j-${i}" onclick="toggleJuz(${i})">${i}</div>`; 
+                gO += `<div class="juz-btn" id="o-j-${i}">${i}</div>`; 
+            }
+            document.getElementById('muhaffiz-grid-juz-30').innerHTML = gM; 
+            document.getElementById('ortu-grid-juz-30').innerHTML = gO;
             
             tarikDataServer();
         };
 
-        function switchAdmin(tab, btn) { document.querySelectorAll('#admin-page .tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-admin-'+tab).classList.add('active'); document.querySelectorAll('#nav-admin .nav-item').forEach(e => e.classList.remove('active')); btn.classList.add('active'); }
-        function switchGuru(tab, btn) { document.querySelectorAll('#muhaffiz-page .tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-guru-'+tab).classList.add('active'); document.querySelectorAll('#nav-guru .nav-item').forEach(e => e.classList.remove('active')); btn.classList.add('active'); }
-        function switchOrtu(tab, btn) { document.querySelectorAll('#ortu-page .tab-content').forEach(e => e.classList.remove('active')); document.getElementById('tab-ortu-'+tab).classList.add('active'); document.querySelectorAll('#nav-ortu .nav-item').forEach(e => e.classList.remove('active')); btn.classList.add('active'); }
-
-        function cekSesiAplikasi() {
-            let page = getSafeStorage('sesi_halaman'); let usr = getSafeStorage('sesi_user');
-            if (page === 'admin') { document.getElementById('admin-page').classList.remove('hidden'); renderTabelAdmin(); } 
-            else if (page === 'muhaffiz') { guruAktif = usr; document.getElementById('muhaffiz-page').classList.remove('hidden'); document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + usr; renderHalaqahDropdowns(); } 
-            else if (page === 'ortu') { document.getElementById('ortu-page').classList.remove('hidden'); renderHalaqahDropdowns(); } 
-            else { document.getElementById('login-page').classList.remove('hidden'); }
-        }
-
+        // FUNGSI KOMUNIKASI DATABASE
         async function tarikDataServer() {
             try {
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc'];
@@ -502,13 +576,26 @@
                 const [rG, rK, rM, rS, rA, rH, rKo, rP] = responses;
                 const safe = arr => Array.isArray(arr) ? arr : [];
 
-                window.akunSandiMap = {}; dAkun = [];
-                safe(rG).forEach(g => { if(g.nama_guru) { dAkun.push(g.nama_guru); window.akunSandiMap[g.nama_guru] = g.sandi; } });
+                window.akunSandiMap = {}; 
+                dAkun = [];
+                safe(rG).forEach(g => { 
+                    if(g.nama_guru) {
+                        dAkun.push(g.nama_guru); 
+                        window.akunSandiMap[g.nama_guru] = g.sandi; 
+                    }
+                });
 
                 dbP = {}; dbKelasGuru = {};
-                safe(rK).forEach(k => { if(k.nama_kelas) { dbP[k.nama_kelas] = []; dbKelasGuru[k.nama_kelas] = k.nama_guru || ''; } });
+                safe(rK).forEach(k => { 
+                    if(k.nama_kelas) {
+                        dbP[k.nama_kelas] = []; 
+                        dbKelasGuru[k.nama_kelas] = k.nama_guru || ''; 
+                    }
+                });
                 
-                safe(rM).forEach(m => { if(m.kelas && dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); });
+                safe(rM).forEach(m => { 
+                    if(m.kelas && dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); 
+                });
 
                 dRiw = safe(rS).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
                 dRiwA = safe(rA).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
@@ -526,9 +613,9 @@
 
                 renderLogins(); 
                 
-                // Animasi Sinematik Ekstra (Tahan logo lebih lama lalu pudar)
                 let loading = document.getElementById('teks-loading');
                 if(loading) loading.innerText = "Selesai Memuat 🚀";
+                
                 setTimeout(() => { 
                     document.getElementById('splash-screen').classList.add('fade-out'); 
                     setTimeout(()=> { 
@@ -538,15 +625,37 @@
                 }, 2500);
 
             } catch(e) {
-                // Tembus Error
-                setTimeout(() => { document.getElementById('splash-screen').classList.add('fade-out'); setTimeout(()=> { document.getElementById('splash-screen').style.display = 'none'; cekSesiAplikasi(); }, 1500); }, 2500);
+                let loading = document.getElementById('teks-loading');
+                if(loading) loading.innerText = "Offline Mode Aktif";
+                setTimeout(() => { 
+                    document.getElementById('splash-screen').classList.add('fade-out'); 
+                    setTimeout(()=> { 
+                        document.getElementById('splash-screen').style.display = 'none'; 
+                        cekSesiAplikasi(); 
+                    }, 1500); 
+                }, 2500);
             }
         }
 
+        // FUNGSI RENDER DROPDOWNS
         function renderLogins() { 
-            let s = document.getElementById('select-muhaffiz'); s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; dAkun.forEach(n => s.appendChild(new Option(n, n))); 
-            let cG1 = document.getElementById('admin-kelas-pilih-guru'); if(cG1) { cG1.innerHTML = '<option value="">-- Guru Utama 1 --</option>'; dAkun.forEach(n => cG1.appendChild(new Option(n, n))); }
-            let cG2 = document.getElementById('admin-kelas-pilih-guru-2'); if(cG2) { cG2.innerHTML = '<option value="">-- Guru Utama 2 (Opsional) --</option>'; dAkun.forEach(n => cG2.appendChild(new Option(n, n))); }
+            let s = document.getElementById('select-muhaffiz'); 
+            if(s) {
+                s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; 
+                dAkun.forEach(n => s.appendChild(new Option(n, n))); 
+            }
+            
+            let cG1 = document.getElementById('admin-kelas-pilih-guru'); 
+            if(cG1) { 
+                cG1.innerHTML = '<option value="">-- Guru Utama 1 --</option>'; 
+                dAkun.forEach(n => cG1.appendChild(new Option(n, n))); 
+            }
+            
+            let cG2 = document.getElementById('admin-kelas-pilih-guru-2'); 
+            if(cG2) { 
+                cG2.innerHTML = '<option value="">-- Guru Utama 2 (Opsional) --</option>'; 
+                dAkun.forEach(n => cG2.appendChild(new Option(n, n))); 
+            }
         }
         
         function renderHalaqahDropdowns() { 
@@ -569,16 +678,23 @@
             let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
             idsBebas.forEach(id => { 
                 let s = document.getElementById(id); 
-                if(s) { s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); }
+                if(s) { 
+                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
+                    for(let h in dbP) s.appendChild(new Option(h, h)); 
+                }
             }); 
         }
 
         function updateDropdownSantriModul(prefix) {
-            let h = document.getElementById(prefix+'-pilih-halaqah') ? document.getElementById(prefix+'-pilih-halaqah').value : document.getElementById(prefix+'-kelas').value;
-            let sId = document.getElementById(prefix+'-pilih-santri') ? prefix+'-pilih-santri' : prefix+'-santri';
-            let s = document.getElementById(sId);
-            s.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
-            if(h && dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n, n))); 
+            let elKelas = document.getElementById(prefix+'-pilih-halaqah') || document.getElementById(prefix+'-kelas');
+            let elSantri = document.getElementById(prefix+'-pilih-santri') || document.getElementById(prefix+'-santri');
+            
+            let h = elKelas ? elKelas.value : '';
+            
+            if(elSantri) {
+                elSantri.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
+                if(h && dbP[h]) dbP[h].forEach(n => elSantri.appendChild(new Option(n, n))); 
+            }
             
             if(prefix.includes('chat')) {
                 let box = document.getElementById('chat-box-'+(prefix==='chat-guru'?'guru':'ortu'));
@@ -586,8 +702,11 @@
             }
         }
 
-        function updateChatGuruSantri() { updateDropdownSantriModul('chat-guru'); }
+        function updateChatGuruSantri() {
+            updateDropdownSantriModul('chat-guru');
+        }
 
+        // FUNGSI BUKU PENGHUBUNG CHAT
         async function muatUlangPesan(role) {
             let btn = document.getElementById('btn-refresh-' + role.toLowerCase());
             let oldHTML = btn ? btn.innerHTML : "🔄";
@@ -595,8 +714,13 @@
             
             try {
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan?select=*&order=id.asc`, {headers: REQ_HEADERS});
-                if(res.ok) { dPesan = await res.json(); renderChat(role); }
-            } catch(e) { } 
+                if(res.ok) {
+                    dPesan = await res.json();
+                    renderChat(role);
+                }
+            } catch(e) { 
+                // Abaikan jika error saat refresh
+            } 
             
             if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
         }
@@ -604,11 +728,15 @@
         function renderChat(role) {
             let s, h;
             if(role === 'Guru') {
-                h = document.getElementById('chat-guru-kelas')?.value;
-                s = document.getElementById('chat-guru-santri')?.value;
+                let elH = document.getElementById('chat-guru-kelas');
+                let elS = document.getElementById('chat-guru-santri');
+                h = elH ? elH.value : '';
+                s = elS ? elS.value : '';
             } else {
-                h = document.getElementById('ortu-pilih-halaqah')?.value;
-                s = document.getElementById('ortu-pilih-santri')?.value;
+                let elH = document.getElementById('ortu-pilih-halaqah');
+                let elS = document.getElementById('ortu-pilih-santri');
+                h = elH ? elH.value : '';
+                s = elS ? elS.value : '';
             }
             
             let box = document.getElementById('chat-box-' + role.toLowerCase());
@@ -626,8 +754,13 @@
             filteredPesan.forEach(p => {
                 let isMyMessage = (p.pengirim === role);
                 let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
-                let safeMsg = escapeHTML(p.isi_pesan).replace(/\n/g, '<br>');
-                html += `<div class="chat-bubble ${bubbleClass}">${safeMsg}<span class="chat-meta">${p.waktu} • ${p.pengirim}</span></div>`;
+                let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
+                html += `
+                    <div class="chat-bubble ${bubbleClass}">
+                        ${safeMsg}
+                        <span class="chat-meta">${p.waktu} • ${p.pengirim}</span>
+                    </div>
+                `;
             });
             
             box.innerHTML = html;
@@ -652,7 +785,9 @@
             if(!msg) return alert("Pesan tidak boleh kosong!");
 
             let btn = document.getElementById('btn-kirim-' + role.toLowerCase());
-            let oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+            let oldText = btn.innerText; 
+            btn.innerText = "⏳"; 
+            btn.disabled = true;
 
             let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
@@ -660,268 +795,615 @@
                 let pay = { waktu: wkt, kelas: h, nama_murid: s, pengirim: role, isi_pesan: msg };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
 
-                if(!res.ok) throw new Error("Gagal");
+                if(!res.ok) throw new Error("Database Error");
                 
-                dPesan.push(pay); msgInput.value = ''; renderChat(role);
+                dPesan.push(pay);
+                msgInput.value = '';
+                renderChat(role);
             } catch(e) {
-                alert("GAGAL MENGIRIM! Pastikan koneksi internet antum stabil.");
-            } finally { btn.innerText = oldText; btn.disabled = false; }
+                alert("GAGAL MENGIRIM!\nPastikan antum sudah mengklik RUN di SQL Supabase untuk tabel pesan.");
+            } finally {
+                btn.innerText = oldText; 
+                btn.disabled = false;
+            }
         }
 
+        // FUNGSI AUTH & ADMIN
         function bukaModalAdminLogin() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
         function tutupModalAdminLogin() { document.getElementById('modal-admin-login').classList.add('hidden'); }
+        
         function loginAdmin() { 
             let p = document.getElementById('admin-password').value;
             if(!p) return alert("Masukkan sandi!");
-            if(p === '@lQur4nKu77') { setSafeStorage('sesi_halaman', 'admin'); tutupModalAdminLogin(); document.getElementById('login-page').classList.add('hidden'); document.getElementById('admin-page').classList.remove('hidden'); renderTabelAdmin(); } else { alert("⛔ Sandi Admin Salah!"); }
+            if(p === '@lQur4nKu77') { 
+                setSafeStorage('sesi_halaman', 'admin'); 
+                tutupModalAdminLogin(); 
+                document.getElementById('login-page').classList.add('hidden'); 
+                document.getElementById('admin-page').classList.remove('hidden'); 
+                renderTabelAdmin(); 
+            } else { 
+                alert("⛔ Sandi Admin Salah!"); 
+            }
         }
 
         function loginMuhaffiz() {
-            let n = document.getElementById('select-muhaffiz').value, p = document.getElementById('sandi-muhaffiz').value;
+            let n = document.getElementById('select-muhaffiz').value;
+            let p = document.getElementById('sandi-muhaffiz').value;
+            
             if(!n) return alert("Pilih nama Anda!");
-            if(window.akunSandiMap[n] === p || p === 'guru123') { guruAktif = n; setSafeStorage('sesi_halaman', 'muhaffiz'); setSafeStorage('sesi_user', n); document.getElementById('login-page').classList.add('hidden'); document.getElementById('muhaffiz-page').classList.remove('hidden'); document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; renderHalaqahDropdowns(); } else { alert("⛔ Sandi Guru Salah!"); }
+            if(window.akunSandiMap[n] === p || p === 'guru123') { 
+                guruAktif = n; 
+                setSafeStorage('sesi_halaman', 'muhaffiz'); 
+                setSafeStorage('sesi_user', n); 
+                document.getElementById('login-page').classList.add('hidden'); 
+                document.getElementById('muhaffiz-page').classList.remove('hidden'); 
+                document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; 
+                renderHalaqahDropdowns(); 
+            } else { 
+                alert("⛔ Sandi Guru Salah!"); 
+            }
         }
 
-        function logout() { removeSafeStorage('sesi_halaman'); removeSafeStorage('sesi_user'); location.reload(); }
+        function logout() { 
+            removeSafeStorage('sesi_halaman'); 
+            removeSafeStorage('sesi_user'); 
+            location.reload(); 
+        }
 
+        // CRUD ADMIN FUNCTIONS
         async function tambahGuru() { 
             let n = document.getElementById('nama-muhaffiz-baru').value.trim(); 
-            if(!n) return alert("⚠️ Nama kosong!"); if(dAkun.includes(n)) return alert("⚠️ Sudah ada!"); 
-            let btn = document.getElementById('btn-tambah-guru'); if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
+            if(!n) return alert("⚠️ Nama kosong!"); 
+            if(dAkun.includes(n)) return alert("⚠️ Sudah ada!"); 
+            
+            let btn = document.getElementById('btn-tambah-guru'); 
+            if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
+            
             try { 
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n, sandi: 'guru123'}) }); 
                 if(!res.ok) throw new Error(); 
-                dAkun.push(n); document.getElementById('nama-muhaffiz-baru').value = ''; renderTabelAdmin(); 
-            } catch(e) { alert("Gagal menyimpan!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
+                dAkun.push(n); 
+                document.getElementById('nama-muhaffiz-baru').value = ''; 
+                renderTabelAdmin(); 
+            } catch(e) { 
+                alert("Gagal menyimpan!"); 
+            } finally { 
+                if(btn){ btn.innerText = "+"; btn.disabled = false; } 
+            }
         }
 
         async function tambahHalaqah() { 
             let d = document.getElementById('nama-halaqah-baru').value.trim(); 
             let g1 = document.getElementById('admin-kelas-pilih-guru').value;
             let g2 = document.getElementById('admin-kelas-pilih-guru-2').value;
+            
             if(!d || !g1) return alert("⚠️ Pilih minimal Guru Utama 1 dan Ketik Nama Kelas!"); 
             
             let gabunganGuru = [g1, g2].filter(x => x).join(', ');
             let lines = d.split('\n'); let arr = []; let added = false; 
             
-            let btn = document.getElementById('btn-tambah-kelas'); if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
+            let btn = document.getElementById('btn-tambah-kelas'); 
+            if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
+            
             try {
-                lines.forEach(n => { let nm = n.trim(); if(nm !== "" && !dbP[nm]) { arr.push({nama_kelas: nm, nama_guru: gabunganGuru}); dbP[nm] = []; dbKelasGuru[nm] = gabunganGuru; added = true; } });
+                lines.forEach(n => { 
+                    let nm = n.trim(); 
+                    if(nm !== "" && !dbP[nm]) { 
+                        arr.push({nama_kelas: nm, nama_guru: gabunganGuru}); 
+                        dbP[nm] = []; 
+                        dbKelasGuru[nm] = gabunganGuru; 
+                        added = true; 
+                    } 
+                });
+                
                 if(arr.length > 0) { 
                     let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
                     if(!res.ok) throw new Error(); 
-                    document.getElementById('nama-halaqah-baru').value = ''; renderTabelAdmin(); 
-                } else if (!added && lines.length > 0) alert("⚠️ Kelas sudah ada!");
-            } catch(e) { alert("Gagal menyimpan!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
+                    document.getElementById('nama-halaqah-baru').value = ''; 
+                    renderTabelAdmin(); 
+                } else if (!added && lines.length > 0) {
+                    alert("⚠️ Kelas sudah ada!");
+                }
+            } catch(e) { 
+                alert("Gagal menyimpan!"); 
+            } finally { 
+                if(btn){ btn.innerText = "+"; btn.disabled = false; } 
+            }
         }
 
         async function tambahSantri() { 
-            let h = document.getElementById('admin-pilih-halaqah').value, d = document.getElementById('data-santri-baru').value.trim(); 
+            let h = document.getElementById('admin-pilih-halaqah').value;
+            let d = document.getElementById('data-santri-baru').value.trim(); 
+            
             if(!h || !d) return alert("⚠️ Pilih Kelas dan ketik nama!"); 
+            
             let lines = d.split('\n'); let arr = []; 
-            let btn = document.getElementById('btn-tambah-murid'); if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
+            let btn = document.getElementById('btn-tambah-murid'); 
+            if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
+            
             try {
-                lines.forEach(n => { let nm = n.trim(); if(nm !== "" && (!dbP[h] || !dbP[h].includes(nm))) { arr.push({kelas: h, nama_murid: nm}); if(dbP[h]) dbP[h].push(nm); } }); 
+                lines.forEach(n => { 
+                    let nm = n.trim(); 
+                    if(nm !== "" && (!dbP[h] || !dbP[h].includes(nm))) { 
+                        arr.push({kelas: h, nama_murid: nm}); 
+                        if(dbP[h]) dbP[h].push(nm); 
+                    } 
+                }); 
+                
                 if(arr.length > 0) { 
                     let res = await fetch(`${SUPABASE_URL}/rest/v1/murid`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
                     if(!res.ok) throw new Error(); 
-                    document.getElementById('data-santri-baru').value = ''; renderTabelSantriAdmin(); 
+                    document.getElementById('data-santri-baru').value = ''; 
+                    renderTabelSantriAdmin(); 
                 }
-            } catch(e) { alert("Gagal menyimpan!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
+            } catch(e) { 
+                alert("Gagal menyimpan!"); 
+            } finally { 
+                if(btn){ btn.innerText = "+"; btn.disabled = false; } 
+            }
         }
 
         async function hapusMaster(id, sh) { 
             if(confirm("Hapus data ini permanen?")) { 
                 try {
                     let res;
-                    if(sh === 'Guru') { res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); if(!res.ok) throw new Error(); let i = dAkun.indexOf(id); if(i>-1) dAkun.splice(i,1); } 
-                    if(sh === 'Kelas') { res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); if(!res.ok) throw new Error(); delete dbP[id]; } 
-                    if(sh === 'Murid') { let parts = id.split('_'); res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(parts[0])}&nama_murid=eq.${encodeURIComponent(parts[1])}`, { method: 'DELETE', headers: REQ_HEADERS }); if(!res.ok) throw new Error(); let idx = dbP[parts[0]].indexOf(parts[1]); if(idx > -1) dbP[parts[0]].splice(idx, 1); } 
+                    if(sh === 'Guru') { 
+                        res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); 
+                        if(!res.ok) throw new Error(); 
+                        let i = dAkun.indexOf(id); 
+                        if(i>-1) dAkun.splice(i,1); 
+                    } 
+                    if(sh === 'Kelas') { 
+                        res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: REQ_HEADERS }); 
+                        if(!res.ok) throw new Error(); 
+                        delete dbP[id]; 
+                    } 
+                    if(sh === 'Murid') { 
+                        let parts = id.split('_'); 
+                        res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(parts[0])}&nama_murid=eq.${encodeURIComponent(parts[1])}`, { method: 'DELETE', headers: REQ_HEADERS }); 
+                        if(!res.ok) throw new Error(); 
+                        let idx = dbP[parts[0]].indexOf(parts[1]); 
+                        if(idx > -1) dbP[parts[0]].splice(idx, 1); 
+                    } 
                     renderTabelAdmin(); 
-                } catch(e) { alert("Gagal Menghapus dari database!"); }
+                } catch(e) { 
+                    alert("Gagal Menghapus dari database!"); 
+                }
             } 
         }
 
-        async function editGuru(namaLama) { let n = prompt("Ubah Nama Guru:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { let res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n.trim()}) }); if(!res.ok) throw new Error(); let i = dAkun.indexOf(namaLama); if(i>-1) dAkun[i] = n.trim(); renderTabelAdmin(); } catch(e){ alert("Error"); } } }
-        async function editHalaqah(namaLama) { alert("Untuk mengubah Guru Utama, silakan hapus dan buat ulang kelasnya agar pembagian guru di database tetap sinkron."); }
-        async function editSantri(halaqah, namaLama) { let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { let res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(halaqah)}&nama_murid=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_murid: n.trim()}) }); if(!res.ok) throw new Error(); let idx = dbP[halaqah].indexOf(namaLama); if(idx > -1) dbP[halaqah][idx] = n.trim(); renderTabelSantriAdmin(); } catch(e){ alert("Error"); } } }
+        async function editGuru(namaLama) { 
+            let n = prompt("Ubah Nama Guru:", namaLama); 
+            if(n && n.trim() !== "" && n !== namaLama) { 
+                try { 
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n.trim()}) }); 
+                    if(!res.ok) throw new Error(); 
+                    let i = dAkun.indexOf(namaLama); 
+                    if(i>-1) dAkun[i] = n.trim(); 
+                    renderTabelAdmin(); 
+                } catch(e){ alert("Error"); } 
+            } 
+        }
+        
+        async function editHalaqah(namaLama) { 
+            alert("Untuk mengubah Guru Utama, silakan hapus dan buat ulang kelasnya agar pembagian guru di database tetap sinkron."); 
+        }
+        
+        async function editSantri(halaqah, namaLama) { 
+            let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); 
+            if(n && n.trim() !== "" && n !== namaLama) { 
+                try { 
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(halaqah)}&nama_murid=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_murid: n.trim()}) }); 
+                    if(!res.ok) throw new Error(); 
+                    let idx = dbP[halaqah].indexOf(namaLama); 
+                    if(idx > -1) dbP[halaqah][idx] = n.trim(); 
+                    renderTabelSantriAdmin(); 
+                } catch(e){ alert("Error"); } 
+            } 
+        }
 
         function renderTabelAdmin() {
             let g = '', h = '';
-            dAkun.forEach(n => { const escapedName = n.replace(/'/g, "\\'"); g += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editGuru('${escapedName}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${escapedName}','Guru')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; });
-            for(let n in dbP) { const escapedHalaqah = n.replace(/'/g, "\\'"); h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Guru Utama: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; }
-            document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
-            renderTabelSantriAdmin(); renderHalaqahDropdowns();
+            dAkun.forEach(n => { 
+                const escapedName = n.replace(/'/g, "\\'"); 
+                g += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editGuru('${escapedName}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${escapedName}','Guru')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
+            });
+            for(let n in dbP) { 
+                const escapedHalaqah = n.replace(/'/g, "\\'"); 
+                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Guru Utama: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
+            }
+            document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; 
+            document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
+            renderTabelSantriAdmin(); 
+            renderHalaqahDropdowns();
         }
 
         function renderTabelSantriAdmin() {
             let el = document.getElementById('admin-pilih-halaqah');
-            let h = el ? el.value : '', s = ''; if(!h) return;
-            (dbP[h] || []).forEach(n => { const eH = h.replace(/'/g, "\\'"); const eN = n.replace(/'/g, "\\'"); s += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editSantri('${eH}','${eN}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${eH}_${eN}','Murid')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; });
+            let h = el ? el.value : '', s = ''; 
+            if(!h) return;
+            
+            (dbP[h] || []).forEach(n => { 
+                const eH = h.replace(/'/g, "\\'"); 
+                const eN = n.replace(/'/g, "\\'"); 
+                s += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editSantri('${eH}','${eN}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${eH}_${eN}','Murid')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
+            });
             document.getElementById('tabel-santri').innerHTML = s || '<p style="text-align:center;">Kosong</p>';
         }
 
-        function toggleJuz(n) { let i = selJuz.indexOf(n); if(i > -1) { selJuz.splice(i, 1); document.getElementById(`m-j-${n}`).classList.remove('aktif'); } else { selJuz.push(n); selJuz.sort((a,b)=>a-b); document.getElementById(`m-j-${n}`).classList.add('aktif'); } document.getElementById('total-juz-teks').innerText = selJuz.length; document.getElementById('input-juz-hidden').value = selJuz.join(','); }
-        function setJuzUI(str, isOrtu) { let p = isOrtu ? 'o-j-' : 'm-j-'; for(let i=1; i<=30; i++) { let el = document.getElementById(p+i); if(el) el.classList.remove('aktif'); } let arr = (str && str !== "-") ? str.split(',').map(Number) : []; arr.forEach(n => { let el = document.getElementById(p+n); if(el) el.classList.add('aktif'); }); if(!isOrtu) { selJuz = arr; document.getElementById('total-juz-teks').innerText = arr.length; document.getElementById('input-juz-hidden').value = arr.join(','); } }
-        function updateMateriUI() { let a = document.getElementById('input-surah').value, b = document.getElementById('input-surah-akhir').value; document.getElementById('wadah-ayat').style.display = (a && b && a!==b) ? 'none' : 'grid'; if(a) { let aw = document.getElementById('input-ayat-awal'), ak = document.getElementById('input-ayat-akhir'); aw.innerHTML = ak.innerHTML = '<option value="">-</option>'; for(let i=1; i<=dataSurahLengkap[a]; i++) { aw.appendChild(new Option(i,i)); ak.appendChild(new Option(i,i)); } } }
+        // FUNGSI MATERI SURAH
+        function toggleJuz(n) { 
+            let i = selJuz.indexOf(n); 
+            if(i > -1) { 
+                selJuz.splice(i, 1); 
+                document.getElementById(`m-j-${n}`).classList.remove('aktif'); 
+            } else { 
+                selJuz.push(n); 
+                selJuz.sort((a,b)=>a-b); 
+                document.getElementById(`m-j-${n}`).classList.add('aktif'); 
+            } 
+            document.getElementById('total-juz-teks').innerText = selJuz.length; 
+            document.getElementById('input-juz-hidden').value = selJuz.join(','); 
+        }
+
+        function setJuzUI(str, isOrtu) { 
+            let p = isOrtu ? 'o-j-' : 'm-j-'; 
+            for(let i=1; i<=30; i++) { 
+                let el = document.getElementById(p+i); 
+                if(el) el.classList.remove('aktif'); 
+            } 
+            let arr = (str && str !== "-") ? str.split(',').map(Number) : []; 
+            arr.forEach(n => { 
+                let el = document.getElementById(p+n); 
+                if(el) el.classList.add('aktif'); 
+            }); 
+            if(!isOrtu) { 
+                selJuz = arr; 
+                document.getElementById('total-juz-teks').innerText = arr.length; 
+                document.getElementById('input-juz-hidden').value = arr.join(','); 
+            } 
+        }
+
+        function updateMateriUI() { 
+            let a = document.getElementById('input-surah').value;
+            let b = document.getElementById('input-surah-akhir').value; 
+            document.getElementById('wadah-ayat').style.display = (a && b && a!==b) ? 'none' : 'grid'; 
+            if(a) { 
+                let aw = document.getElementById('input-ayat-awal');
+                let ak = document.getElementById('input-ayat-akhir'); 
+                aw.innerHTML = ak.innerHTML = '<option value="">-</option>'; 
+                for(let i=1; i<=dataSurahLengkap[a]; i++) { 
+                    aw.appendChild(new Option(i,i)); 
+                    ak.appendChild(new Option(i,i)); 
+                } 
+            } 
+        }
 
         function ubahModeSetoran(m) {
             modeAktif = m;
-            document.getElementById('btn-mode-ziyadah').className = 'toggle-btn ' + (m === 'Ziyadah' ? 'aktif-ziyadah' : ''); document.getElementById('btn-mode-murojaah').className = 'toggle-btn ' + (m === 'Murojaah' ? 'aktif-murojaah' : '');
-            document.getElementById('jenis-setoran-aktif').value = m; document.getElementById('box-form-setoran').className = 'card ' + (m==='Ziyadah'?'mode-z':'mode-m');
+            document.getElementById('btn-mode-ziyadah').className = 'toggle-btn ' + (m === 'Ziyadah' ? 'aktif-ziyadah' : ''); 
+            document.getElementById('btn-mode-murojaah').className = 'toggle-btn ' + (m === 'Murojaah' ? 'aktif-murojaah' : '');
+            document.getElementById('jenis-setoran-aktif').value = m; 
+            document.getElementById('box-form-setoran').className = 'card ' + (m==='Ziyadah'?'mode-z':'mode-m');
             document.documentElement.style.setProperty('--warna-input-aktif', m==='Ziyadah'?'var(--emerald-light)':'var(--cerulean-logo)');
+            
             let btn = document.getElementById('btn-simpan-utama');
-            if(m === 'Ziyadah') { btn.style.background = 'linear-gradient(135deg, var(--emerald-light), var(--emerald-logo))'; } else { btn.style.background = 'linear-gradient(135deg, var(--cerulean-light), var(--cerulean-logo))'; }
-            btn.innerText = "💾 SIMPAN DATA " + m.toUpperCase(); pilihStatus(document.getElementById('statusSetoran').value);
+            if(m === 'Ziyadah') { 
+                btn.style.background = 'linear-gradient(135deg, var(--emerald-light), var(--emerald-logo))'; 
+            } else { 
+                btn.style.background = 'linear-gradient(135deg, var(--cerulean-light), var(--cerulean-logo))'; 
+            }
+            btn.innerText = "💾 SIMPAN DATA " + m.toUpperCase(); 
+            pilihStatus(document.getElementById('statusSetoran').value);
         }
-        function pilihStatus(s) { document.getElementById('statusSetoran').value = s; document.getElementById('p-lanjut').className = 'status-pill ' + (s === 'Lanjut' ? 'active' : ''); document.getElementById('p-ulang').className = 'status-pill ' + (s === 'Ulangi' ? 'active-danger' : ''); }
+
+        function pilihStatus(s) { 
+            document.getElementById('statusSetoran').value = s; 
+            document.getElementById('p-lanjut').className = 'status-pill ' + (s === 'Lanjut' ? 'active' : ''); 
+            document.getElementById('p-ulang').className = 'status-pill ' + (s === 'Ulangi' ? 'active-danger' : ''); 
+        }
         
         async function simpanSetoran() {
-            let h = document.getElementById('muhaffiz-pilih-halaqah').value, s = document.getElementById('muhaffiz-pilih-santri').value, sa = document.getElementById('input-surah').value, sk = document.getElementById('input-surah-akhir').value, aya = "";
+            let h = document.getElementById('muhaffiz-pilih-halaqah').value;
+            let s = document.getElementById('muhaffiz-pilih-santri').value;
+            let sa = document.getElementById('input-surah').value;
+            let sk = document.getElementById('input-surah-akhir').value;
+            let aya = "";
             let tglKirim = new Date(document.getElementById('tgl-quran').value).toLocaleDateString('id-ID');
-            if(!h || !s || !sa) return alert("Lengkapi data!");
-            if(sa && sk && sa !== sk) { sa = sa + " s/d " + sk; aya = "Penuh"; } else { let aw = document.getElementById('input-ayat-awal').value, ak = document.getElementById('input-ayat-akhir').value; if(!aw || !ak) return alert("Pilih ayat!"); aya = aw === ak ? aw : aw + "-" + ak; }
             
-            let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM KE SUPABASE..."; btn.disabled = true;
+            if(!h || !s || !sa) return alert("Lengkapi data!");
+            if(sa && sk && sa !== sk) { 
+                sa = sa + " s/d " + sk; aya = "Penuh"; 
+            } else { 
+                let aw = document.getElementById('input-ayat-awal').value;
+                let ak = document.getElementById('input-ayat-akhir').value; 
+                if(!aw || !ak) return alert("Pilih ayat!"); 
+                aya = aw === ak ? aw : aw + "-" + ak; 
+            }
+            
+            let btn = document.getElementById('btn-simpan-utama'); 
+            let old = btn.innerText; 
+            btn.innerText = "⏳ MENGIRIM..."; 
+            btn.disabled = true;
+            
             try {
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Setoran Tersimpan!"); location.reload();
-            } catch(e) { alert("⚠️ Gagal menyambung ke Supabase."); } finally { btn.innerText = old; btn.disabled = false; }
+                if(!res.ok) throw new Error(); 
+                alert("✅ Data Setoran Tersimpan!"); 
+                location.reload();
+            } catch(e) { 
+                alert("⚠️ Gagal menyambung ke Supabase."); 
+            } finally { 
+                btn.innerText = old; 
+                btn.disabled = false; 
+            }
         }
         
         async function simpanModulLain(modul) {
-            let h = document.getElementById(modul+'-pilih-halaqah').value, s = document.getElementById(modul+'-pilih-santri').value;
+            let h = document.getElementById(modul+'-pilih-halaqah').value;
+            let s = document.getElementById(modul+'-pilih-santri').value;
+            
             if(!h || !s) return alert("Pilih Kelas dan Murid!");
-            let btn = document.getElementById('btn-simpan-'+modul); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
+            
+            let btn = document.getElementById('btn-simpan-'+modul); 
+            let old = btn.innerText; 
+            btn.innerText = "⏳ MENGIRIM..."; 
+            btn.disabled = true;
+            
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Tersimpan!"); location.reload();
-            } catch(e) { alert("⚠️ Gagal menyimpan."); } finally { btn.innerText = old; btn.disabled = false; }
+                if(!res.ok) throw new Error(); 
+                alert("✅ Data Tersimpan!"); 
+                location.reload();
+            } catch(e) { 
+                alert("⚠️ Gagal menyimpan."); 
+            } finally { 
+                btn.innerText = old; 
+                btn.disabled = false; 
+            }
         }
 
-        function getV(n){ let r = document.querySelector(`input[name="${n}"]:checked`); return r?r.value:"3"; }
+        function getV(n){ 
+            let r = document.querySelector(`input[name="${n}"]:checked`); 
+            return r?r.value:"3"; 
+        }
 
-        function updateDropdownSantri() { let h = document.getElementById('muhaffiz-pilih-halaqah').value, s = document.getElementById('muhaffiz-pilih-santri'); s.innerHTML = '<option value="">-- Pilih Murid --</option>'; (dbP[h] || []).forEach(n => s.appendChild(new Option(n, n))); document.getElementById('kartuPrestasi').style.display = 'none'; setJuzUI("", false); }
+        function updateDropdownSantri() { 
+            let h = document.getElementById('muhaffiz-pilih-halaqah').value;
+            let s = document.getElementById('muhaffiz-pilih-santri'); 
+            s.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
+            if(dbP[h]) { dbP[h].forEach(n => s.appendChild(new Option(n, n))); }
+            document.getElementById('kartuPrestasi').style.display = 'none'; 
+            setJuzUI("", false); 
+        }
 
         function tampilkanKartuPrestasi() {
-            let s = document.getElementById('muhaffiz-pilih-santri').value, p = dProg[s]; document.getElementById('kartuPrestasi').style.display = s ? 'block' : 'none';
-            let ws = document.getElementById('wadah-sertif-guru'); ws.innerHTML = '';
+            let s = document.getElementById('muhaffiz-pilih-santri').value;
+            let p = dProg[s]; 
+            document.getElementById('kartuPrestasi').style.display = s ? 'block' : 'none';
+            let ws = document.getElementById('wadah-sertif-guru'); 
+            ws.innerHTML = '';
             
             if(p) { 
                 setJuzUI(p.juz, false); 
-                let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; let jC = arrJuz.length; 
-                document.getElementById('infoTotalJuz').innerText = jC; document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
-                if(jC >= 1) ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
-            } else { setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; }
+                let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; 
+                let jC = arrJuz.length; 
+                document.getElementById('infoTotalJuz').innerText = jC; 
+                document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
+                if(jC >= 1) {
+                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
+                }
+            } else { 
+                setJuzUI("", false); 
+                document.getElementById('infoTotalJuz').innerText = "-"; 
+                document.getElementById('infoSurah').innerText = "-"; 
+            }
             
-            let h = ''; dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`; }); document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
+            let h = ''; 
+            dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { 
+                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`; 
+            }); 
+            document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
 
-        // --- ORTU LOGIC ---
-        function bukaPortalOrtu() { setSafeStorage('sesi_halaman', 'ortu'); document.getElementById('login-page').classList.add('hidden'); document.getElementById('ortu-page').classList.remove('hidden'); renderHalaqahDropdowns(); }
-        
-        function updateSantriOrtu() { 
-            let h = document.getElementById('ortu-pilih-halaqah').value, s = document.getElementById('ortu-pilih-santri'); 
-            s.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
-            if(dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n,n))); 
-            
-            document.getElementById('ortu-kartuPrestasi').style.display = 'none'; document.getElementById('list-ortu-quran').innerHTML = ''; 
-            if(h) renderLeaderboard(h); else document.getElementById('ortu-leaderboard').style.display = 'none'; 
-            
-            let sc = document.getElementById('chat-ortu-santri'); 
-            if(sc) { sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; if(dbP[h]) dbP[h].forEach(n => sc.appendChild(new Option(n,n))); document.getElementById('chat-ortu-kelas').value = h; }
-            document.getElementById('chat-box-ortu').innerHTML = '';
-        }
-
+        // ==============================================================
+        // LEADERBOARD & DATA ORANG TUA
+        // ==============================================================
         function renderLeaderboard(halaqah) {
-            let lb = document.getElementById('ortu-leaderboard'), list = document.getElementById('leaderboard-list'), santris = dbP[halaqah] || [];
-            document.getElementById('teks-judul-leaderboard').innerText = "Bintang Hafalan - " + halaqah;
+            let lb = document.getElementById('ortu-leaderboard');
+            let list = document.getElementById('leaderboard-list');
+            let santris = dbP[halaqah] || [];
+            
+            let elJudul = document.getElementById('teks-judul-leaderboard');
+            if(elJudul) elJudul.innerText = "Bintang Hafalan - " + halaqah;
+
             let scores = santris.map(nama => {
-                let p = dProg[nama], jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0, poinMutu = 0;
-                dRiw.forEach(r => { if(r.santri === nama && r.status === 'Lanjut') { let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); poinMutu += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); } });
+                let p = dProg[nama];
+                let jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0;
+                let poinMutu = 0;
+                dRiw.forEach(r => { 
+                    if(r.santri === nama && r.status === 'Lanjut') { 
+                        let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); 
+                        poinMutu += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); 
+                    } 
+                });
                 return { nama: nama, jCount: jCount, surah: (p ? p.surah : "-"), poin: poinMutu };
             });
-            scores = scores.filter(x => x.jCount > 0 || x.poin > 0); scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || a.nama.localeCompare(b.nama)); let top10 = scores.slice(0, 10);
+            
+            scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
+            scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || a.nama.localeCompare(b.nama)); 
+            let top10 = scores.slice(0, 10);
+            
             if(top10.length === 0) { lb.style.display = 'none'; return; }
-            lb.style.display = 'block'; let html = '';
+            
+            lb.style.display = 'block'; 
+            let html = '';
             top10.forEach((item, index) => {
-                let medali = ''; if(index === 0) medali = '🥇'; else if(index === 1) medali = '🥈'; else if(index === 2) medali = '🥉'; else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
+                let medali = ''; 
+                if(index === 0) medali = '🥇'; 
+                else if(index === 1) medali = '🥈'; 
+                else if(index === 2) medali = '🥉'; 
+                else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
                 html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;"><div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.jCount} Juz</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div></div></div>`;
-            }); list.innerHTML = html;
+            }); 
+            list.innerHTML = html;
         }
 
         function tampilkanDataOrtu() {
-            let s = document.getElementById('ortu-pilih-santri').value, p = dProg[s], h = ''; document.getElementById('ortu-kartuPrestasi').style.display = s ? 'block' : 'none';
-            let ws = document.getElementById('wadah-sertif-ortu'); ws.innerHTML = '';
+            let s = document.getElementById('ortu-pilih-santri').value;
+            let p = dProg[s];
+            let h = ''; 
+            document.getElementById('ortu-kartuPrestasi').style.display = s ? 'block' : 'none';
+            let ws = document.getElementById('wadah-sertif-ortu'); 
+            ws.innerHTML = '';
             
             let sc = document.getElementById('chat-ortu-santri');
             if(sc) { sc.value = s; muatUlangPesan('Ortu'); }
 
             if(p) { 
                 setJuzUI(p.juz, true); 
-                let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; let jC = arrJuz.length; 
-                document.getElementById('ortu-infoJuz').innerText = jC; document.getElementById('ortu-infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; font-weight:800; color:var(--text-mute);">(Ayat: ${p.ayat})</span>`; 
-                if(jC >= 1) ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
-            } 
-            else { setJuzUI("", true); document.getElementById('ortu-infoJuz').innerText = "0"; document.getElementById('ortu-infoSurah').innerText = "-"; }
+                let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; 
+                let jC = arrJuz.length; 
+                document.getElementById('ortu-infoJuz').innerText = jC; 
+                document.getElementById('ortu-infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; font-weight:800; color:var(--text-mute);">(Ayat: ${p.ayat})</span>`; 
+                if(jC >= 1) {
+                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
+                }
+            } else { 
+                setJuzUI("", true); 
+                document.getElementById('ortu-infoJuz').innerText = "0"; 
+                document.getElementById('ortu-infoSurah').innerText = "-"; 
+            }
             
             dRiw.filter(i => i.santri === s).forEach(i => {
                 let badge = i.jenis === 'Murojaah' ? `<span style="color:#0284C7; font-weight:800; font-size:11px;">🔄 Muroja'ah</span>` : `<span style="color:#059669; font-weight:800; font-size:11px;">⭐ Ziyadah</span>`;
                 h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat})</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`;
-            }); document.getElementById('list-ortu-quran').innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat setoran.</p></div>';
+            }); 
+            document.getElementById('list-ortu-quran').innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat setoran.</p></div>';
 
             let renderRiwayatLain = (arr, id, ikon) => {
-                let html = ''; arr.filter(i => i.santri === s).forEach(i => { html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan}</div></div><div style="font-weight:900;">${i.status}</div></div>`; });
+                let html = ''; 
+                arr.filter(i => i.santri === s).forEach(i => { 
+                    html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan}</div></div><div style="font-weight:900;">${i.status}</div></div>`; 
+                });
                 document.getElementById(id).innerHTML = html || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat.</p></div>';
             };
-            renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘'); renderRiwayatLain(dRiwH, 'list-ortu-hadits', '📜'); renderRiwayatLain(dRiwK, 'list-ortu-arab', '🔤');
+            
+            renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘'); 
+            renderRiwayatLain(dRiwH, 'list-ortu-hadits', '📜'); 
+            renderRiwayatLain(dRiwK, 'list-ortu-arab', '🔤');
         }
 
-        // --- IMPORT EXCEL ---
-        function unduhTemplate() { let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Kelas","Nama Murid"],["Kelas 1A","Ahmad Zaid"],["Kelas 1A","Budi"]]), "Murid"); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Nama Guru","Sandi"],["Ustadz Fulan","guru123"]]), "Guru"); XLSX.writeFile(wb, "Template_SDIT_QurratuAyun.xlsx"); }
+        // ==============================================================
+        // TOOLS & EXPORT (EXCEL / PDF / LAPORAN)
+        // ==============================================================
+        function unduhTemplate() { 
+            let wb = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Kelas","Nama Murid"],["Kelas 1A","Ahmad Zaid"],["Kelas 1A","Budi"]]), "Murid"); 
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Nama Guru","Sandi"],["Ustadz Fulan","guru123"]]), "Guru"); 
+            XLSX.writeFile(wb, "Template_SDIT_QurratuAyun.xlsx"); 
+        }
+
         async function prosesImportExcel() {
-            let f = document.getElementById('file-import-excel').files[0]; if(!f) return alert("Pilih file Excel!");
-            let r = new FileReader(); r.onload = async (e) => {
+            let f = document.getElementById('file-import-excel').files[0]; 
+            if(!f) return alert("Pilih file Excel!");
+            
+            let r = new FileReader(); 
+            r.onload = async (e) => {
                 let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-                let g = wb.Sheets["Guru"] ? XLSX.utils.sheet_to_json(wb.Sheets["Guru"], {header:1}).slice(1) : []; let s = wb.Sheets["Murid"] ? XLSX.utils.sheet_to_json(wb.Sheets["Murid"], {header:1}).slice(1) : [];
-                let btn = document.getElementById('btn-proses-import'); btn.innerText = "⏳ Memproses..."; btn.disabled = true;
+                let g = wb.Sheets["Guru"] ? XLSX.utils.sheet_to_json(wb.Sheets["Guru"], {header:1}).slice(1) : []; 
+                let s = wb.Sheets["Murid"] ? XLSX.utils.sheet_to_json(wb.Sheets["Murid"], {header:1}).slice(1) : [];
+                
+                let btn = document.getElementById('btn-proses-import'); 
+                btn.innerText = "⏳ Memproses..."; 
+                btn.disabled = true;
                 
                 try {
-                    if(g.length > 0) { let gArr = g.map(x => ({nama_guru: x[0], sandi: x[1]})); await fetch(`${SUPABASE_URL}/rest/v1/guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(gArr) }); }
-                    if(s.length > 0) {
-                        let sArr = s.map(x => ({kelas: x[0], nama_murid: x[1]})); await fetch(`${SUPABASE_URL}/rest/v1/murid`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(sArr) });
-                        let existingClasses = Object.keys(dbP); let newClasses = [...new Set(s.map(x => x[0]))].filter(c => !existingClasses.includes(c));
-                        if(newClasses.length > 0) { let cArr = newClasses.map(c => ({nama_kelas: c})); await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(cArr) }); }
+                    if(g.length > 0) { 
+                        let gArr = g.map(x => ({nama_guru: x[0], sandi: x[1]})); 
+                        await fetch(`${SUPABASE_URL}/rest/v1/guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(gArr) }); 
                     }
-                    alert("✅ Import Selesai!"); location.reload();
-                } catch(err) { alert("Error Import Supabase"); } finally { btn.innerText = "🚀 3. Jalankan Import"; btn.disabled = false; }
-            }; r.readAsArrayBuffer(f);
+                    if(s.length > 0) {
+                        let sArr = s.map(x => ({kelas: x[0], nama_murid: x[1]})); 
+                        await fetch(`${SUPABASE_URL}/rest/v1/murid`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(sArr) });
+                        
+                        let existingClasses = Object.keys(dbP); 
+                        let newClasses = [...new Set(s.map(x => x[0]))].filter(c => !existingClasses.includes(c));
+                        if(newClasses.length > 0) { 
+                            let cArr = newClasses.map(c => ({nama_kelas: c})); 
+                            await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(cArr) }); 
+                        }
+                    }
+                    alert("✅ Import Selesai!"); 
+                    location.reload();
+                } catch(err) { 
+                    alert("Error Import Supabase"); 
+                } finally { 
+                    btn.innerText = "🚀 3. Jalankan Import"; 
+                    btn.disabled = false; 
+                }
+            }; 
+            r.readAsArrayBuffer(f);
         }
 
         function bukaModalLaporan() { document.getElementById('modal-laporan').classList.remove('hidden'); document.getElementById('tanggal-laporan').valueAsDate = new Date(); aturFormLaporan(); }
         function tutupModalLaporan() { document.getElementById('modal-laporan').classList.add('hidden'); }
         function aturFormLaporan() { let v = document.getElementById('jenis-laporan').value; document.getElementById('opsi-halaqah-laporan').className = v==='halaqah'||v==='santri'?'':'hidden'; document.getElementById('opsi-santri-laporan').className = v==='santri'?'':'hidden'; }
-        function updateSantriLaporan() { let h = document.getElementById('pilih-halaqah-laporan').value, s = document.getElementById('pilih-santri-laporan'); s.innerHTML=''; (dbP[h]||[]).forEach(n => s.appendChild(new Option(n,n))); }
+        function updateSantriLaporan() { let h = document.getElementById('pilih-halaqah-laporan').value; let s = document.getElementById('pilih-santri-laporan'); s.innerHTML=''; if(dbP[h]) { dbP[h].forEach(n => s.appendChild(new Option(n,n))); } }
+        
         function prosesCetak(t) {
-            let j = document.getElementById('jenis-laporan').value, th = document.getElementById('pilih-halaqah-laporan').value, ts = document.getElementById('pilih-santri-laporan').value, pj = document.getElementById('penanggung-jawab').value || "Admin Pusat"; let tgl = document.getElementById('tanggal-laporan').value || new Date().toLocaleDateString('id-ID');
-            let d = dRiw.filter(i => (j==='halaqah'?i.halaqah===th : j==='santri'?(i.halaqah===th&&i.santri===ts):true)); if(d.length===0) return alert("Tidak ada data untuk dicetak!");
+            let j = document.getElementById('jenis-laporan').value;
+            let th = document.getElementById('pilih-halaqah-laporan').value;
+            let ts = document.getElementById('pilih-santri-laporan').value;
+            let pj = document.getElementById('penanggung-jawab').value || "Admin Pusat"; 
+            let tgl = document.getElementById('tanggal-laporan').value || new Date().toLocaleDateString('id-ID');
+            
+            let d = dRiw.filter(i => (j==='halaqah' ? i.halaqah===th : j==='santri' ? (i.halaqah===th && i.santri===ts) : true)); 
+            if(d.length===0) return alert("Tidak ada data untuk dicetak!");
+            
             let h = [["No","Waktu","Kelas","Nama Murid","Jenis","Juz","Surah/Ayat","Nilai(T,L,M)","Status"]]; 
             let b = d.map((i,idx)=>[idx+1,i.tgl,i.halaqah,i.santri,i.jenis,i.juz,`${i.surah}:${i.ayat}`,`T:${i.tajwid},L:${i.lancar},M:${i.makhraj}`,i.status]);
             
-            if(t==='Excel'){ let wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...h,...b]), "Laporan"); XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); } 
-            else { const {jsPDF}=window.jspdf; let doc=new jsPDF('l'); doc.setFontSize(16); doc.setTextColor(4, 120, 87); doc.text("Laporan Capaian Tahfiz - SDIT Qurratu A'yun", 14, 15); doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 23); doc.autoTable({head:h, body:b, startY:28, theme:'grid', headStyles:{fillColor:[4,120,87]}}); doc.save(`Laporan_${tgl}.pdf`); }
+            if(t==='Excel'){ 
+                let wb=XLSX.utils.book_new(); 
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...h,...b]), "Laporan"); 
+                XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); 
+            } else { 
+                const {jsPDF}=window.jspdf; 
+                let doc=new jsPDF('l'); 
+                doc.setFontSize(16); doc.setTextColor(4, 120, 87); doc.text("Laporan Capaian Tahfiz - SDIT Qurratu A'yun", 14, 15); 
+                doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 23); 
+                doc.autoTable({head:h, body:b, startY:28, theme:'grid', headStyles:{fillColor:[4,120,87]}}); 
+                doc.save(`Laporan_${tgl}.pdf`); 
+            }
             tutupModalLaporan();
         }
 
         function bukaModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.remove('hidden'); }
         function tutupModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.add('hidden'); }
+        
         async function prosesGantiSandi() { 
-            let sLama = document.getElementById('input-sandi-lama').value, sBaru = document.getElementById('input-sandi-baru').value, sKon = document.getElementById('input-sandi-konfirmasi').value; 
+            let sLama = document.getElementById('input-sandi-lama').value;
+            let sBaru = document.getElementById('input-sandi-baru').value;
+            let sKon = document.getElementById('input-sandi-konfirmasi').value; 
+            
             if(sBaru.length < 5 || sBaru !== sKon) return alert("Sandi baru tidak valid!"); 
+            
             let btn = document.getElementById('btn-proses-sandi'); btn.innerText = "⏳"; btn.disabled = true;
-            try { await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(guruAktif)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({sandi: sBaru}) }); window.akunSandiMap[guruAktif] = sBaru; alert("Sandi berhasil diperbarui!"); tutupModalGantiSandi(); } catch (e) { alert("Error Ganti Sandi!"); } finally { btn.innerText = "Simpan"; btn.disabled = false; }
+            try { 
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(guruAktif)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({sandi: sBaru}) }); 
+                if(res.ok) {
+                    window.akunSandiMap[guruAktif] = sBaru; 
+                    alert("Sandi berhasil diperbarui!"); 
+                    tutupModalGantiSandi(); 
+                }
+            } catch (e) { 
+                alert("Error Ganti Sandi!"); 
+            } finally { 
+                btn.innerText = "Simpan"; btn.disabled = false; 
+            }
         }
     </script>
 </body>
