@@ -21,24 +21,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --emerald-logo: #047857; --emerald-light: #059669; --cerulean-logo: #0284C7; --gold-accent: #D97706; --ivory-bg: #F4F2EC; --white: #FFFFFF; --text-dark: #1E293B; --text-mute: #64748B; --border-color: #E2E8F0; }
-        body { font-family: 'Inter', system-ui, sans-serif; background-color: var(--ivory-bg); background-image: radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%); background-attachment: fixed; margin: 0; padding: 20px; color: var(--text-dark); line-height: 1.6; transition: background 0.5s ease; padding-bottom: 90px; }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        :root {
+            --emerald-logo: #047857;
+            --emerald-light: #059669;
+            --cerulean-logo: #0284C7;
+            --gold-accent: #D97706;
+            --ivory-bg: #F4F2EC;
+            --white: #FFFFFF;
+            --text-dark: #1E293B;
+            --text-mute: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--ivory-bg);
+            background-image: radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%),
+                              radial-gradient(at 100% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-dark);
+            line-height: 1.6;
+            transition: background 0.5s ease;
+            padding-bottom: 90px;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
 
         /* ==============================================================
            CINEMATIC SPLASH SCREEN 
            ============================================================== */
         #splash-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
             background: #050505; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
             z-index: 9999; 
             transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.5s; 
         }
         #splash-screen.fade-out { opacity: 0; visibility: hidden; }
         
         .splash-logo { 
-            width: 170px; height: 170px; object-fit: contain; 
+            width: 170px; 
+            height: 170px; 
+            object-fit: contain; 
             opacity: 0; 
             animation: fadeInLogo 1.5s ease-out forwards, cinematicBreathing 4s ease-in-out infinite alternate 1.5s; 
         }
@@ -54,67 +89,387 @@
         /* ============================================================== */
 
         .container { max-width: 600px; margin: 0 auto; }
-        .card { background: var(--white); border-radius: 24px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--white); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
-        .section-title { font-size: 18px; font-weight: 800; color: var(--emerald-logo); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .section-title::before { content: ''; display: block; width: 4px; height: 18px; background: var(--emerald-logo); border-radius: 10px; }
+        
+        .card { 
+            background: var(--white); 
+            border-radius: 24px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            border: 1px solid var(--white); 
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); 
+        }
 
-        label { font-size: 13px; font-weight: 700; color: var(--text-mute); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        input, select, textarea { width: 100%; padding: 14px 18px; margin-bottom: 15px; background: #F8FAFC; border: 2px solid #F1F5F9; border-radius: 16px; box-sizing: border-box; font-size: 15px; color: var(--text-dark); font-weight: 600; outline: none; font-family: 'Inter', sans-serif;}
-        input:focus, select:focus, textarea:focus { border-color: var(--emerald-light); background: var(--white); box-shadow: 0 0 0 4px rgba(5,150,105,0.15); }
-        button { width: 100%; background: linear-gradient(135deg, var(--emerald-light), var(--emerald-logo)); color: white; border: none; font-weight: 800; padding: 16px; border-radius: 16px; font-size: 15px; cursor: pointer; text-transform: uppercase; transition: 0.2s; box-shadow: 0 4px 12px rgba(4,120,87,0.2); }
-        button:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(4,120,87,0.3); }
-        button:disabled { filter: grayscale(100%); cursor: not-allowed; }
-        .btn-danger { background: #FFFFFF; color: #EF4444; border: 2px solid #FEE2E2; box-shadow: none; }
+        .section-title { 
+            font-size: 18px; 
+            font-weight: 800; 
+            color: var(--emerald-logo); 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .section-title::before { 
+            content: ''; 
+            display: block; 
+            width: 4px; 
+            height: 18px; 
+            background: var(--emerald-logo); 
+            border-radius: 10px; 
+        }
 
-        .grid-juz-30 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-bottom: 20px; }
-        .juz-btn { background: #F1F5F9; color: #94A3B8; border-radius: 10px; padding: 10px 0; text-align: center; font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s; border: 1px solid #E2E8F0; }
-        .mode-z .juz-btn.aktif { background: var(--emerald-light); color: white; border-color: var(--emerald-logo); }
-        .mode-m .juz-btn.aktif { background: var(--cerulean-logo); color: white; border-color: var(--cerulean-logo); }
-        #ortu-grid-juz-30 .juz-btn.aktif { background: var(--emerald-light); color: white; }
+        label { 
+            font-size: 13px; 
+            font-weight: 700; 
+            color: var(--text-mute); 
+            text-transform: uppercase; 
+            margin-bottom: 6px; 
+            display: block; 
+        }
 
-        .rating-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F1F5F9; flex-wrap:wrap;}
-        .stars { display: flex; flex-direction: row-reverse; gap: 4px; } .stars input { display: none; }
-        .stars label { font-size: 26px; color: #E2E8F0; cursor: pointer; transition: 0.2s; } .stars input:checked ~ label { color: var(--gold-accent); transform: scale(1.1); }
+        input, select, textarea { 
+            width: 100%; 
+            padding: 14px 18px; 
+            margin-bottom: 15px; 
+            background: #F8FAFC; 
+            border: 2px solid #F1F5F9; 
+            border-radius: 16px; 
+            box-sizing: border-box; 
+            font-size: 15px; 
+            color: var(--text-dark); 
+            font-weight: 600; 
+            outline: none; 
+            font-family: 'Inter', sans-serif;
+        }
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--emerald-light); 
+            background: var(--white); 
+            box-shadow: 0 0 0 4px rgba(5,150,105,0.15); 
+        }
 
-        .toggle-container { display: flex; background: #F1F5F9; padding: 6px; border-radius: 16px; margin-bottom: 25px; gap: 6px; overflow-x: auto; }
-        .toggle-btn { flex: 1; padding: 12px; text-align: center; font-weight: 800; cursor: pointer; border-radius: 12px; font-size: 14px; color: #94A3B8; transition: all 0.3s; border: 2px solid transparent; white-space: nowrap; }
-        .toggle-btn.aktif-pilih { background: var(--white); color: var(--emerald-logo); border-color: var(--emerald-logo); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        button { 
+            width: 100%; 
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald-logo)); 
+            color: white; 
+            border: none; 
+            font-weight: 800; 
+            padding: 16px; 
+            border-radius: 16px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            transition: 0.2s; 
+            box-shadow: 0 4px 12px rgba(4,120,87,0.2); 
+        }
+        button:hover { 
+            transform: translateY(-1px); 
+            box-shadow: 0 6px 15px rgba(4,120,87,0.3); 
+        }
+        button:disabled { 
+            filter: grayscale(100%); 
+            cursor: not-allowed; 
+        }
+
+        .btn-danger { 
+            background: #FFFFFF; 
+            color: #EF4444; 
+            border: 2px solid #FEE2E2; 
+            box-shadow: none; 
+        }
+
+        .grid-juz-30 { 
+            display: grid; 
+            grid-template-columns: repeat(10, 1fr); 
+            gap: 6px; 
+            margin-bottom: 20px; 
+        }
+        .juz-btn { 
+            background: #F1F5F9; 
+            color: #94A3B8; 
+            border-radius: 10px; 
+            padding: 10px 0; 
+            text-align: center; 
+            font-size: 13px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            border: 1px solid #E2E8F0; 
+        }
+        .mode-z .juz-btn.aktif { 
+            background: var(--emerald-light); 
+            color: white; 
+            border-color: var(--emerald-logo); 
+        }
+        .mode-m .juz-btn.aktif { 
+            background: var(--cerulean-logo); 
+            color: white; 
+            border-color: var(--cerulean-logo); 
+        }
+        #ortu-grid-juz-30 .juz-btn.aktif { 
+            background: var(--emerald-light); 
+            color: white; 
+        }
+
+        .rating-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px 0; 
+            border-bottom: 1px solid #F1F5F9; 
+            flex-wrap: wrap;
+        }
+        .stars { display: flex; flex-direction: row-reverse; gap: 4px; }
+        .stars input { display: none; }
+        .stars label { 
+            font-size: 26px; 
+            color: #E2E8F0; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+        .stars input:checked ~ label { 
+            color: var(--gold-accent); 
+            transform: scale(1.1); 
+        }
+
+        .toggle-container { 
+            display: flex; 
+            background: #F1F5F9; 
+            padding: 6px; 
+            border-radius: 16px; 
+            margin-bottom: 25px; 
+            gap: 6px; 
+            overflow-x: auto; 
+        }
+        .toggle-btn { 
+            flex: 1; 
+            padding: 12px; 
+            text-align: center; 
+            font-weight: 800; 
+            cursor: pointer; 
+            border-radius: 12px; 
+            font-size: 14px; 
+            color: #94A3B8; 
+            transition: all 0.3s; 
+            border: 2px solid transparent; 
+            white-space: nowrap; 
+        }
+        .toggle-btn.aktif-pilih { 
+            background: var(--white); 
+            color: var(--emerald-logo); 
+            border-color: var(--emerald-logo); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        }
+        .toggle-btn.aktif-ziyadah { 
+            background: var(--white); 
+            color: var(--emerald-logo); 
+            border-color: var(--emerald-logo); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        }
+        .toggle-btn.aktif-murojaah { 
+            background: var(--white); 
+            color: var(--cerulean-logo); 
+            border-color: var(--cerulean-logo); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        }
 
         .status-pill-group { display: flex; gap: 10px; margin-top: 5px; }
-        .status-pill { flex: 1; padding: 14px; border-radius: 14px; text-align: center; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.3s; background: #F1F5F9; color: #94A3B8; border: 2px solid transparent; }
-        .status-pill.active { background: #ECFDF5; color: var(--emerald-logo); border-color: var(--emerald-light); box-shadow: 0 4px 10px rgba(4,120,87,0.1); }
-        .status-pill.active-danger { background: #FEF2F2; color: #EF4444; border-color: #FCA5A5; box-shadow: 0 4px 10px rgba(239,68,68,0.1); }
+        .status-pill { 
+            flex: 1; 
+            padding: 14px; 
+            border-radius: 14px; 
+            text-align: center; 
+            font-weight: 800; 
+            font-size: 13px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            background: #F1F5F9; 
+            color: #94A3B8; 
+            border: 2px solid transparent; 
+        }
+        .status-pill.active { 
+            background: #ECFDF5; 
+            color: var(--emerald-logo); 
+            border-color: var(--emerald-light); 
+            box-shadow: 0 4px 10px rgba(4,120,87,0.1); 
+        }
+        .status-pill.active-danger { 
+            background: #FEF2F2; 
+            color: #EF4444; 
+            border-color: #FCA5A5; 
+            box-shadow: 0 4px 10px rgba(239,68,68,0.1); 
+        }
 
-        .tab-content { display: none; animation: slideUp 0.3s ease; } .tab-content.active { display: block; }
+        .tab-content { display: none; animation: slideUp 0.3s ease; }
+        .tab-content.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .nav-wrapper { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; z-index: 1000; pointer-events: none; }
-        .bottom-nav { width: 100%; max-width: 600px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 10px 10px 20px; border-top-left-radius: 20px; border-top-right-radius: 20px; border: 1px solid var(--border-color); pointer-events: auto; box-shadow: 0 -10px 20px rgba(0,0,0,0.05); }
-        .nav-item { flex: 1; text-align: center; color: #94A3B8; font-size: 11px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .nav-item .icon { font-size: 22px; display: block; margin-bottom: 4px; filter: grayscale(100%) opacity(0.6); transition: 0.3s; }
-        .nav-item.active { color: var(--emerald-logo); } .nav-item.active .icon { transform: scale(1.15) translateY(-2px); filter: grayscale(0%); }
+        .nav-wrapper { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            display: flex; 
+            justify-content: center; 
+            z-index: 1000; 
+            pointer-events: none; 
+        }
+        .bottom-nav { 
+            width: 100%; 
+            max-width: 600px; 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(10px); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 10px 10px 20px; 
+            border-top-left-radius: 20px; 
+            border-top-right-radius: 20px; 
+            border: 1px solid var(--border-color); 
+            pointer-events: auto; 
+            box-shadow: 0 -10px 20px rgba(0,0,0,0.05); 
+        }
+        .nav-item { 
+            flex: 1; 
+            text-align: center; 
+            color: #94A3B8; 
+            font-size: 11px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            transition: 0.3s; 
+        }
+        .nav-item .icon { 
+            font-size: 22px; 
+            display: block; 
+            margin-bottom: 4px; 
+            filter: grayscale(100%) opacity(0.6); 
+            transition: 0.3s; 
+        }
+        .nav-item.active { color: var(--emerald-logo); }
+        .nav-item.active .icon { 
+            transform: scale(1.15) translateY(-2px); 
+            filter: grayscale(0%); 
+        }
 
-        .list-card { padding: 15px; background: #F8FAFC; border-radius: 16px; margin-bottom: 10px; border-left: 5px solid var(--emerald-logo); display:flex; justify-content:space-between; align-items:center; border-right: 1px solid #F1F5F9; border-top: 1px solid #F1F5F9; border-bottom: 1px solid #F1F5F9;}
-        .history-meta { font-size: 11px; color: var(--text-mute); font-weight: 700; text-transform: uppercase; margin-bottom:4px; }
+        .list-card { 
+            padding: 15px; 
+            background: #F8FAFC; 
+            border-radius: 16px; 
+            margin-bottom: 10px; 
+            border-left: 5px solid var(--emerald-logo); 
+            display:flex; 
+            justify-content:space-between; 
+            align-items:center; 
+            border-right: 1px solid #F1F5F9; 
+            border-top: 1px solid #F1F5F9; 
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .history-meta { 
+            font-size: 11px; 
+            color: var(--text-mute); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            margin-bottom:4px; 
+        }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.8); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--white); padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
-        .btn-kecil { padding: 8px 12px; font-size: 13px; width: auto; border-radius: 10px; margin:0; }
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(30, 41, 59, 0.8); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 2000; 
+            backdrop-filter: blur(5px); 
+        }
+        .modal-content { 
+            background: var(--white); 
+            padding: 30px; 
+            border-radius: 24px; 
+            width: 90%; 
+            max-width: 400px; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+        }
+        .btn-kecil { 
+            padding: 8px 12px; 
+            font-size: 13px; 
+            width: auto; 
+            border-radius: 10px; 
+            margin:0; 
+        }
         .hidden { display: none !important; }
 
         /* CHAT UI */
-        .chat-box { height: 350px; overflow-y: auto; background: #F8FAFC; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; gap: 15px; border: 1px solid #E2E8F0; margin-bottom:15px; scroll-behavior: smooth;}
-        .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 14px; position: relative; line-height: 1.5; font-weight: 600; word-wrap: break-word; word-break: break-word;}
-        .chat-me { align-self: flex-end; background: var(--emerald-light); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(5,150,105,0.15);}
-        .chat-other { align-self: flex-start; background: var(--white); color: var(--text-dark); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05);}
+        .chat-box { 
+            height: 350px; 
+            overflow-y: auto; 
+            background: #F8FAFC; 
+            border-radius: 16px; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            border: 1px solid #E2E8F0; 
+            margin-bottom:15px; 
+            scroll-behavior: smooth;
+        }
+        .chat-bubble { 
+            max-width: 85%; 
+            padding: 12px 16px; 
+            border-radius: 16px; 
+            font-size: 14px; 
+            position: relative; 
+            line-height: 1.5; 
+            font-weight: 600; 
+            word-wrap: break-word; 
+            word-break: break-word;
+        }
+        .chat-me { 
+            align-self: flex-end; 
+            background: var(--emerald-light); 
+            color: white; 
+            border-bottom-right-radius: 4px; 
+            box-shadow: 0 4px 10px rgba(5,150,105,0.15);
+        }
+        .chat-other { 
+            align-self: flex-start; 
+            background: var(--white); 
+            color: var(--text-dark); 
+            border-bottom-left-radius: 4px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
         
         /* PESAN SIAR UI */
-        .chat-global { align-self: center; background: #FFFBEB; color: #B45309; border-radius: 16px; border: 1px solid #FDE68A; box-shadow: 0 4px 10px rgba(217, 119, 6, 0.1); width: 95%; text-align: center;}
+        .chat-global { 
+            align-self: center; 
+            background: #FFFBEB; 
+            color: #B45309; 
+            border-radius: 16px; 
+            border: 1px solid #FDE68A; 
+            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.1); 
+            width: 95%; 
+            text-align: center;
+        }
         
-        .chat-meta { font-size: 10px; opacity: 0.8; margin-top: 6px; text-align: right; display: block; font-weight: 700; }
-        .chat-global .chat-meta { text-align: center; color: #D97706;}
+        .chat-meta { 
+            font-size: 10px; 
+            opacity: 0.8; 
+            margin-top: 6px; 
+            text-align: right; 
+            display: block; 
+            font-weight: 700; 
+        }
+        .chat-global .chat-meta { 
+            text-align: center; 
+            color: #D97706;
+        }
         
-        @media (max-width: 500px) { .grid-juz-30 { grid-template-columns: repeat(6, 1fr); } }
+        @media (max-width: 500px) { 
+            .grid-juz-30 { grid-template-columns: repeat(6, 1fr); } 
+        }
     </style>
 </head>
 <body>
@@ -165,7 +520,7 @@
                 <div class="section-title">Database Guru</div>
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="nama-muhaffiz-baru" placeholder="Ketik nama guru..." style="margin:0;">
-                    <button id="btn-tambah-guru" onclick="tambahGuru()" style="width:60px; margin:0; font-size:20px;">+</button>
+                    <button onclick="tambahGuru()" style="width:60px; margin:0; font-size:20px;">+</button>
                 </div>
                 <label style="margin-top:8px; font-size:11px; text-transform:none;">Sandi bawaan: <b style="color:var(--emerald-logo);">guru123</b></label>
                 <div id="tabel-guru" style="margin-top:20px;"></div>
@@ -183,7 +538,7 @@
                 <label>2. Masukkan Nama Kelas:</label>
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="nama-halaqah-baru" placeholder="Ketik nama kelas..." style="margin:0;">
-                    <button id="btn-tambah-kelas" onclick="tambahHalaqah()" style="width:60px; margin:0; font-size:20px;">+</button>
+                    <button onclick="tambahHalaqah()" style="width:60px; margin:0; font-size:20px;">+</button>
                 </div>
                 <div id="tabel-halaqah" style="margin-top:20px;"></div>
             </div>
@@ -192,11 +547,12 @@
         <div id="tab-admin-murid" class="tab-content">
             <div class="card">
                 <div class="section-title">Database Murid</div>
-                <label>Pilih Kelas:</label><select id="admin-pilih-halaqah" onchange="renderTabelSantriAdmin()"></select>
+                <label>Pilih Kelas:</label>
+                <select id="admin-pilih-halaqah" onchange="renderTabelSantriAdmin()"></select>
                 <label style="margin-top:10px;">Paste/Input Nama (Format: NIS - Nama):</label>
                 <div style="display:flex; gap:10px;">
                     <textarea id="data-santri-baru" placeholder="01 - Ahmad Zaid&#10;02 - Budi Utama" style="margin:0; height:80px;"></textarea>
-                    <button id="btn-tambah-murid" onclick="tambahSantri()" style="width:60px; margin:0; font-size:20px;">+</button>
+                    <button onclick="tambahSantri()" style="width:60px; margin:0; font-size:20px;">+</button>
                 </div>
                 <div id="tabel-santri" style="margin-top:20px;"></div>
             </div>
@@ -217,12 +573,14 @@
             </div>
         </div>
 
-        <div class="nav-wrapper"><div class="bottom-nav" id="nav-admin">
-            <div class="nav-item active" onclick="switchAdmin('guru', this)"><span class="icon">👨‍🏫</span>Guru</div>
-            <div class="nav-item" onclick="switchAdmin('kelas', this)"><span class="icon">🏫</span>Kelas</div>
-            <div class="nav-item" onclick="switchAdmin('murid', this)"><span class="icon">👦</span>Murid</div>
-            <div class="nav-item" onclick="switchAdmin('data', this)"><span class="icon">📊</span>Laporan</div>
-        </div></div>
+        <div class="nav-wrapper">
+            <div class="bottom-nav" id="nav-admin">
+                <div class="nav-item active" onclick="switchAdmin('guru', this)"><span class="icon">👨‍🏫</span>Guru</div>
+                <div class="nav-item" onclick="switchAdmin('kelas', this)"><span class="icon">🏫</span>Kelas</div>
+                <div class="nav-item" onclick="switchAdmin('murid', this)"><span class="icon">👦</span>Murid</div>
+                <div class="nav-item" onclick="switchAdmin('data', this)"><span class="icon">📊</span>Laporan</div>
+            </div>
+        </div>
     </div>
 
     <div id="muhaffiz-page" class="container hidden">
@@ -251,15 +609,21 @@
             <div id="kartuPrestasi" class="card" style="display:none; border:2px dashed #E2E8F0; padding:20px;">
                 <div class="section-title" style="font-size:15px; margin-bottom:15px;">Info Server Al-Qur'an</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; text-align:center;"><span style="font-size: 10px; font-weight: 800; color: var(--text-mute);">TOTAL JUZ</span><br><span id="infoTotalJuz" style="font-size: 18px; font-weight: 900; color: var(--emerald-logo);">-</span></div>
-                    <div style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; text-align:center;"><span style="font-size: 10px; font-weight: 800; color: var(--text-mute);">SURAH TERAKHIR</span><br><span id="infoSurah" style="font-size: 14px; font-weight: 900; color: var(--gold-accent); display:block; margin-top:5px; line-height:1.3;">-</span></div>
+                    <div style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; text-align:center;">
+                        <span style="font-size: 10px; font-weight: 800; color: var(--text-mute);">TOTAL JUZ</span><br>
+                        <span id="infoTotalJuz" style="font-size: 18px; font-weight: 900; color: var(--emerald-logo);">-</span>
+                    </div>
+                    <div style="background: #F8FAFC; padding: 15px; border-radius: 12px; border: 1px solid #E2E8F0; text-align:center;">
+                        <span style="font-size: 10px; font-weight: 800; color: var(--text-mute);">SURAH TERAKHIR</span><br>
+                        <span id="infoSurah" style="font-size: 14px; font-weight: 900; color: var(--gold-accent); display:block; margin-top:5px; line-height:1.3;">-</span>
+                    </div>
                 </div>
                 <div id="wadah-sertif-guru"></div>
             </div>
 
             <div class="card mode-z" id="box-form-setoran" style="border-top: 6px solid var(--warna-input-aktif);">
                 <div class="toggle-container">
-                    <div id="btn-mode-ziyadah" class="toggle-btn aktif-pilih" onclick="ubahModeSetoran('Ziyadah')">⭐ ZIYADAH</div>
+                    <div id="btn-mode-ziyadah" class="toggle-btn aktif-ziyadah" onclick="ubahModeSetoran('Ziyadah')">⭐ ZIYADAH</div>
                     <div id="btn-mode-murojaah" class="toggle-btn" onclick="ubahModeSetoran('Murojaah')">🔄 MUROJA'AH</div>
                 </div>
                 <input type="hidden" id="jenis-setoran-aktif" value="Ziyadah">
@@ -267,8 +631,12 @@
                 <label>Tanggal Setoran</label>
                 <input type="date" id="tgl-quran" style="margin-bottom:25px;">
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;"><label style="margin:0;">Buku Centang Juz</label><span style="font-size:12px; font-weight:900; color:white; background:var(--warna-input-aktif); padding:4px 12px; border-radius:12px;">Total: <span id="total-juz-teks">0</span></span></div>
-                <div class="grid-juz-30" id="muhaffiz-grid-juz-30"></div><input type="hidden" id="input-juz-hidden" value="">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <label style="margin:0;">Buku Centang Juz</label>
+                    <span style="font-size:12px; font-weight:900; color:white; background:var(--warna-input-aktif); padding:4px 12px; border-radius:12px;">Total: <span id="total-juz-teks">0</span></span>
+                </div>
+                <div class="grid-juz-30" id="muhaffiz-grid-juz-30"></div>
+                <input type="hidden" id="input-juz-hidden" value="">
 
                 <div class="section-title" style="margin-top:20px;">Batas Hafalan</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -282,9 +650,18 @@
 
                 <div class="section-title" style="margin-top:20px;">Penilaian Mutu</div>
                 <div style="background: #F8FAFC; border-radius: 20px; padding: 10px 20px; border: 1px solid #E2E8F0;">
-                    <div class="rating-row"><span>Tajwid <br><span onclick="clearRating('tajwid')" style="font-size:10px; color:#EF4444; cursor:pointer; background:#FEE2E2; padding:2px 6px; border-radius:4px; font-weight:800;">❌ Batal</span></span><div class="stars" id="stars-tajwid"></div></div>
-                    <div class="rating-row"><span>Kelancaran <br><span onclick="clearRating('lancar')" style="font-size:10px; color:#EF4444; cursor:pointer; background:#FEE2E2; padding:2px 6px; border-radius:4px; font-weight:800;">❌ Batal</span></span><div class="stars" id="stars-lancar"></div></div>
-                    <div class="rating-row"><span>Makhraj <br><span onclick="clearRating('makhraj')" style="font-size:10px; color:#EF4444; cursor:pointer; background:#FEE2E2; padding:2px 6px; border-radius:4px; font-weight:800;">❌ Batal</span></span><div class="stars" id="stars-makhraj"></div></div>
+                    <div class="rating-row">
+                        <span>Tajwid <br><span onclick="clearRating('tajwid')" style="font-size:10px; color:#EF4444; cursor:pointer; background:#FEE2E2; padding:2px 6px; border-radius:4px; font-weight:800;">❌ Batal</span></span>
+                        <div class="stars" id="stars-tajwid"></div>
+                    </div>
+                    <div class="rating-row">
+                        <span>Kelancaran <br><span onclick="clearRating('lancar')" style="font-size:10px; color:#EF4444; cursor:pointer; background:#FEE2E2; padding:2px 6px; border-radius:4px; font-weight:800;">❌ Batal</span></span>
+                        <div class="stars" id="stars-lancar"></div>
+                    </div>
+                    <div class="rating-row">
+                        <span>Makhraj <br><span onclick="clearRating('makhraj')" style="font-size:10px; color:#EF4444; cursor:pointer; background:#FEE2E2; padding:2px 6px; border-radius:4px; font-weight:800;">❌ Batal</span></span>
+                        <div class="stars" id="stars-makhraj"></div>
+                    </div>
                 </div>
 
                 <div class="section-title" style="margin-top:25px;">Tindakan</div>
@@ -309,7 +686,11 @@
                 </div>
                 <label>Tanggal</label><input type="date" id="tgl-aisar">
                 <label>Jilid & Halaman</label><input type="text" id="in-aisar" placeholder="Contoh: Jilid 2 Hal 15">
-                <label>Status</label><select id="stat-aisar"><option value="Lanjut">Lanjut</option><option value="Ulang">Ulang</option></select>
+                <label>Status</label>
+                <select id="stat-aisar">
+                    <option value="Lanjut">Lanjut</option>
+                    <option value="Ulang">Ulang</option>
+                </select>
                 <label>Catatan</label><textarea id="cat-aisar" placeholder="Pesan evaluasi..."></textarea>
                 <button onclick="simpanModulLain('aisar')">Simpan AISAR</button>
             </div>
@@ -324,7 +705,12 @@
                 </div>
                 <label>Tanggal</label><input type="date" id="tgl-hadits">
                 <label>Nama Hadits / Doa</label><input type="text" id="in-hadits" placeholder="Contoh: Hadits Niat">
-                <label>Status</label><select id="stat-hadits"><option value="Sangat Lancar">Sangat Lancar</option><option value="Cukup">Cukup Lancar</option><option value="Ulang">Perlu Diulang</option></select>
+                <label>Status</label>
+                <select id="stat-hadits">
+                    <option value="Sangat Lancar">Sangat Lancar</option>
+                    <option value="Cukup">Cukup Lancar</option>
+                    <option value="Ulang">Perlu Diulang</option>
+                </select>
                 <label>Catatan</label><textarea id="cat-hadits" placeholder="Pesan evaluasi..."></textarea>
                 <button style="background: linear-gradient(135deg, var(--gold-light), var(--gold-accent));" onclick="simpanModulLain('hadits')">Simpan Hadits</button>
             </div>
@@ -339,7 +725,11 @@
                 </div>
                 <label>Tanggal</label><input type="date" id="tgl-kosakata">
                 <label>Materi / Kosakata</label><input type="text" id="in-kosakata" placeholder="Contoh: Anggota Tubuh (1-5)">
-                <label>Status</label><select id="stat-kosakata"><option value="Hafal">Sudah Hafal</option><option value="Proses">Sedang Dihafal</option></select>
+                <label>Status</label>
+                <select id="stat-kosakata">
+                    <option value="Hafal">Sudah Hafal</option>
+                    <option value="Proses">Sedang Dihafal</option>
+                </select>
                 <label>Catatan</label><textarea id="cat-kosakata" placeholder="Pesan evaluasi..."></textarea>
                 <button style="background: linear-gradient(135deg, var(--cerulean-light), var(--cerulean-logo));" onclick="simpanModulLain('kosakata')">Simpan Kosakata</button>
             </div>
@@ -347,7 +737,6 @@
 
         <div id="tab-guru-penghubung" class="tab-content">
             <div class="card">
-                
                 <div class="toggle-container" style="margin-bottom:15px;">
                     <div id="btn-sub-ortu" class="toggle-btn aktif-pilih" onclick="gantiSubPesan('Ortu')">👨‍👩‍👧‍👦 Ortu</div>
                     <div id="btn-sub-forum" class="toggle-btn" onclick="gantiSubPesan('Forum')">👨‍🏫 Forum</div>
@@ -360,12 +749,12 @@
                         <button onclick="muatUlangPesanOrtu()" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Refresh</button>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                        <select id="chat-guru-kelas" onchange="updateDropdownSantriModul('chat-guru')"></select>
+                        <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
                         <select id="chat-guru-santri" onchange="renderChatOrtu()"><option value="">-- Murid --</option></select>
                     </div>
                     <div class="chat-box" id="chat-box-guru"></div>
                     <div style="display:flex; gap:10px; align-items: flex-end;">
-                        <textarea id="input-pesan-guru" placeholder="Ketik pesan panjang untuk Orang Tua..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
+                        <textarea id="input-pesan-guru" placeholder="Ketik/Paste pesan untuk Orang Tua..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
                         <button id="btn-kirim-guru" onclick="kirimChatOrtu('Guru')" style="width:80px; margin:0; padding:12px;">Kirim</button>
                     </div>
                 </div>
@@ -396,13 +785,15 @@
             </div>
         </div>
 
-        <div class="nav-wrapper"><div class="bottom-nav" id="nav-guru">
-            <div class="nav-item active" onclick="switchGuru('quran', this)"><span class="icon">📖</span>Qur'an</div>
-            <div class="nav-item" onclick="switchGuru('aisar', this)"><span class="icon">📘</span>AISAR</div>
-            <div class="nav-item" onclick="switchGuru('hadits', this)"><span class="icon">📜</span>Hadits</div>
-            <div class="nav-item" onclick="switchGuru('arab', this)"><span class="icon">🔤</span>Arab</div>
-            <div class="nav-item" onclick="switchGuru('penghubung', this)"><span class="icon">💬</span>Pesan</div>
-        </div></div>
+        <div class="nav-wrapper">
+            <div class="bottom-nav" id="nav-guru">
+                <div class="nav-item active" onclick="switchGuru('quran', this)"><span class="icon">📖</span>Qur'an</div>
+                <div class="nav-item" onclick="switchGuru('aisar', this)"><span class="icon">📘</span>AISAR</div>
+                <div class="nav-item" onclick="switchGuru('hadits', this)"><span class="icon">📜</span>Hadits</div>
+                <div class="nav-item" onclick="switchGuru('arab', this)"><span class="icon">🔤</span>Arab</div>
+                <div class="nav-item" onclick="switchGuru('penghubung', this)"><span class="icon">💬</span>Pesan</div>
+            </div>
+        </div>
     </div>
 
     <div id="ortu-page" class="container hidden">
@@ -455,27 +846,28 @@
                 </div>
                 <div class="chat-box" id="chat-box-ortu"></div>
                 <div style="display:flex; gap:10px; align-items: flex-end;">
-                    <textarea id="input-pesan-ortu" placeholder="Ketik pesan panjang untuk Ustadz/ah di sini..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
+                    <textarea id="input-pesan-ortu" placeholder="Ketik/Paste pesan untuk Ustadz/ah di sini..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
                     <button id="btn-kirim-ortu" onclick="kirimChatOrtu('Ortu')" style="width:80px; margin:0; padding:12px;">Kirim</button>
                 </div>
             </div>
         </div>
 
-        <div class="nav-wrapper"><div class="bottom-nav" id="nav-ortu">
-            <div class="nav-item active" onclick="switchOrtu('quran', this)"><span class="icon">📖</span>Qur'an</div>
-            <div class="nav-item" onclick="switchOrtu('aisar', this)"><span class="icon">📘</span>AISAR</div>
-            <div class="nav-item" onclick="switchOrtu('hadits', this)"><span class="icon">📜</span>Hadits</div>
-            <div class="nav-item" onclick="switchOrtu('arab', this)"><span class="icon">🔤</span>Arab</div>
-            <div class="nav-item" onclick="switchOrtu('penghubung', this)"><span class="icon">💬</span>Pesan</div>
-        </div></div>
+        <div class="nav-wrapper">
+            <div class="bottom-nav" id="nav-ortu">
+                <div class="nav-item active" onclick="switchOrtu('quran', this)"><span class="icon">📖</span>Qur'an</div>
+                <div class="nav-item" onclick="switchOrtu('aisar', this)"><span class="icon">📘</span>AISAR</div>
+                <div class="nav-item" onclick="switchOrtu('hadits', this)"><span class="icon">📜</span>Hadits</div>
+                <div class="nav-item" onclick="switchOrtu('arab', this)"><span class="icon">🔤</span>Arab</div>
+                <div class="nav-item" onclick="switchOrtu('penghubung', this)"><span class="icon">💬</span>Pesan</div>
+            </div>
+        </div>
     </div>
 
     <div id="modal-wallpaper" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Latar Belakang</div><div style="display:flex; gap:10px; margin-bottom:20px; overflow-x:auto; padding-bottom:10px;"><div style="min-width:60px; height:60px; background:var(--ivory-bg); border-radius:12px; cursor:pointer; border:2px solid #ccc; position:relative;" onclick="setWallpaper('')"><span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:10px; font-weight:bold; color:#ccc;">RESET</span></div><div style="min-width:60px; height:60px; background:#0F172A; border-radius:12px; cursor:pointer;" onclick="setWallpaper('#0F172A')"></div><div style="min-width:60px; height:60px; background:#064E3B; border-radius:12px; cursor:pointer;" onclick="setWallpaper('#064E3B')"></div><div style="min-width:60px; height:60px; background:url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560'); background-size:cover; border-radius:12px; cursor:pointer;" onclick="setWallpaper('url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560)')"></div></div><label>Atau Unggah Foto Sendiri:</label><input type="file" accept="image/*" onchange="uploadWallpaper(event)" style="padding:10px; margin-bottom:25px;"><button class="btn-danger" style="padding:14px; border-radius:14px;" onclick="tutupModalWallpaper()">Tutup</button></div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 5)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
-
+    
     <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
-
-    <script>
+<script>
         const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
         const REQ_HEADERS = { 
@@ -485,6 +877,11 @@
         };
 
         let dbP = {}, dbKelasGuru = {}, dProg = {}, dRiw = [], dRiwA = [], dRiwH = [], dRiwK = [], dPesan = [], dForum = [], dAkun = [], guruAktif = "", modeAktif = "Ziyadah", selJuz = [];
+
+        // Mengompres Daftar Surah untuk menghemat memori kode
+        const surahStr = "Al-Fatihah:7,Al-Baqarah:286,Ali 'Imran:200,An-Nisa':176,Al-Ma'idah:120,Al-An'am:165,Al-A'raf:206,Al-Anfal:75,At-Taubah:129,Yunus:109,Hud:123,Yusuf:111,Ar-Ra'd:43,Ibrahim:52,Al-Hijr:99,An-Nahl:128,Al-Isra':111,Al-Kahf:110,Maryam:98,Taha:135,Al-Anbiya':112,Al-Hajj:78,Al-Mu'minun:118,An-Nur:64,Al-Furqan:77,Asy-Syu'ara':227,An-Naml:93,Al-Qasas:88,Al-'Ankabut:69,Ar-Rum:60,Luqman:34,As-Sajdah:30,Al-Ahzab:73,Saba':54,Fatir:45,Yasin:83,As-Saffat:182,Sad:88,Az-Zumar:75,Gafir:85,Fussilat:54,Asy-Syura:53,Az-Zukhruf:89,Ad-Dukhan:59,Al-Jasiyah:37,Al-Ahqaf:35,Muhammad:38,Al-Fath:29,Al-Hujurat:18,Qaf:45,Az-Zariyat:60,At-Tur:49,An-Najm:62,Al-Qamar:55,Ar-Rahman:78,Al-Waqi'ah:96,Al-Hadid:29,Al-Mujadilah:22,Al-Hasyr:24,Al-Mumtahanah:13,As-Saff:14,Al-Jumu'ah:11,Al-Munafiqun:11,At-Tagabun:18,At-Talaq:12,At-Tahrim:12,Al-Mulk:30,Al-Qalam:52,Al-Haqqah:52,Al-Ma'arij:44,Nuh:28,Al-Jinn:28,Al-Muzzammil:20,Al-Muddassir:56,Al-Qiyamah:40,Al-Insan:31,Al-Mursalat:50,An-Naba':40,An-Nazi'at:46,'Abasa:42,At-Takwir:29,Al-Infitar:19,Al-Mutaffifin:36,Al-Insyiqaq:25,Al-Buruj:22,At-Tariq:17,Al-A'la:19,Al-Gasyiyah:26,Al-Fajr:30,Al-Balad:20,Asy-Syams:15,Al-Lail:21,Ad-Duha:11,Asy-Syarh:8,At-Tin:8,Al-'Alaq:19,Al-Qadr:5,Al-Bayyinah:8,Az-Zalzalah:8,Al-'Adiyat:11,Al-Qari'ah:11,At-Takasur:8,Al-'Asr:3,Al-Humazah:9,Al-Fil:5,Quraisy:4,Al-Ma'un:7,Al-Kausar:3,Al-Kafirun:6,An-Nasr:3,Al-Lahab:5,Al-Ikhlas:4,Al-Falaq:5,An-Nas:6";
+        const dataSurahLengkap = {};
+        surahStr.split(',').forEach(s => { let p = s.split(':'); dataSurahLengkap[p[0]] = parseInt(p[1]); });
 
         // FUNGSI UTILITIES
         function getSafeStorage(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
@@ -570,6 +967,40 @@
                 document.getElementById('login-page').classList.remove('hidden'); 
             }
         }
+
+        // INIT SAAT APLIKASI DIBUKA
+        window.onload = () => {
+            let wp = getSafeStorage('wp'); 
+            if(wp) setWallpaper(wp);
+            
+            let tzoffset = (new Date()).getTimezoneOffset() * 60000; 
+            let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+            let ds = localISOTime.split('T')[0]; 
+            document.querySelectorAll('input[type="date"]').forEach(e => e.value = ds);
+            
+            ['tajwid', 'lancar', 'makhraj'].forEach(id => {
+                let h = ''; 
+                for(let i=5; i>=1; i--) h += `<input type="radio" id="s${i}${id}" name="${id}" value="${i}"><label for="s${i}${id}">★</label>`;
+                document.getElementById('stars-'+id).innerHTML = h;
+            });
+            
+            let s1 = document.getElementById('input-surah'), s2 = document.getElementById('input-surah-akhir');
+            s1.innerHTML = s2.innerHTML = '<option value="">-- Surah --</option>';
+            for(let k in dataSurahLengkap) { 
+                s1.appendChild(new Option(k,k)); 
+                s2.appendChild(new Option(k,k)); 
+            }
+            
+            let gM = '', gO = '';
+            for(let i=1; i<=30; i++){ 
+                gM += `<div class="juz-btn" id="m-j-${i}" onclick="toggleJuz(${i})">${i}</div>`; 
+                gO += `<div class="juz-btn" id="o-j-${i}">${i}</div>`; 
+            }
+            document.getElementById('muhaffiz-grid-juz-30').innerHTML = gM; 
+            document.getElementById('ortu-grid-juz-30').innerHTML = gO;
+            
+            tarikDataServer();
+        };
 
         // FUNGSI KOMUNIKASI DATABASE
         async function tarikDataServer() {
@@ -726,7 +1157,7 @@
             updateDropdownSantriModul('chat-guru');
         }
 
-        // FUNGSI KOMUNIKASI
+        // FUNGSI KOMUNIKASI PENGHUBUNG & FORUM
         function gantiSubPesan(jenis) {
             document.getElementById('btn-sub-ortu').classList.remove('aktif-pilih');
             document.getElementById('btn-sub-forum').classList.remove('aktif-pilih');
@@ -748,6 +1179,10 @@
 
         async function muatUlangPesanOrtu() {
             let role = getSafeStorage('sesi_halaman') === 'muhaffiz' ? 'Guru' : 'Ortu';
+            let btn = document.querySelector('#box-pesan-ortu button');
+            let oldHTML = btn ? btn.innerHTML : "🔄";
+            if(btn) { btn.innerHTML = "⏳"; btn.disabled = true; }
+
             try {
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan?select=*&order=id.asc`, {headers: REQ_HEADERS});
                 if(res.ok) {
@@ -755,9 +1190,15 @@
                     renderChatOrtu();
                 }
             } catch(e) { } 
+
+            if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
         }
         
         async function muatUlangForum() {
+            let btn = document.querySelector('#box-pesan-forum button');
+            let oldHTML = btn ? btn.innerHTML : "🔄";
+            if(btn) { btn.innerHTML = "⏳"; btn.disabled = true; }
+
             try {
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/forum_guru?select=*&order=id.asc`, {headers: REQ_HEADERS});
                 if(res.ok) {
@@ -765,6 +1206,8 @@
                     renderForum();
                 }
             } catch(e) { } 
+
+            if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
         }
 
         function renderChatOrtu() {
@@ -820,20 +1263,26 @@
             if(!msg) return alert("Pesan tidak boleh kosong!");
 
             let btn = document.getElementById('btn-kirim-' + role.toLowerCase());
-            let oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+            let oldText = btn.innerText; 
+            btn.innerText = "⏳"; 
+            btn.disabled = true;
+
             let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
             try {
                 let pay = { waktu: wkt, kelas: h, nama_murid: s, pengirim: role, isi_pesan: msg };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+
                 if(!res.ok) throw new Error();
+                
                 dPesan.push(pay);
                 msgInput.value = '';
                 renderChatOrtu();
             } catch(e) {
-                alert("GAGAL MENGIRIM PESAN!");
+                alert("GAGAL MENGIRIM PESAN!\nPastikan antum sudah mengklik RUN di SQL Supabase untuk tabel pesan.");
             } finally {
-                btn.innerText = oldText; btn.disabled = false;
+                btn.innerText = oldText; 
+                btn.disabled = false;
             }
         }
 
@@ -845,20 +1294,26 @@
             if(!h || !msg) return alert("Pilih Tujuan dan Ketik Pesan!");
 
             let btn = document.getElementById('btn-kirim-siar');
-            let oldText = btn.innerText; btn.innerText = "⏳ Mengirim..."; btn.disabled = true;
+            let oldText = btn.innerText; 
+            btn.innerText = "⏳ Mengirim..."; 
+            btn.disabled = true;
+            
             let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
             try {
                 let pay = { waktu: wkt, kelas: h, nama_murid: 'SEMUA', pengirim: 'Guru', isi_pesan: msg };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                
                 if(!res.ok) throw new Error();
+                
                 dPesan.push(pay);
                 msgInput.value = '';
                 alert("📢 Pesan Siar Berhasil Terkirim!");
             } catch(e) {
                 alert("Gagal Kirim Pesan Siar!");
             } finally {
-                btn.innerText = oldText; btn.disabled = false;
+                btn.innerText = oldText; 
+                btn.disabled = false;
             }
         }
 
@@ -894,20 +1349,26 @@
             if(!msg) return alert("Pesan tidak boleh kosong!");
 
             let btn = document.getElementById('btn-kirim-forum');
-            let oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+            let oldText = btn.innerText; 
+            btn.innerText = "⏳"; 
+            btn.disabled = true;
+            
             let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
             try {
                 let pay = { waktu: wkt, pengirim: guruAktif, isi_pesan: msg };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/forum_guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                
                 if(!res.ok) throw new Error();
+                
                 dForum.push(pay);
                 msgInput.value = '';
                 renderForum();
             } catch(e) {
                 alert("GAGAL MENGIRIM! Pastikan SQL tabel forum_guru sudah di-Run.");
             } finally {
-                btn.innerText = oldText; btn.disabled = false;
+                btn.innerText = oldText; 
+                btn.disabled = false;
             }
         }
 
@@ -1302,9 +1763,7 @@
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
 
-        // ==============================================================
-        // TOOLS & EXPORT (EXCEL / PDF / LAPORAN)
-        // ==============================================================
+        // FUNGSI IMPORT EXCEL DLL
         function unduhTemplate() { 
             let wb = XLSX.utils.book_new(); 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Kelas","Nama Murid"],["Kelas 1A","01 - Ahmad Zaid"],["Kelas 1A","02 - Budi"]]), "Murid"); 
@@ -1415,7 +1874,8 @@
                 alert("Error Ganti Sandi!"); 
             } finally { 
                 btn.innerText = "Simpan"; btn.disabled = false; 
-            }        }
+            }
+        }
     </script>
 </body>
 </html>
