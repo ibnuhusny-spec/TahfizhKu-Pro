@@ -536,10 +536,13 @@
     <span>Database Kelas</span>
     <button onclick="hapusSemua('Kelas')" style="background:#FEF2F2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; box-shadow:none; border-radius:8px;">🗑️ Hapus Semua</button>
 </div>
-                <label>1. Tetapkan Guru Pengampu Kelas:</label>
-                <div style="display:flex; gap:10px; margin-bottom: 10px;">
-                    <select id="admin-kelas-pilih-guru" style="margin:0;"><option value="">-- Guru Utama 1 --</option></select>
-                    <select id="admin-kelas-pilih-guru-2" style="margin:0;"><option value="">-- Guru Utama 2 (Opsional) --</option></select>
+                <label>1. Tim Pengajar Kelas (Bisa Sampai 5 Guru):</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 10px;">
+                    <select id="admin-kelas-pilih-guru" style="margin:0;"><option value="">-- Guru 1 (Wajib) --</option></select>
+                    <select id="admin-kelas-pilih-guru-2" style="margin:0;"><option value="">-- Guru 2 (Ops) --</option></select>
+                    <select id="admin-kelas-pilih-guru-3" style="margin:0;"><option value="">-- Guru 3 (Ops) --</option></select>
+                    <select id="admin-kelas-pilih-guru-4" style="margin:0;"><option value="">-- Guru 4 (Ops) --</option></select>
+                    <select id="admin-kelas-pilih-guru-5" style="margin:0;"><option value="">-- Guru 5 (Ops) --</option></select>
                 </div>
                 <label>2. Masukkan Nama Kelas:</label>
                 <div style="display:flex; gap:10px;">
@@ -1093,16 +1096,13 @@
                 dAkun.forEach(n => s.appendChild(new Option(n, n))); 
             }
             
-            let cG1 = document.getElementById('admin-kelas-pilih-guru'); 
-            if(cG1) { 
-                cG1.innerHTML = '<option value="">-- Guru Utama 1 --</option>'; 
-                dAkun.forEach(n => cG1.appendChild(new Option(n, n))); 
-            }
-            
-            let cG2 = document.getElementById('admin-kelas-pilih-guru-2'); 
-            if(cG2) { 
-                cG2.innerHTML = '<option value="">-- Guru Utama 2 (Opsional) --</option>'; 
-                dAkun.forEach(n => cG2.appendChild(new Option(n, n))); 
+            for(let i=1; i<=5; i++) {
+                let id = i === 1 ? 'admin-kelas-pilih-guru' : `admin-kelas-pilih-guru-${i}`;
+                let cG = document.getElementById(id); 
+                if(cG) { 
+                    cG.innerHTML = `<option value="">-- Guru ${i} ${i===1 ? '(Wajib)' : '(Ops)'} --</option>`; 
+                    dAkun.forEach(n => cG.appendChild(new Option(n, n))); 
+                }
             }
         }
         
@@ -1564,10 +1564,13 @@
             let d = document.getElementById('nama-halaqah-baru').value.trim(); 
             let g1 = document.getElementById('admin-kelas-pilih-guru').value;
             let g2 = document.getElementById('admin-kelas-pilih-guru-2').value;
+            let g3 = document.getElementById('admin-kelas-pilih-guru-3').value;
+            let g4 = document.getElementById('admin-kelas-pilih-guru-4').value;
+            let g5 = document.getElementById('admin-kelas-pilih-guru-5').value;
             
-            if(!d || !g1) return alert("⚠️ Pilih minimal Guru Utama 1 dan Ketik Nama Kelas!"); 
+            if(!d || !g1) return alert("⚠️ Pilih minimal Guru 1 dan Ketik Nama Kelas!"); 
             
-            let gabunganGuru = [g1, g2].filter(x => x).join(', ');
+            let gabunganGuru = [g1, g2, g3, g4, g5].filter(x => x).join(', ');
             let lines = d.split('\n'); let arr = []; let added = false; 
             
             let btn = document.getElementById('btn-tambah-kelas'); 
