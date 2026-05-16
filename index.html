@@ -1455,10 +1455,12 @@
                 setJuzUI(p.juz, true); 
                 let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; 
                 let jC = arrJuz.length; 
+                let teksJuz = arrJuz.join(', '); // Ambil NAMA JUZ
+                
                 document.getElementById('ortu-infoJuz').innerText = jC; 
                 document.getElementById('ortu-infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; font-weight:800; color:var(--text-mute);">(Ayat: ${p.ayat})</span>`; 
                 if(jC >= 1) {
-                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
+                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat Juz ${teksJuz}</button>`;
                 }
             } 
             else { 
@@ -1866,15 +1868,15 @@
             const { jsPDF } = window.jspdf; 
             let doc = new jsPDF('l', 'mm', 'a4'); // Kertas A4 mode memanjang (Landscape)
             
-            // Palet Warna (Elegan dan Tidak Norak)
-            let darkBlue = [26, 60, 96]; // Biru Dongker
+            // Palet Warna
+            let darkBlue = [26, 60, 96]; 
             let lightBlue = [41, 128, 185];
             let gold = [241, 196, 15];
             let orange = [230, 126, 34];
             let red = [192, 57, 43];
-            let black = [0, 0, 0]; // Hitam Teks
+            let black = [0, 0, 0]; 
             
-            // Background kertas abu-abu sangat muda 
+            // Background
             doc.setFillColor(250, 250, 250);
             doc.rect(0, 0, 297, 210, 'F');
 
@@ -1884,7 +1886,6 @@
             doc.setFillColor(...gold); doc.triangle(0, 30, 70, 100, 0, 170, 'F');
             doc.setFillColor(...orange); doc.triangle(0, 110, 80, 210, 0, 210, 'F');
             doc.setFillColor(...darkBlue); doc.triangle(0, 160, 50, 210, 0, 210, 'F');
-            
             doc.setFillColor(...darkBlue);
             doc.triangle(10, 80, 35, 105, 10, 130, 'F');
             doc.triangle(10, 80, -15, 105, 10, 130, 'F');
@@ -1895,42 +1896,38 @@
             doc.setFillColor(...darkBlue); doc.triangle(297, 100, 200, 210, 297, 210, 'F');
             doc.setFillColor(...lightBlue); doc.triangle(297, 150, 240, 210, 297, 210, 'F');
             
-            // --- HEADER SEKOLAH ---
-            doc.setTextColor(...black); // Tulisan Hitam
+            // --- HEADER ---
+            doc.setTextColor(...black); 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
-            // Baris pertama dihapus sesuai permintaan
             doc.text("YAYASAN PENDIDIKAN QURRATU A'YUN AL-ISLAMI MAROS", 148, 20, {align: "center"});
-
             doc.setFontSize(22);
             doc.text('SDIT QURRATU A\'YUN "CEMERLANG"', 148, 30, {align: "center"});
 
-            // --- JUDUL SERTIFIKAT ---
-            doc.setTextColor(200, 200, 200); // Shadow
+            // --- JUDUL ---
+            doc.setTextColor(200, 200, 200); 
             doc.setFont("times", "italic");
             doc.setFontSize(55);
             doc.text("Sertifikat", 149.5, 60.5, {align: "center"});
-            doc.setTextColor(...darkBlue); // Biru Dongker Elegan
+            doc.setTextColor(...darkBlue); 
             doc.text("Sertifikat", 148, 60, {align: "center"});
 
-            // --- ISI TEKS ---
-            doc.setTextColor(...black); // Hitam
+            // --- ISI ---
+            doc.setTextColor(...black); 
             doc.setFont("helvetica", "normal");
             doc.setFontSize(12);
             doc.text("Diberikan Kepada :", 148, 80, {align: "center"});
 
-            // Nama Anak (Warna Biru Elegan)
-            doc.setTextColor(...darkBlue); 
+            // Nama Anak
+            doc.setTextColor(17, 70, 143); 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(30);
             doc.text(nama.toUpperCase(), 148, 95, {align: "center"});
-
-            // Garis Hitam
             doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(1);
             doc.line(60, 100, 236, 100);
 
-            // Prestasi (Hitam)
+            // Prestasi (Dengan NAMA JUZ)
             doc.setTextColor(...black);
             doc.setFontSize(16);
             doc.text(`Telah Menyelesaikan Tahfidzul Qur'an Juz ${juz}`, 148, 113, {align: "center"});
@@ -1941,30 +1938,10 @@
             let tglMasehi = new Date().toLocaleDateString('id-ID', { weekday:'long', year: 'numeric', month: 'long', day: 'numeric' });
             doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148, 123, {align: "center"});
 
-            // Paragraf Doa (Diperbarui)
+            // Paragraf
             doc.setFontSize(11);
             let paragraf = "Kepadanya kami berikan penghargaan setinggi - tingginya.\nSemoga tanda penghargaan ini menjadi motivasi untuk\nsenantiasa meningkatkan amal ibadahnya sesuai ketentuan\nAl-Qur'an dan As-Sunnah.";
             doc.text(paragraf, 148, 135, {align: "center", lineHeightFactor: 1.5});
-
-            // --- TANDA TANGAN ---
-            doc.setFontSize(11);
-            doc.text("Mengetahui,", 90, 165, {align: "center"});
-            doc.text("Kepala SDIT Qurratu A'yun", 90, 171, {align: "center"});
-            doc.setFont("helvetica", "bold");
-            doc.text("Radiant Fadli, S.Pd.", 90, 195, {align: "center"});
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.text("NIY: ..............................", 90, 200, {align: "center"});
-
-            // TTD Guru (Otomatis nama yang Login)
-            let namaPembimbing = guruAktif ? guruAktif : "________________________";
-            doc.setFontSize(11);
-            doc.text("Guru Pembimbing", 206, 171, {align: "center"});
-            doc.setFont("helvetica", "bold");
-            doc.text(namaPembimbing, 206, 195, {align: "center"});
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.text("NIY: ..............................", 206, 200, {align: "center"});
 
             // --- KOTAK WISUDA (KIRI BAWAH) ---
             doc.setFillColor(...darkBlue);
@@ -1976,20 +1953,17 @@
             doc.setFontSize(12);
             doc.text("Wisuda Tahfidz Qur'an", 15, 197);
 
-            // --- PITA MEDALI JUZ (KANAN BAWAH) ---
-            let cx = 250;
-            let cy = 165;
+            // --- MEDALI (DIGAMBAR LEBIH DULU SEBAGAI LAYER BELAKANG) ---
+            let cx = 245; // Digeser sedikit agar aman
+            let cy = 160;
             
-            // Ekor Pita Merah
             doc.setFillColor(...red);
             doc.triangle(cx - 10, cy, cx - 25, cy + 35, cx, cy + 25, 'F'); 
             doc.triangle(cx + 10, cy, cx + 25, cy + 35, cx, cy + 25, 'F'); 
-            // Aksen Pita Kuning
             doc.setFillColor(...gold);
             doc.triangle(cx - 8, cy, cx - 21, cy + 35, cx - 18, cy + 35, 'F');
             doc.triangle(cx + 8, cy, cx + 21, cy + 35, cx + 18, cy + 35, 'F');
 
-            // Bintang Medali Luar
             doc.setFillColor(...gold);
             for(let i=0; i<360; i+=15) {
                 let rad = i * Math.PI / 180;
@@ -1998,24 +1972,49 @@
                 doc.circle(x, y, 3, 'F'); 
             }
             doc.circle(cx, cy, 22, 'F'); 
-            
-            // Lingkaran Merah Dalam
             doc.setFillColor(...red);
             doc.circle(cx, cy, 19, 'F');
             doc.setDrawColor(255, 255, 255);
             doc.setLineWidth(0.5);
             doc.circle(cx, cy, 17, 'S');
 
-            // Teks Medali
+            // Teks Medali (Menyesuaikan Panjang Teks)
             doc.setTextColor(255, 255, 255);
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
             doc.text("JUZ", cx, cy - 3, {align: "center"});
-            doc.setFontSize(26);
-            doc.text(juz.toString(), cx, cy + 7, {align: "center"});
+            
+            let txtJuz = juz.toString();
+            let sizeJuz = txtJuz.length > 3 ? 12 : 26; // Jika teks juz panjang (contoh: 29, 30), font otomatis mengecil
+            doc.setFontSize(sizeJuz);
+            doc.text(txtJuz, cx, cy + 7, {align: "center"});
+
+            // --- TANDA TANGAN (DIGAMBAR PALING AKHIR AGAR ADA DI LAYER DEPAN) ---
+            doc.setTextColor(...black); // Tulisan Hitam
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            
+            // Posisi Kepala Sekolah (Kiri)
+            doc.text("Mengetahui,", 80, 165, {align: "center"});
+            doc.text("Kepala SDIT Qurratu A'yun", 80, 171, {align: "center"});
+            doc.setFont("helvetica", "bold");
+            doc.text("Radiant Fadli, S.Pd.", 80, 195, {align: "center"});
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text("NIY: ..............................", 80, 200, {align: "center"});
+
+            // Posisi Guru Pembimbing (Kanan)
+            let namaPembimbing = guruAktif ? guruAktif : "________________________";
+            doc.setFontSize(11);
+            doc.text("Guru Pembimbing", 206, 171, {align: "center"});
+            doc.setFont("helvetica", "bold");
+            doc.text(namaPembimbing, 206, 195, {align: "center"});
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text("NIY: ..............................", 206, 200, {align: "center"});
 
             // Eksekusi Download
-            doc.save(`Sertifikat_${nama}_${juz}Juz.pdf`);
+            doc.save(`Sertifikat_${nama}_Juz_${juz}.pdf`);
         }
         function tampilkanKartuPrestasi() {
             let s = document.getElementById('muhaffiz-pilih-santri').value;
@@ -2028,10 +2027,12 @@
                 setJuzUI(p.juz, false); 
                 let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; 
                 let jC = arrJuz.length; 
+                let teksJuz = arrJuz.join(', '); // Ambil NAMA JUZ, bukan jumlahnya
+                
                 document.getElementById('infoTotalJuz').innerText = jC; 
                 document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
                 if(jC >= 1) {
-                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', ${jC})" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat ${jC} Juz</button>`;
+                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat Juz ${teksJuz}</button>`;
                 }
             } else { 
                 setJuzUI("", false); 
