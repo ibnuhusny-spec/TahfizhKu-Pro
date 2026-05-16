@@ -1164,11 +1164,11 @@
                 }); 
                 
                 if(!res.ok) {
-                    let errData = await res.text();
-                    throw new Error(errData); 
+                    let errData = await res.json();
+                    throw new Error(errData.message || JSON.stringify(errData)); 
                 }
                 
-                // Jika Supabase sukses, baru masukkan ke sistem lokal HP
+                // Update layar lokal HANYA jika Supabase sudah bilang "OK"
                 arr.forEach(item => {
                     dbP[item.nama_kelas] = []; 
                     dbKelasGuru[item.nama_kelas] = item.nama_guru; 
@@ -1176,10 +1176,9 @@
                 
                 document.getElementById('nama-halaqah-baru').value = ''; 
                 renderTabelAdmin(); 
-                alert("✅ Kelas berhasil disimpan sempurna!");
+                
             } catch(e) { 
-                console.error(e);
-                alert("❌ SERVER MENOLAK!\n\nKemungkinan teks gabungan nama 4-5 Guru terlalu panjang untuk database Anda. Silakan buka Supabase, ubah tipe data kolom 'nama_guru' menjadi 'text'."); 
+                alert("❌ SUPABASE MENOLAK!\n\nAlasan Asli:\n" + e.message); 
             } finally { 
                 if(btn){ btn.innerText = "+"; btn.disabled = false; } 
             }
