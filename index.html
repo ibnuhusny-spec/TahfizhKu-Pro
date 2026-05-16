@@ -1143,33 +1143,43 @@
             let gabunganGuru = [g1, g2, g3, g4, g5].filter(x => x !== "").join(', ');
             let lines = d.split('\n'); 
             let arr = []; 
-            let added = false; 
             
+            lines.forEach(n => { 
+                let nm = n.trim(); 
+                if(nm !== "" && !dbP[nm]) { 
+                    arr.push({nama_kelas: nm, nama_guru: gabunganGuru}); 
+                } 
+            });
+            
+            if(arr.length === 0) return alert("⚠️ Kelas sudah ada atau nama kosong!");
+
             let btn = document.querySelector('#tab-admin-kelas button'); 
             if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             
             try {
-                lines.forEach(n => { 
-                    let nm = n.trim(); 
-                    if(nm !== "" && !dbP[nm]) { 
-                        arr.push({nama_kelas: nm, nama_guru: gabunganGuru}); 
-                        dbP[nm] = []; 
-                        dbKelasGuru[nm] = gabunganGuru; 
-                        added = true; 
-                    } 
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { 
+                    method: 'POST', 
+                    headers: REQ_HEADERS, 
+                    body: JSON.stringify(arr) 
+                }); 
+                
+                if(!res.ok) {
+                    let errData = await res.text();
+                    throw new Error(errData); 
+                }
+                
+                // Jika Supabase sukses, baru masukkan ke sistem lokal HP
+                arr.forEach(item => {
+                    dbP[item.nama_kelas] = []; 
+                    dbKelasGuru[item.nama_kelas] = item.nama_guru; 
                 });
                 
-                if(arr.length > 0) { 
-                    let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
-                    if(!res.ok) throw new Error(); 
-                    
-                    document.getElementById('nama-halaqah-baru').value = ''; 
-                    renderTabelAdmin(); 
-                } else if (!added && lines.length > 0) {
-                    alert("⚠️ Kelas sudah ada!");
-                }
+                document.getElementById('nama-halaqah-baru').value = ''; 
+                renderTabelAdmin(); 
+                alert("✅ Kelas berhasil disimpan sempurna!");
             } catch(e) { 
-                alert("Gagal menyimpan!"); 
+                console.error(e);
+                alert("❌ SERVER MENOLAK!\n\nKemungkinan teks gabungan nama 4-5 Guru terlalu panjang untuk database Anda. Silakan buka Supabase, ubah tipe data kolom 'nama_guru' menjadi 'text'."); 
             } finally { 
                 if(btn){ btn.innerText = "+"; btn.disabled = false; } 
             }
