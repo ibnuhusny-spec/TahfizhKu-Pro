@@ -517,7 +517,10 @@
         
         <div id="tab-admin-guru" class="tab-content active">
             <div class="card">
-                <div class="section-title">Database Guru</div>
+                <div class="section-title" style="justify-content: space-between;">
+    <span>Database Guru</span>
+    <button onclick="hapusSemua('Guru')" style="background:#FEF2F2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; box-shadow:none; border-radius:8px;">🗑️ Hapus Semua</button>
+</div>
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="nama-muhaffiz-baru" placeholder="Ketik nama guru..." style="margin:0;">
                     <button onclick="tambahGuru()" style="width:60px; margin:0; font-size:20px;">+</button>
@@ -529,7 +532,10 @@
 
         <div id="tab-admin-kelas" class="tab-content">
             <div class="card">
-                <div class="section-title">Database Kelas</div>
+                <div class="section-title" style="justify-content: space-between;">
+    <span>Database Kelas</span>
+    <button onclick="hapusSemua('Kelas')" style="background:#FEF2F2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; box-shadow:none; border-radius:8px;">🗑️ Hapus Semua</button>
+</div>
                 <label>1. Tetapkan Guru Pengampu Kelas:</label>
                 <div style="display:flex; gap:10px; margin-bottom: 10px;">
                     <select id="admin-kelas-pilih-guru" style="margin:0;"><option value="">-- Guru Utama 1 --</option></select>
@@ -546,7 +552,10 @@
 
         <div id="tab-admin-murid" class="tab-content">
             <div class="card">
-                <div class="section-title">Database Murid</div>
+                <div class="section-title" style="justify-content: space-between;">
+    <span>Database Murid</span>
+    <button onclick="hapusSemua('Murid')" style="background:#FEF2F2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; box-shadow:none; border-radius:8px;">🗑️ Hapus Semua</button>
+</div>
                 <label>Pilih Kelas:</label>
                 <select id="admin-pilih-halaqah" onchange="renderTabelSantriAdmin()"></select>
                 <label style="margin-top:10px;">Paste/Input Nama (Format: NIS - Nama):</label>
@@ -1651,6 +1660,33 @@
             } 
         }
 
+    async function hapusSemua(sh) { 
+            let keyword = sh === 'Guru' ? 'SEMUA GURU' : (sh === 'Kelas' ? 'SEMUA KELAS' : 'SEMUA MURID');
+            let konfirmasi = prompt(`⚠️ PERINGATAN BAHAYA!\nAnda akan menghapus ${keyword} secara permanen dari database.\n\nKetik kata "HAPUS" (huruf besar semua) untuk melanjutkan:`);
+            
+            if(konfirmasi === 'HAPUS') {
+                try {
+                    let res;
+                    if(sh === 'Guru') { 
+                        res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=not.is.null`, { method: 'DELETE', headers: REQ_HEADERS }); 
+                    } 
+                    else if(sh === 'Kelas') { 
+                        res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=not.is.null`, { method: 'DELETE', headers: REQ_HEADERS }); 
+                    } 
+                    else if(sh === 'Murid') { 
+                        res = await fetch(`${SUPABASE_URL}/rest/v1/murid?nama_murid=not.is.null`, { method: 'DELETE', headers: REQ_HEADERS }); 
+                    } 
+                    
+                    if(!res.ok) throw new Error(); 
+                    alert(`✅ ${keyword} berhasil dikosongkan!`); 
+                    location.reload(); 
+                } catch(e) { 
+                    alert("❌ Gagal menghapus masal! Pastikan koneksi internet stabil."); 
+                }
+            } else if (konfirmasi !== null) {
+                alert("Batal menghapus. Kata kunci pengaman salah.");
+            }
+        }
         async function editGuru(namaLama) { 
             let n = prompt("Ubah Nama Guru:", namaLama); 
             if(n && n.trim() !== "" && n !== namaLama) { 
