@@ -8,7 +8,7 @@
     <script>
         window.onerror = function(msg) {
             var loading = document.getElementById('teks-loading');
-            if(loading) loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:14px;">🚨 ERROR KODE!<br>Ada masalah pada mesin JavaScript.</span>';
+            if(loading) loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:14px;">🚨 ERROR KODE!<br>Pastikan antum sudah menjalankan perintah SQL untuk menambahkan kolom nama_guru di tabel kelas.</span>';
         };
     </script>
 
@@ -134,7 +134,7 @@
         <div id="tab-admin-guru" class="tab-content active">
             <div class="card">
                 <div class="section-title">Database Guru</div>
-                <div style="display:flex; gap:10px;"><input type="text" id="nama-muhaffiz-baru" placeholder="Ketik nama guru..." style="margin:0;"><button onclick="tambahGuru()" style="width:60px; margin:0; font-size:20px;">+</button></div>
+                <div style="display:flex; gap:10px;"><input type="text" id="nama-muhaffiz-baru" placeholder="Ketik nama guru..." style="margin:0;"><button id="btn-tambah-guru" onclick="tambahGuru()" style="width:60px; margin:0; font-size:20px;">+</button></div>
                 <label style="margin-top:8px; font-size:11px; text-transform:none;">Sandi bawaan: <b style="color:var(--emerald-logo);">guru123</b></label>
                 <div id="tabel-guru" style="margin-top:20px;"></div>
             </div>
@@ -144,9 +144,12 @@
             <div class="card">
                 <div class="section-title">Database Kelas</div>
                 <label>1. Tetapkan Guru Pengampu Kelas:</label>
-                <select id="admin-kelas-pilih-guru" style="margin-bottom: 10px;"><option value="">-- Pilih Guru --</option></select>
+                <div style="display:flex; gap:10px; margin-bottom: 10px;">
+                    <select id="admin-kelas-pilih-guru" style="margin:0;"><option value="">-- Guru 1 --</option></select>
+                    <select id="admin-kelas-pilih-guru-2" style="margin:0;"><option value="">-- Guru 2 (Ops) --</option></select>
+                </div>
                 <label>2. Masukkan Nama Kelas:</label>
-                <div style="display:flex; gap:10px;"><input type="text" id="nama-halaqah-baru" placeholder="Ketik nama kelas..." style="margin:0;"><button onclick="tambahHalaqah()" style="width:60px; margin:0; font-size:20px;">+</button></div>
+                <div style="display:flex; gap:10px;"><input type="text" id="nama-halaqah-baru" placeholder="Ketik nama kelas..." style="margin:0;"><button id="btn-tambah-kelas" onclick="tambahHalaqah()" style="width:60px; margin:0; font-size:20px;">+</button></div>
                 <div id="tabel-halaqah" style="margin-top:20px;"></div>
             </div>
         </div>
@@ -156,12 +159,20 @@
                 <div class="section-title">Database Murid</div>
                 <label>Pilih Kelas:</label><select id="admin-pilih-halaqah" onchange="renderTabelSantriAdmin()"></select>
                 <label style="margin-top:10px;">Paste Nama Murid Masal:</label>
-                <div style="display:flex; gap:10px;"><textarea id="data-santri-baru" placeholder="Satu baris satu nama..." style="margin:0; height:80px;"></textarea><button onclick="tambahSantri()" style="width:60px; margin:0; font-size:20px;">+</button></div>
+                <div style="display:flex; gap:10px;"><textarea id="data-santri-baru" placeholder="Satu baris satu nama..." style="margin:0; height:80px;"></textarea><button id="btn-tambah-murid" onclick="tambahSantri()" style="width:60px; margin:0; font-size:20px;">+</button></div>
                 <div id="tabel-santri" style="margin-top:20px;"></div>
             </div>
         </div>
 
         <div id="tab-admin-data" class="tab-content">
+            <div class="card" style="background:#F0FDF4; border:2px solid var(--emerald-logo);">
+                <div class="section-title">Import Data Excel</div>
+                <p style="font-size: 13px; color: var(--text-mute); font-weight: 600; margin-bottom: 15px;">Solusi cepat memasukkan puluhan nama Guru & Murid sekaligus.</p>
+                <button onclick="unduhTemplate()" style="background:#ECFDF5; color:#047857; border:2px solid #059669; margin-bottom:15px; box-shadow:none;">📥 1. Unduh Template</button>
+                <label>2. Unggah Template Terisi:</label>
+                <input type="file" id="file-import-excel" accept=".xlsx, .xls">
+                <button onclick="prosesImportExcel()" id="btn-proses-import">🚀 3. Jalankan Import</button>
+            </div>
             <div class="card">
                 <div class="section-title" style="color:var(--gold-accent);">Cetak Laporan</div>
                 <button onclick="bukaModalLaporan()" style="background: linear-gradient(135deg, #FBBF24, #D97706);">🖨️ Buka Menu Laporan</button>
@@ -298,14 +309,18 @@
 
         <div id="tab-guru-penghubung" class="tab-content">
             <div class="card">
-                <div class="section-title">💬 Buku Penghubung</div>
+                <div class="section-title" style="justify-content:space-between; align-items:center;">
+                    <span style="display:flex; align-items:center; gap:10px;">💬 Buku Penghubung</span>
+                    <button id="btn-refresh-guru" onclick="muatUlangPesan('Guru')" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Tarik Pesan</button>
+                </div>
+
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                     <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
-                    <select id="chat-guru-santri" onchange="renderChat('Guru')"><option value="">-- Murid --</option></select>
+                    <select id="chat-guru-santri" onchange="muatUlangPesan('Guru')"><option value="">-- Murid --</option></select>
                 </div>
                 <div class="chat-box" id="chat-box-guru"></div>
                 <div style="display:flex; gap:10px; align-items: flex-end;">
-                    <textarea id="input-pesan-guru" placeholder="Ketik pesan panjang di sini..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
+                    <textarea id="input-pesan-guru" placeholder="Ketik pesan untuk Orang Tua..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
                     <button id="btn-kirim-guru" onclick="kirimPesan('Guru')" style="width:80px; margin:0; padding:12px;">Kirim</button>
                 </div>
             </div>
@@ -364,10 +379,14 @@
         
         <div id="tab-ortu-penghubung" class="tab-content">
             <div class="card">
-                <div class="section-title">💬 Buku Penghubung</div>
+                <div class="section-title" style="justify-content:space-between; align-items:center;">
+                    <span style="display:flex; align-items:center; gap:10px;">💬 Buku Penghubung</span>
+                    <button id="btn-refresh-ortu" onclick="muatUlangPesan('Ortu')" style="background:var(--emerald-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Tarik Pesan</button>
+                </div>
+
                 <div class="chat-box" id="chat-box-ortu"></div>
                 <div style="display:flex; gap:10px; align-items: flex-end;">
-                    <textarea id="input-pesan-ortu" placeholder="Ketik pesan panjang di sini..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
+                    <textarea id="input-pesan-ortu" placeholder="Tulis pesan panjang untuk Ustadz/ah di sini..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
                     <button id="btn-kirim-ortu" onclick="kirimPesan('Ortu')" style="width:80px; margin:0; padding:12px;">Kirim</button>
                 </div>
             </div>
@@ -402,8 +421,10 @@
 
         window.onload = () => {
             let wp = getSafeStorage('wp'); if(wp) setWallpaper(wp);
+            
             let tzoffset = (new Date()).getTimezoneOffset() * 60000; 
-            let ds = (new Date(Date.now() - tzoffset)).toISOString().split('T')[0]; 
+            let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+            let ds = localISOTime.split('T')[0]; 
             document.querySelectorAll('input[type="date"]').forEach(e => e.value = ds);
             
             ['tajwid', 'lancar', 'makhraj'].forEach(id => {
@@ -452,6 +473,7 @@
             else { document.getElementById('login-page').classList.remove('hidden'); }
         }
 
+        // --- RAW FETCH API ---
         async function tarikDataServer() {
             try {
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc'];
@@ -463,7 +485,10 @@
                 (rG || []).forEach(g => { dAkun.push(g.nama_guru); window.akunSandiMap[g.nama_guru] = g.sandi; });
 
                 dbP = {}; dbKelasGuru = {};
-                (rK || []).forEach(k => { dbP[k.nama_kelas] = []; dbKelasGuru[k.nama_kelas] = k.nama_guru || ''; });
+                (rK || []).forEach(k => { 
+                    dbP[k.nama_kelas] = []; 
+                    dbKelasGuru[k.nama_kelas] = k.nama_guru || ''; 
+                });
                 (rM || []).forEach(m => { if(dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); });
 
                 dRiw = (rS || []).map(r => ({tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
@@ -485,58 +510,87 @@
                 setTimeout(() => { document.getElementById('splash-screen').classList.add('fade-out'); setTimeout(()=> { document.getElementById('splash-screen').style.display = 'none'; cekSesiAplikasi(); }, 800); }, 300);
 
             } catch(e) {
-                document.getElementById('teks-loading').innerHTML = '<span style="color:#EF4444; font-weight:800;">🚨 Gagal Memuat Data! Cek Koneksi Internet.</span>';
+                document.getElementById('teks-loading').innerHTML = '<span style="color:#EF4444; font-weight:800;">🚨 Gagal Konek ke Database Supabase!</span>';
             }
         }
 
         function renderLogins() { 
             let s = document.getElementById('select-muhaffiz'); s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; dAkun.forEach(n => s.appendChild(new Option(n, n))); 
-            let cG = document.getElementById('admin-kelas-pilih-guru'); if(cG) { cG.innerHTML = '<option value="">-- Pilih Guru Pengampu --</option>'; dAkun.forEach(n => cG.appendChild(new Option(n, n))); }
+            let cG1 = document.getElementById('admin-kelas-pilih-guru'); if(cG1) { cG1.innerHTML = '<option value="">-- Guru Utama --</option>'; dAkun.forEach(n => cG1.appendChild(new Option(n, n))); }
+            let cG2 = document.getElementById('admin-kelas-pilih-guru-2'); if(cG2) { cG2.innerHTML = '<option value="">-- Guru Pendamping (Opsional) --</option>'; dAkun.forEach(n => cG2.appendChild(new Option(n, n))); }
         }
         
         function renderHalaqahDropdowns() { 
             let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
             
-            // Khusus Guru (Difilter sesuai kelas miliknya)
+            // Filter Kelas Khusus Guru Pengampu Saja
             let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
             idsGuru.forEach(id => { 
                 let s = document.getElementById(id); 
                 if(s) { 
                     s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
                     for(let h in dbP) {
-                        if(!isGuru || dbKelasGuru[h] === guruAktif) s.appendChild(new Option(h, h)); 
+                        let gurunya = dbKelasGuru[h] || '';
+                        // Jika role ortu/admin, atau jika role guru dan namanya ada di database kelas
+                        if(!isGuru || gurunya.includes(guruAktif)) {
+                            s.appendChild(new Option(h, h)); 
+                        }
                     }
                 }
             }); 
 
-            // Khusus Admin & Ortu (Lihat Semua)
+            // Kelas Lengkap untuk Admin dan Ortu
             let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
             idsBebas.forEach(id => { 
                 let s = document.getElementById(id); 
-                if(s) { 
-                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
-                    for(let h in dbP) s.appendChild(new Option(h, h)); 
-                }
+                if(s) { s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); }
             }); 
         }
 
         function updateDropdownSantriModul(prefix) {
-            let h = document.getElementById(prefix+'-kelas') ? document.getElementById(prefix+'-kelas').value : document.getElementById(prefix+'-pilih-halaqah').value;
-            let sId = document.getElementById(prefix+'-santri') ? prefix+'-santri' : prefix+'-pilih-santri';
+            let h = document.getElementById(prefix+'-pilih-halaqah') ? document.getElementById(prefix+'-pilih-halaqah').value : document.getElementById(prefix+'-kelas').value;
+            let sId = document.getElementById(prefix+'-pilih-santri') ? prefix+'-pilih-santri' : prefix+'-santri';
             let s = document.getElementById(sId);
             s.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
             if(h && dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n, n))); 
-            if(prefix.includes('chat')) document.getElementById('chat-box-'+(prefix==='chat-guru'?'guru':'ortu')).innerHTML = '';
+            
+            if(prefix === 'chat-guru') {
+                document.getElementById('chat-box-guru').innerHTML = '';
+            }
         }
 
-        function updateChatGuruSantri() { updateDropdownSantriModul('chat-guru'); }
+        // --- SISTEM BUKU PENGHUBUNG CHAT MULTI-BARIS & AUTO REFRESH ---
+        function updateChatGuruSantri() {
+            updateDropdownSantriModul('chat-guru');
+        }
 
-        // --- SISTEM CHAT BUBBLE ---
-        function renderChat(role) {
-            let h = role === 'Guru' ? document.getElementById('chat-guru-kelas').value : document.getElementById('ortu-pilih-halaqah').value;
-            let s = role === 'Guru' ? document.getElementById('chat-guru-santri').value : document.getElementById('ortu-pilih-santri').value;
-            let box = document.getElementById('chat-box-' + role.toLowerCase());
+        async function muatUlangPesan(role) {
+            let btn = document.getElementById('btn-refresh-' + role.toLowerCase());
+            let oldHTML = btn.innerHTML;
+            if(btn) { btn.innerHTML = "⏳"; btn.disabled = true; }
             
+            try {
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan?select=*&order=id.asc`, {headers: REQ_HEADERS});
+                if(res.ok) {
+                    dPesan = await res.json();
+                    renderChat(role);
+                }
+            } catch(e) { } 
+            
+            if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
+        }
+
+        function renderChat(role) {
+            let s, h;
+            if(role === 'Guru') {
+                h = document.getElementById('chat-guru-kelas').value;
+                s = document.getElementById('chat-guru-santri').value;
+            } else {
+                h = document.getElementById('ortu-pilih-halaqah').value;
+                s = document.getElementById('ortu-pilih-santri').value;
+            }
+            
+            let box = document.getElementById('chat-box-' + role.toLowerCase());
             if(!s || !h) { box.innerHTML = ''; return; }
 
             let html = '';
@@ -550,8 +604,14 @@
             filteredPesan.forEach(p => {
                 let isMyMessage = (p.pengirim === role);
                 let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
+                // Escape newline to <br> so it renders correctly in HTML
                 let msgStr = p.isi_pesan ? p.isi_pesan.toString().replace(/\n/g, '<br>') : "";
-                html += `<div class="chat-bubble ${bubbleClass}">${msgStr}<span class="chat-meta">${p.waktu} • ${p.pengirim}</span></div>`;
+                html += `
+                    <div class="chat-bubble ${bubbleClass}">
+                        ${msgStr}
+                        <span class="chat-meta">${p.waktu} • ${p.pengirim}</span>
+                    </div>
+                `;
             });
             
             box.innerHTML = html;
@@ -559,26 +619,44 @@
         }
 
         async function kirimPesan(role) {
-            let h = role === 'Guru' ? document.getElementById('chat-guru-kelas').value : document.getElementById('ortu-pilih-halaqah').value;
-            let s = role === 'Guru' ? document.getElementById('chat-guru-santri').value : document.getElementById('ortu-pilih-santri').value;
-            let msgInput = document.getElementById('input-pesan-' + role.toLowerCase());
+            let h, s, msgInput;
+            if(role === 'Guru') {
+                h = document.getElementById('chat-guru-kelas').value;
+                s = document.getElementById('chat-guru-santri').value;
+                msgInput = document.getElementById('input-pesan-guru');
+            } else {
+                h = document.getElementById('ortu-pilih-halaqah').value;
+                s = document.getElementById('ortu-pilih-santri').value;
+                msgInput = document.getElementById('input-pesan-ortu');
+            }
+
             let msg = msgInput.value.trim();
 
             if(!h || !s) return alert("Pilih Kelas dan Murid terlebih dahulu!");
             if(!msg) return alert("Pesan tidak boleh kosong!");
 
             let btn = document.getElementById('btn-kirim-' + role.toLowerCase());
-            let oldText = btn.innerText; btn.innerText = "⏳"; btn.disabled = true;
+            let oldText = btn.innerText; 
+            btn.innerText = "⏳"; 
+            btn.disabled = true;
 
             let wkt = new Date().toLocaleString('id-ID', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 
             try {
                 let pay = { waktu: wkt, kelas: h, nama_murid: s, pengirim: role, isi_pesan: msg };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error();
+
+                if(!res.ok) throw new Error("Gagal menyimpan ke database");
                 
-                dPesan.push(pay); msgInput.value = ''; renderChat(role);
-            } catch(e) { alert("GAGAL MENGIRIM! Periksa koneksi."); } finally { btn.innerText = oldText; btn.disabled = false; }
+                dPesan.push(pay);
+                msgInput.value = '';
+                renderChat(role);
+            } catch(e) {
+                alert("GAGAL MENGIRIM PESAN!\nPastikan tabel 'pesan' sudah ada di Supabase.");
+            } finally {
+                btn.innerText = oldText; 
+                btn.disabled = false;
+            }
         }
 
 
@@ -605,23 +683,26 @@
             try { 
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/guru`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n, sandi: 'guru123'}) }); 
                 if(!res.ok) throw new Error(); dAkun.push(n); document.getElementById('nama-muhaffiz-baru').value = ''; renderTabelAdmin(); 
-            } catch(e) { alert("Gagal!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
+            } catch(e) { alert("Gagal menyimpan!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
         }
 
         async function tambahHalaqah() { 
             let d = document.getElementById('nama-halaqah-baru').value.trim(); 
-            let g = document.getElementById('admin-kelas-pilih-guru').value;
-            if(!d || !g) return alert("⚠️ Pilih Guru Pengampu dan Ketik Nama Kelas!"); 
+            let g1 = document.getElementById('admin-kelas-pilih-guru').value;
+            let g2 = document.getElementById('admin-kelas-pilih-guru-2').value;
+            if(!d || !g1) return alert("⚠️ Pilih minimal Guru Utama dan Ketik Nama Kelas!"); 
             
+            let gabunganGuru = [g1, g2].filter(x => x).join(', ');
             let lines = d.split('\n'); let arr = []; let added = false; 
+            
             let btn = document.getElementById('btn-tambah-kelas'); if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             try {
-                lines.forEach(n => { let nm = n.trim(); if(nm !== "" && !dbP[nm]) { arr.push({nama_kelas: nm, nama_guru: g}); dbP[nm] = []; dbKelasGuru[nm] = g; added = true; } });
+                lines.forEach(n => { let nm = n.trim(); if(nm !== "" && !dbP[nm]) { arr.push({nama_kelas: nm, nama_guru: gabunganGuru}); dbP[nm] = []; dbKelasGuru[nm] = gabunganGuru; added = true; } });
                 if(arr.length > 0) { 
                     let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
                     if(!res.ok) throw new Error(); document.getElementById('nama-halaqah-baru').value = ''; renderTabelAdmin(); 
                 } else if (!added && lines.length > 0) alert("⚠️ Kelas sudah ada!");
-            } catch(e) { alert("Gagal!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
+            } catch(e) { alert("Gagal menyimpan!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
         }
 
         async function tambahSantri() { 
@@ -635,7 +716,7 @@
                     let res = await fetch(`${SUPABASE_URL}/rest/v1/murid`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
                     if(!res.ok) throw new Error(); document.getElementById('data-santri-baru').value = ''; renderTabelSantriAdmin(); 
                 }
-            } catch(e) { alert("Gagal!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
+            } catch(e) { alert("Gagal menyimpan!"); } finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
         }
 
         async function hapusMaster(id, sh) { 
@@ -651,13 +732,13 @@
         }
 
         async function editGuru(namaLama) { let n = prompt("Ubah Nama Guru:", namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { let res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_guru: n.trim()}) }); if(!res.ok) throw new Error(); let i = dAkun.indexOf(namaLama); if(i>-1) dAkun[i] = n.trim(); renderTabelAdmin(); } catch(e){ alert("Error"); } } }
-        async function editHalaqah(namaLama) { alert("Untuk mengubah kelas, silakan hapus dan buat yang baru agar relasi Guru Pengampu tetap rapi."); }
+        async function editHalaqah(namaLama) { alert("Untuk mengubah Pengampu Kelas, silakan hapus dan buat ulang kelasnya agar pembagian guru di database tetap bersih."); }
         async function editSantri(halaqah, namaLama) { let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); if(n && n.trim() !== "" && n !== namaLama) { try { let res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(halaqah)}&nama_murid=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_murid: n.trim()}) }); if(!res.ok) throw new Error(); let idx = dbP[halaqah].indexOf(namaLama); if(idx > -1) dbP[halaqah][idx] = n.trim(); renderTabelSantriAdmin(); } catch(e){ alert("Error"); } } }
 
         function renderTabelAdmin() {
             let g = '', h = '';
             dAkun.forEach(n => { const escapedName = n.replace(/'/g, "\\'"); g += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editGuru('${escapedName}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${escapedName}','Guru')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; });
-            for(let n in dbP) { const escapedHalaqah = n.replace(/'/g, "\\'"); h += `<div class="list-card"><div><div class="history-meta">Guru: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; }
+            for(let n in dbP) { const escapedHalaqah = n.replace(/'/g, "\\'"); h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Pengampu: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; }
             document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
             renderTabelSantriAdmin(); renderHalaqahDropdowns();
         }
@@ -734,18 +815,21 @@
         
         function updateSantriOrtu() { 
             let h = document.getElementById('ortu-pilih-halaqah').value, s = document.getElementById('ortu-pilih-santri'); 
-            s.innerHTML='<option value="">-- Pilih Ananda --</option>'; (dbP[h]||[]).forEach(n => s.appendChild(new Option(n,n))); 
+            s.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
+            if(dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n,n))); 
+            
             document.getElementById('ortu-kartuPrestasi').style.display = 'none'; document.getElementById('list-ortu-quran').innerHTML = ''; 
             if(h) renderLeaderboard(h); else document.getElementById('ortu-leaderboard').style.display = 'none'; 
             
             let sc = document.getElementById('chat-ortu-santri'); 
-            if(sc) { sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; (dbP[h]||[]).forEach(n => sc.appendChild(new Option(n,n))); }
+            if(sc) { sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; if(dbP[h]) dbP[h].forEach(n => sc.appendChild(new Option(n,n))); }
             document.getElementById('chat-box-ortu').innerHTML = '';
         }
 
         function renderLeaderboard(halaqah) {
             let lb = document.getElementById('ortu-leaderboard'), list = document.getElementById('leaderboard-list'), santris = dbP[halaqah] || [];
             
+            // PERBAIKAN: Judul Dinamis
             document.getElementById('teks-judul-leaderboard').innerText = "Bintang Hafalan - " + halaqah;
 
             let scores = santris.map(nama => {
@@ -767,7 +851,7 @@
             let ws = document.getElementById('wadah-sertif-ortu'); ws.innerHTML = '';
             
             let sc = document.getElementById('chat-ortu-santri');
-            if(sc) { sc.value = s; renderChat('Ortu'); }
+            if(sc) { sc.value = s; muatUlangPesan('Ortu'); }
 
             if(p) { 
                 setJuzUI(p.juz, true); 
