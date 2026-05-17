@@ -1113,7 +1113,15 @@
                 s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; 
                 dAkun.forEach(n => s.appendChild(new Option(n, n))); 
             }
-            
+            function renderHalaqahDropdowns() { 
+            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
+            let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
+            idsGuru.forEach(id => { let s = document.getElementById(id); if(s) { s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) { let gurunya = dbKelasGuru[h] || ''; if(!isGuru || gurunya.includes(guruAktif)) { s.appendChild(new Option(h, h)); } } } }); 
+            let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
+            idsBebas.forEach(id => { let s = document.getElementById(id); if(s) { s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); } }); 
+            let sSiar = document.getElementById('siar-pilih-kelas');
+            if(sSiar && isGuru) { sSiar.innerHTML = '<option value="GLOBAL">SEMUA KELAS (GLOBAL)</option>'; for(let h in dbP) { let gurunya = dbKelasGuru[h] || ''; if(gurunya.includes(guruAktif)) sSiar.appendChild(new Option(h, h)); } }
+        }
             for(let i=1; i<=5; i++) {
                 let id = i === 1 ? 'admin-kelas-pilih-guru' : `admin-kelas-pilih-guru-${i}`;
                 let cG = document.getElementById(id); 
@@ -1745,20 +1753,27 @@
             if(sa && sk && sa !== sk) { aya = "Penuh"; sa = sa + " s/d " + sk; } 
             else { 
                 let aw = document.getElementById('input-ayat-awal').value, ak = document.getElementById('input-ayat-akhir').value; 
-                if(!aw || !ak) return alert("Pilih ayat!"); 
-                aya = aw === ak ? aw : aw + "-" + ak; 
+                if(!aw || !ak) return alert("Pilih ayat!"); aya = aw === ak ? aw : aw + "-" + ak; 
             }
             
             let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
             try {
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); 
+                
+                if(!res.ok) {
+                    let errStr = await res.text();
+                    throw new Error(errStr); // Lempar error aslinya!
+                }
                 
                 alert("✅ Data Setoran Tersimpan!"); 
-                await muatUlangDataDiamDiam();
+                await muatUlangDataDiamDiam(); 
                 tampilkanKartuPrestasi();
-            } catch(e) { alert("⚠️ Gagal menyambung ke Supabase."); } finally { btn.innerText = old; btn.disabled = false; }
+            } catch(e) { 
+                alert("⚠️ GAGAL MENYIMPAN!\n\nAlasan Asli:\n" + e.message); 
+            } finally { 
+                btn.innerText = old; btn.disabled = false; 
+            }
         }
         
         async function simpanModulLain(modul) {
