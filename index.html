@@ -1644,10 +1644,13 @@
                     });
                     if(!res.ok) throw new Error();
                     alert("✅ Riwayat berhasil dihapus!");
-                    location.reload(); 
-                } catch(e) {
-                    alert("❌ Gagal menghapus riwayat!");
-                }
+                    await muatUlangDataDiamDiam();
+                    if(tabel === 'setoran') { tampilkanKartuPrestasi(); }
+                    else { 
+                        let idPrefix = tabel === 'aisar' ? 'aisar' : (tabel === 'hadits' ? 'hadits' : 'kosakata');
+                        // Update riwayatnya (Logika sama dengan simpanModulLain di atas)
+                    } 
+               
             }
         }
 
@@ -1702,7 +1705,29 @@
             document.getElementById('p-lanjut').className = 'status-pill ' + (s === 'Lanjut' ? 'active' : ''); 
             document.getElementById('p-ulang').className = 'status-pill ' + (s === 'Ulangi' ? 'active-danger' : ''); 
         }
-        
+        async function muatUlangDataDiamDiam() {
+            try {
+                const endpoints = ['setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc'];
+                const responses = await Promise.all(endpoints.map(ep => fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS}).then(res => res.ok ? res.json() : []).catch(() => [])));
+                
+                const [rS, rA, rH, rKo] = responses;
+                const safe = arr => Array.isArray(arr) ? arr : [];
+
+                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
+                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+
+                dProg = {};
+                for(let i = dRiw.length-1; i >= 0; i--) {
+                    let r = dRiw[i];
+                    if(r.status === 'Lanjut' && r.jenis === 'Ziyadah') {
+                        dProg[r.santri] = { juz: r.juz, surah: r.surah, ayat: r.ayat };
+                    }
+                }
+            } catch (e) { console.error("Gagal refresh data diam-diam"); }
+        }
+    
         async function simpanSetoran() {
             let h = document.getElementById('muhaffiz-pilih-halaqah').value;
             let s = document.getElementById('muhaffiz-pilih-santri').value;
@@ -1723,7 +1748,10 @@
             try {
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Setoran Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error(); 
+                alert("✅ Data Setoran Tersimpan!"); 
+                await muatUlangDataDiamDiam(); 
+                tampilkanKartuPrestasi();
             } catch(e) { alert("⚠️ Gagal menyambung ke Supabase."); } finally { btn.innerText = old; btn.disabled = false; }
         }
         
@@ -1734,7 +1762,21 @@
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error(); 
+                alert("✅ Data Tersimpan!"); 
+                await muatUlangDataDiamDiam();
+                if (modul === 'aisar' || modul === 'hadits' || modul === 'kosakata') {
+                    // Update list riwayat di modul tersebut
+                    let s = document.getElementById(modul+'-pilih-santri').value;
+                    let targetDiv = document.getElementById('riwayat-'+modul);
+                    if(targetDiv && s) {
+                        let arrData = modul === 'aisar' ? dRiwA : (modul === 'hadits' ? dRiwH : dRiwK);
+                        let ikon = modul === 'aisar' ? '📘' : (modul === 'hadits' ? '📜' : '🔤');
+                        let h = '';
+                        arrData.filter(i => i.santri === s).slice(0,5).forEach(i => { h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900;">${i.status}</div><button onclick="hapusRiwayat(${i.id}, '${modul}')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ Batal</button></div></div>`; });
+                        targetDiv.innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat.</p></div>';
+                    }
+                }
             } catch(e) { alert("⚠️ Gagal menyimpan."); } finally { btn.innerText = old; btn.disabled = false; }
         }
 
