@@ -758,7 +758,13 @@
                 <div id="box-pesan-ortu">
                     <div class="section-title" style="justify-content:space-between; align-items:center;">
                         <span style="display:flex; align-items:center; gap:10px;">💬 Buku Penghubung</span>
-                        <button onclick="muatUlangPesanOrtu()" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Refresh</button>
+                        <div style="display:flex; gap:5px;">
+    <button onclick="bersihkanChat('Ortu')" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🗑️ Bersihkan</button>
+    <div style="display:flex; gap:5px;">
+    <button onclick="bersihkanChat('Ortu')" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🗑️ Bersihkan</button>
+    <button onclick="muatUlangPesanOrtu()" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Refresh</button>
+</div>
+</div>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                         <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
@@ -774,9 +780,12 @@
                 <div id="box-pesan-forum" style="display:none;">
                     <div class="section-title" style="justify-content:space-between; align-items:center;">
                         <span style="display:flex; align-items:center; gap:10px; color:#4F46E5;">👨‍🏫 Forum Diskusi Guru</span>
-                        <button onclick="muatUlangForum()" style="background:#4F46E5; color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Refresh</button>
+                        
                     </div>
-                    <p style="font-size:12px; color:var(--text-mute); font-weight:600; line-height:1.4; margin-bottom:15px; margin-top:0;">Ruang ngobrol khusus Ustadz/ah. Pesan tidak akan dibaca oleh wali murid.</p>
+                    <p style="font-si<div style="display:flex; gap:5px;">
+    <button onclick="bersihkanChat('Forum')" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🗑️ Bersihkan</button>
+    <button onclick="muatUlangForum()" style="background:#4F46E5; color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Refresh</button>
+</div>e:12px; color:var(--text-mute); font-weight:600; line-height:1.4; margin-bottom:15px; margin-top:0;">Ruang ngobrol khusus Ustadz/ah. Pesan tidak akan dibaca oleh wali murid.</p>
                     <div class="chat-box" id="chat-box-forum" style="background:#EEF2FF; border-color:#C7D2FE;"></div>
                     <div style="display:flex; gap:10px; align-items: flex-end;">
                         <textarea id="input-pesan-forum" placeholder="Tuliskan ide/diskusi ustadz/ah di sini..." style="margin:0; resize:vertical; flex:1; height:60px; border-color:#C7D2FE;" rows="3"></textarea>
@@ -1069,8 +1078,8 @@
                 dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
                 dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
                 dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
-                dPesan = safe(rP).map(r => ({waktu: r.waktu, kelas: r.kelas, nama_murid: r.nama_murid, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
-                dForum = safe(rF).map(r => ({waktu: r.waktu, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
+                dPesan = safe(rP).map(r => ({id: r.id, waktu: r.waktu, kelas: r.kelas, nama_murid: r.nama_murid, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
+                dForum = safe(rF).map(r => ({id: r.id, waktu: r.waktu, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
 
                 dProg = {};
                 for(let i = dRiw.length-1; i >= 0; i--) {
@@ -1266,20 +1275,28 @@
             let s = isGuru ? document.getElementById('chat-guru-santri')?.value : document.getElementById('ortu-pilih-santri')?.value;
             
             let box = document.getElementById(isGuru ? 'chat-box-guru' : 'chat-box-ortu');
-            if(!box) return;
-            if(!s || !h) { box.innerHTML = ''; return; }
-
+            if(!box) return; if(!s || !h) { box.innerHTML = ''; return; }
             let html = '';
-            let filteredPesan = dPesan.filter(p => 
-                (p.kelas === h && p.nama_murid === s) || 
-                (!isGuru && p.kelas === 'GLOBAL' && p.nama_murid === 'SEMUA') ||
-                (!isGuru && p.kelas === h && p.nama_murid === 'SEMUA')
-            );
             
-            if(filteredPesan.length === 0) {
-                box.innerHTML = `<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:50px;">Belum ada pesan.<br>Mulai percakapan sekarang.</p>`;
-                return;
-            }
+            let filteredPesan = dPesan.filter(p => (p.kelas === h && p.nama_murid === s) || (!isGuru && p.kelas === 'GLOBAL' && p.nama_murid === 'SEMUA') || (!isGuru && p.kelas === h && p.nama_murid === 'SEMUA'));
+            if(filteredPesan.length === 0) { box.innerHTML = `<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:50px;">Belum ada pesan.<br>Mulai percakapan sekarang.</p>`; return; }
+            
+            filteredPesan.forEach(p => {
+                let isGlobal = p.nama_murid === 'SEMUA';
+                let isMyMessage = (p.pengirim === role);
+                
+                // Guru bisa hapus semua pesan di kelas. Ortu hanya pesan miliknya.
+                let bisaHapus = isGuru || isMyMessage;
+                let tombolHapus = bisaHapus && p.id ? `<span onclick="hapusPesanObrolan(${p.id}, 'pesan')" style="cursor:pointer; color:#EF4444; margin-left:8px;" title="Hapus Pesan">🗑️</span>` : '';
+
+                let bubbleClass = isGlobal ? 'chat-global' : (isMyMessage ? 'chat-me' : 'chat-other'); 
+                let icon = isGlobal ? '📢 ' : ''; 
+                let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
+                
+                html += `<div class="chat-bubble ${bubbleClass}">${icon}${safeMsg}<span class="chat-meta">${p.waktu} • ${isGlobal ? 'Pengumuman' : p.pengirim} ${tombolHapus}</span></div>`;
+            });
+            box.innerHTML = html; box.scrollTop = box.scrollHeight;
+        }
 
             filteredPesan.forEach(p => {
                 let isGlobal = p.nama_murid === 'SEMUA';
@@ -1351,13 +1368,21 @@
         }
 
         function renderForum() {
-            let box = document.getElementById('chat-box-forum');
-            if(!box) return;
-            
-            if(dForum.length === 0) {
-                box.innerHTML = `<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:50px;">Forum masih kosong.</p>`;
-                return;
-            }
+            let box = document.getElementById('chat-box-forum'); if(!box) return;
+            if(dForum.length === 0) { box.innerHTML = `<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:50px;">Forum masih kosong.</p>`; return; }
+            let html = '';
+            dForum.forEach(p => {
+                let isMyMessage = (p.pengirim === guruAktif); 
+                let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
+                let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
+                
+                // Guru hanya bisa hapus pesan miliknya sendiri di forum
+                let tombolHapus = isMyMessage && p.id ? `<span onclick="hapusPesanObrolan(${p.id}, 'forum_guru')" style="cursor:pointer; color:#EF4444; margin-left:8px;" title="Hapus Pesan">🗑️</span>` : '';
+
+                html += `<div class="chat-bubble ${bubbleClass}">${safeMsg}<span class="chat-meta">${p.waktu} • ${p.pengirim} ${tombolHapus}</span></div>`;
+            });
+            box.innerHTML = html; box.scrollTop = box.scrollHeight;
+        }
 
             let html = '';
             dForum.forEach(p => {
@@ -2038,6 +2063,56 @@
                     let gurunya = dbKelasGuru[h] || ''; 
                     if(gurunya.includes(guruAktif)) sSiar.appendChild(new Option(h, h)); 
                 } 
+            }
+        }
+    // FUNGSI HAPUS 1 PESAN
+        async function hapusPesanObrolan(id, tabel) {
+            if(confirm("Hapus pesan ini secara permanen?")) {
+                try {
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/${tabel}?id=eq.${id}`, { method: 'DELETE', headers: REQ_HEADERS });
+                    if(!res.ok) throw new Error();
+                    
+                    if(tabel === 'pesan') {
+                        dPesan = dPesan.filter(p => p.id !== id);
+                        renderChatOrtu();
+                    } else if(tabel === 'forum_guru') {
+                        dForum = dForum.filter(p => p.id !== id);
+                        renderForum();
+                    }
+                } catch(e) { alert("❌ Gagal menghapus pesan!"); }
+            }
+        }
+
+        // FUNGSI BERSIHKAN SELURUH CHAT (CLEAR CHAT)
+        async function bersihkanChat(jenis) {
+            if(jenis === 'Ortu') {
+                let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
+                let h = isGuru ? document.getElementById('chat-guru-kelas').value : document.getElementById('ortu-pilih-halaqah').value;
+                let s = isGuru ? document.getElementById('chat-guru-santri').value : document.getElementById('ortu-pilih-santri').value;
+                
+                if(!h || !s) return alert("⚠️ Pilih kelas dan murid terlebih dahulu!");
+                
+                if(confirm(`Yakin ingin MENGHAPUS SELURUH OBROLAN dengan ananda ${s}? (Pesan Siar Global tidak akan terhapus)`)) {
+                    try {
+                        let res = await fetch(`${SUPABASE_URL}/rest/v1/pesan?kelas=eq.${encodeURIComponent(h)}&nama_murid=eq.${encodeURIComponent(s)}`, { method: 'DELETE', headers: REQ_HEADERS });
+                        if(!res.ok) throw new Error();
+                        
+                        dPesan = dPesan.filter(p => !(p.kelas === h && p.nama_murid === s));
+                        renderChatOrtu();
+                        alert("✅ Obrolan berhasil dibersihkan!");
+                    } catch(e) { alert("❌ Gagal membersihkan obrolan!"); }
+                }
+            } else if(jenis === 'Forum') {
+                if(confirm("Yakin ingin MENGOSONGKAN SELURUH FORUM GURU secara permanen?")) {
+                    try {
+                        let res = await fetch(`${SUPABASE_URL}/rest/v1/forum_guru?pengirim=not.is.null`, { method: 'DELETE', headers: REQ_HEADERS });
+                        if(!res.ok) throw new Error();
+                        
+                        dForum = [];
+                        renderForum();
+                        alert("✅ Forum berhasil dikosongkan!");
+                    } catch(e) { alert("❌ Gagal mengosongkan forum!"); }
+                }
             }
         }
     </script>
