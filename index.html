@@ -652,8 +652,8 @@
 
                 <div class="section-title" style="margin-top:20px;">Batas Hafalan</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <select id="input-surah" onchange="updateMateriUI()"></select>
-                    <select id="input-surah-akhir" onchange="updateMateriUI()"></select>
+                    <select id="input-surah" onchange="updateMateriUI('Awal')"></select>
+                    <select id="input-surah-akhir" onchange="updateMateriUI('Akhir')"></select>
                 </div>
                 <div id="wadah-ayat" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <select id="input-ayat-awal"></select>
@@ -679,8 +679,8 @@
                 <div class="section-title" style="margin-top:25px;">Tindakan</div>
                 <input type="hidden" id="statusSetoran" value="Lanjut"> 
                 <div class="status-pill-group">
-                    <div id="p-lanjut" class="status-pill active" onclick="pilihStatus('Lanjut')">✅ BOLEH LANJUT</div>
-                    <div id="p-ulang" class="status-pill" onclick="pilihStatus('Ulangi')">🔄 HARUS ULANGI</div>
+                    <div id="p-lanjut" class="status-pill active" onclick="pilihStatus('Lanjut')">✅ LULUS</div>
+                    <div id="p-ulang" class="status-pill" onclick="pilihStatus('Ulangi')">🔄 ULANG</div>
                 </div>
                 
                 <button id="btn-simpan-utama" onclick="simpanSetoran()" style="margin-top:25px;">💾 SIMPAN AL-QUR'AN</button>
@@ -1013,6 +1013,23 @@
         };
 
         // --- SISTEM KOMUNIKASI DATABASE ---
+    async function muatUlangDataDiamDiam() {
+            try {
+                const endpoints = ['setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc'];
+                const responses = await Promise.all(endpoints.map(ep => fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS}).then(res => res.ok ? res.json() : []).catch(() => [])));
+                
+                const [rS, rA, rH, rKo] = responses;
+                const safe = arr => Array.isArray(arr) ? arr : [];
+
+                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
+                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+
+                dProg = {};
+                for(let i = dRiw.length-1; i >= 0; i--) { let r = dRiw[i]; if(r.status === 'Lanjut' && r.jenis === 'Ziyadah') { dProg[r.santri] = { juz: r.juz, surah: r.surah, ayat: r.ayat }; } }
+            } catch (e) { console.error("Gagal refresh data"); }
+        }
         async function tarikDataServer() {
             try {
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc', 'forum_guru?select=*&order=id.asc'];
@@ -1638,13 +1655,13 @@
         async function hapusRiwayat(id, tabel) {
             if(confirm("Hapus riwayat hafalan ini? Data yang dihapus tidak bisa dikembalikan.")) {
                 try {
-                    let res = await fetch(`${SUPABASE_URL}/rest/v1/${tabel}?id=eq.${id}`, { 
-                        method: 'DELETE', 
-                        headers: REQ_HEADERS 
-                    });
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/${tabel}?id=eq.${id}`, { method: 'DELETE', headers: REQ_HEADERS });
                     if(!res.ok) throw new Error();
+                    
+                    await muatUlangDataDiamDiam();
+                    if(tabel === 'setoran') { tampilkanKartuPrestasi(); }
+                    
                     alert("✅ Riwayat berhasil dihapus!");
-                    location.reload(); 
                 } catch(e) {
                     alert("❌ Gagal menghapus riwayat!");
                 }
@@ -1673,8 +1690,21 @@
             } 
         }
 
-        function updateMateriUI() { 
-            let a = document.getElementById('input-surah').value, b = document.getElementById('input-surah-akhir').value; 
+        function updateMateriUI(jenisTrigger) { 
+            let a = document.getElementById('input-surah').value;
+            let b = document.getElementById('input-surah-akhir').value; 
+            let selAkhir = document.getElementById('input-surah-akhir');
+            
+            if(jenisTrigger === 'Awal' && a) {
+                selAkhir.innerHTML = '<option value="">-- Surah Akhir --</option>';
+                let isPassed = false;
+                for(let k in dataSurahLengkap) {
+                    if (k === a) isPassed = true;
+                    if (isPassed) selAkhir.appendChild(new Option(k, k));
+                }
+                selAkhir.value = a; b = a;
+            }
+
             document.getElementById('wadah-ayat').style.display = (a && b && a!==b) ? 'none' : 'grid'; 
             if(a) { 
                 let aw = document.getElementById('input-ayat-awal'), ak = document.getElementById('input-ayat-akhir'); 
@@ -1723,7 +1753,11 @@
             try {
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Setoran Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error(); 
+                
+                alert("✅ Data Setoran Tersimpan!"); 
+                await muatUlangDataDiamDiam();
+                tampilkanKartuPrestasi();
             } catch(e) { alert("⚠️ Gagal menyambung ke Supabase."); } finally { btn.innerText = old; btn.disabled = false; }
         }
         
@@ -1734,7 +1768,12 @@
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); alert("✅ Data Tersimpan!"); location.reload();
+                if(!res.ok) throw new Error(); 
+                
+                alert("✅ Data Tersimpan!"); 
+                document.getElementById('in-'+modul).value = '';
+                document.getElementById('cat-'+modul).value = '';
+                await muatUlangDataDiamDiam();
             } catch(e) { alert("⚠️ Gagal menyimpan."); } finally { btn.innerText = old; btn.disabled = false; }
         }
 
@@ -1762,7 +1801,7 @@
             let h = ''; 
             dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { 
                 // MENGGABUNGKAN TOMBOL HAPUS DI SINI
-                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ Batal</button></div></div>`; 
+                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ Batal</button></div></div>`; 
             }); 
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
