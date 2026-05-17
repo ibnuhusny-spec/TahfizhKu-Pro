@@ -5,17 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TahfizhKu Pro - SDIT Qurratu A'yun Al-Islami</title>
 
-    <script>
-        window.onerror = function(msg, url, line) {
-            var loading = document.getElementById('teks-loading');
-            if(loading) {
-                loading.style.display = 'block';
-                loading.innerHTML = '<span style="color:#EF4444; font-weight:900; font-size:12px;">🚨 ERROR KODE: ' + msg + ' (Baris: ' + line + ')</span>';
-            }
-            return false;
-        };
-    </script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
