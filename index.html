@@ -644,6 +644,7 @@
                 </div>
                 <div class="grid-juz-30" id="muhaffiz-grid-juz-30"></div>
                 <input type="hidden" id="input-juz-hidden" value="">
+<button type="button" onclick="updateJuzKhusus()" style="background:#E0F2FE; color:#0284C7; font-size:12px; padding:10px; margin-top:10px; box-shadow:none; border:1px dashed #7DD3FC;">🔄 Simpan Perubahan Angka Juz Saja</button>
 
                 <div class="section-title" style="margin-top:20px;">Batas Hafalan</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1815,21 +1816,27 @@
             if(p) { 
                 setJuzUI(p.juz, false); 
                 let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; 
-                let jC = arrJuz.length; 
-                let teksJuz = arrJuz.join(', ');
+                let jC = arrJuz.length; let teksJuz = arrJuz.join(', ');
                 
                 document.getElementById('infoTotalJuz').innerText = jC; 
                 document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
-                if(jC >= 1) {
-                    ws.innerHTML = `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat Juz ${teksJuz}</button>`;
-                }
+                
+                // MENGGABUNGKAN TOMBOL SERTIFIKAT DAN TOMBOL RESET ANAK
+                let btnSertif = jC >= 1 ? `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); flex:1; font-size:12px; padding:10px; box-shadow:none;">🎓 Cetak Sertifikat</button>` : '';
+                ws.innerHTML = `<div style="display:flex; gap:10px; margin-top:15px;">
+                    ${btnSertif}
+                    <button onclick="resetRiwayatMurid('${s}')" style="background:#FEE2E2; color:#EF4444; flex:1; font-size:12px; padding:10px; box-shadow:none; border:1px solid #FCA5A5;">🗑️ Reset Data Anak Ini</button>
+                </div>`;
             } else { 
                 setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; 
+                // MUNCULKAN TOMBOL RESET WALAUPUN BELUM ADA JUZ
+                ws.innerHTML = `<button onclick="resetRiwayatMurid('${s}')" style="background:#FEE2E2; color:#EF4444; width:100%; margin-top:15px; font-size:12px; padding:10px; box-shadow:none; border:1px solid #FCA5A5;">🗑️ Reset Data Anak Ini</button>`;
             }
             
             let h = ''; 
             dRiw.filter(i => i.santri === s).forEach(i => { 
-                // MENGGABUNGKAN TOMBOL HAPUS DI SINI
+                let statusLabel = i.status === 'Lanjut' ? 'LULUS' : 'ULANG';
+                let statusColor = i.status === 'Lanjut' ? 'var(--emerald-logo)' : '#EF4444';
                 h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah} (Ayat: ${i.ayat})</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
             }); 
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
@@ -2103,6 +2110,46 @@
                     } catch(e) { alert("❌ Gagal mengosongkan forum!"); }
                 }
             }
+        }
+    // FUNGSI SIMPAN JUZ TANPA SURAH
+        async function updateJuzKhusus() {
+            let h = document.getElementById('muhaffiz-pilih-halaqah').value;
+            let s = document.getElementById('muhaffiz-pilih-santri').value;
+            if(!h || !s) return alert("Pilih kelas dan murid dulu!");
+            
+            let j = document.getElementById('input-juz-hidden').value || "-";
+            let rec = dRiw.find(i => i.santri === s && i.jenis === 'Ziyadah'); // Cari setoran ziyadah terakhir anak ini
+            
+            try {
+                if(rec) {
+                    // Update riwayat yang sudah ada secara diam-diam
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran?id=eq.${rec.id}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({ juz: j }) });
+                    if(!res.ok) throw new Error();
+                } else {
+                    // Bikin riwayat baru dummy kalau belum ada riwayat sama sekali
+                    let pay = { waktu: new Date().toLocaleDateString('id-ID'), kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: "Ziyadah", juz: j, surah: "-", ayat: "-", tajwid: 3, lancar: 3, makhraj: 3, status: "Lanjut", catatan: "Update Juz Manual" };
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                    if(!res.ok) throw new Error();
+                }
+                alert("✅ Pilihan Angka Juz berhasil diperbarui!");
+                await muatUlangDataDiamDiam();
+                tampilkanKartuPrestasi();
+            } catch(e) { alert("❌ Gagal menyimpan perubahan Juz!"); }
+        }
+
+        // FUNGSI RESET TOTAL DATA MURID
+        async function resetRiwayatMurid(nama) {
+            let h = document.getElementById('muhaffiz-pilih-halaqah').value;
+            if(!confirm(`⚠️ PERINGATAN BAHAYA!\n\nYakin ingin MENGHAPUS SELURUH RIWAYAT Al-Qur'an milik ${nama}?\n\nData akan kembali menjadi 0 (Kosong) dan tidak bisa dikembalikan.`)) return;
+            
+            try {
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran?kelas=eq.${encodeURIComponent(h)}&nama_murid=eq.${encodeURIComponent(nama)}`, { method: 'DELETE', headers: REQ_HEADERS });
+                if(!res.ok) throw new Error();
+                
+                alert(`✅ Seluruh riwayat ${nama} berhasil dihapus permanen!`);
+                await muatUlangDataDiamDiam();
+                tampilkanKartuPrestasi();
+            } catch(e) { alert("❌ Gagal mereset data!"); }
         }
     </script>
 </body>
