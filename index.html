@@ -458,6 +458,8 @@
         
         @media (max-width: 500px) { 
             .grid-juz-30 { grid-template-columns: repeat(6, 1fr); } 
+            .text-mobile { display: none; }
+            .btn-icon-mobile { width: auto; padding: 12px; }
         }
     </style>
 </head>
@@ -699,7 +701,7 @@
 
         <div id="tab-guru-hadits" class="tab-content">
             <div class="card">
-                <div class="section-title" style="color:var(--gold-accent)">📜 Hafalan Hadits</div>
+                <div class="section-title" style="color:var(--gold-accent)">📜 Hafalan Hadis</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                     <select id="hadits-pilih-halaqah" onchange="updateDropdownSantriModul('hadits')"></select>
                     <select id="hadits-pilih-santri"><option value="">-- Murid --</option></select>
@@ -713,7 +715,7 @@
                     <option value="Ulang">Perlu Diulang</option>
                 </select>
                 <label>Catatan</label><textarea id="cat-hadits" placeholder="Pesan evaluasi..."></textarea>
-                <button style="background: linear-gradient(135deg, var(--gold-light), var(--gold-accent));" onclick="simpanModulLain('hadits')">Simpan Hadits</button>
+                <button style="background: linear-gradient(135deg, #FBBF24, var(--gold-accent));" onclick="simpanModulLain('hadits')">💾 Simpan Hadis</button>
             </div>
         </div>
 
@@ -732,7 +734,7 @@
                     <option value="Proses">Sedang Dihafal</option>
                 </select>
                 <label>Catatan</label><textarea id="cat-kosakata" placeholder="Pesan evaluasi..."></textarea>
-                <button style="background: linear-gradient(135deg, var(--cerulean-light), var(--cerulean-logo));" onclick="simpanModulLain('kosakata')">Simpan Kosakata</button>
+                <button style="background: linear-gradient(135deg, #38BDF8, var(--cerulean-logo));" onclick="simpanModulLain('kosakata')">💾 Simpan Kosakata</button>
             </div>
         </div>
 
@@ -748,8 +750,8 @@
                     <div class="section-title" style="justify-content:space-between; align-items:center;">
                         <span style="display:flex; align-items:center; gap:10px;">💬 Buku Penghubung</span>
                         <div style="display:flex; gap:5px;">
-                            <button onclick="bersihkanChat('Ortu')" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🗑️ Bersihkan</button>
-                            <button onclick="muatUlangPesanOrtu()" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 Refresh</button>
+                            <button onclick="bersihkanChat('Ortu')" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🗑️ <span class="text-mobile">Bersihkan</span></button>
+                            <button onclick="muatUlangPesanOrtu()" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 <span class="text-mobile">Refresh</span></button>
                         </div>
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
@@ -759,7 +761,7 @@
                     <div class="chat-box" id="chat-box-guru"></div>
                     <div style="display:flex; gap:10px; align-items: flex-end;">
                         <textarea id="input-pesan-guru" placeholder="Ketik/Paste pesan untuk Orang Tua..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
-                        <button id="btn-kirim-guru" onclick="kirimChatOrtu('Guru')" style="width:80px; margin:0; padding:12px;">Kirim</button>
+                        <button id="btn-kirim-guru" onclick="kirimChatOrtu('Guru')" style="width:80px; margin:0; padding:12px;"class="btn-icon-mobile">🚀 <span class="text-mobile">Kirim</span></button>
                     </div>
                 </div>
 
@@ -1824,7 +1826,7 @@
             let h = ''; 
             dRiw.filter(i => i.santri === s).slice(0,5).forEach(i => { 
                 // MENGGABUNGKAN TOMBOL HAPUS DI SINI
-                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ Batal</button></div></div>`; 
+                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah} (Ayat: ${i.ayat})</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
             }); 
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
