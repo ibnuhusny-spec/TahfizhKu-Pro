@@ -1028,7 +1028,14 @@
                 dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
 
                 dProg = {};
-                for(let i = dRiw.length-1; i >= 0; i--) { let r = dRiw[i]; if(r.status === 'Lanjut' && r.jenis === 'Ziyadah') { dProg[r.santri] = { juz: r.juz, surah: r.surah, ayat: r.ayat }; } }
+                for(let i = dRiw.length-1; i >= 0; i--) {
+                    let r = dRiw[i];
+                    if(r.status === 'Lanjut') {
+                        if(!dProg[r.santri]) dProg[r.santri] = { juz: "-", surah: "-", ayat: "-" };
+                        if(r.juz) dProg[r.santri].juz = r.juz;
+                        if(r.jenis === 'Ziyadah') { dProg[r.santri].surah = r.surah; dProg[r.santri].ayat = r.ayat; }
+                    }
+                }
             } catch (e) { console.error("Gagal refresh data"); }
         }
         async function tarikDataServer() {
@@ -1832,7 +1839,20 @@
             dRiw.filter(i => i.santri === s).forEach(i => { 
                 let statusLabel = i.status === 'Lanjut' ? 'LULUS' : 'ULANG';
                 let statusColor = i.status === 'Lanjut' ? 'var(--emerald-logo)' : '#EF4444';
-                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${i.jenis}</div><div class="list-card-title">📖 ${i.surah} (Ayat: ${i.ayat})</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
+                
+                // Pembeda Desain Warna untuk Ujian Tasmi' (Warna Ungu Premium / Indigo)
+                let badge = '';
+                let gayaKartu = '';
+                
+                if(i.jenis === "Tasmi'") {
+                    badge = `<span style="color:#4F46E5; font-weight:800; font-size:11px;">🎓 UJIAN TASMI'</span>`;
+                    gayaKartu = `border-left: 5px solid #4F46E5; background: #EEF2FF; border-color: #C7D2FE;`;
+                } else {
+                    badge = i.jenis === 'Murojaah' ? `<span style="color:#0284C7; font-weight:800; font-size:11px;">🔄 MUROJA'AH</span>` : `<span style="color:#059669; font-weight:800; font-size:11px;">⭐ ZIYADAH</span>`;
+                    gayaKartu = i.jenis === 'Murojaah' ? `border-left: 5px solid #0284C7;` : `border-left: 5px solid var(--emerald-logo);`;
+                }
+
+                h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
             }); 
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
@@ -2128,7 +2148,7 @@
                 }
                 
                 // Buat Riwayat Baru khusus Tasmi' agar tercatat rapi dan indah di layar
-                let teksSurah = j === "-" ? "Batal Juz (Reset)" : "Tasmi' Juz (" + j + ")";
+                let teksSurah = j === "-" ? "Reset Pilihan Juz" : "Lulus Tasmi' Juz " + j;
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: "Tasmi'", juz: j, surah: teksSurah, ayat: "Lulus", tajwid: 5, lancar: 5, makhraj: 5, status: "Lanjut", catatan: "Ujian Tasmi'" };
                 await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
 
