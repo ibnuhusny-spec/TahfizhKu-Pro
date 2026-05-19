@@ -644,7 +644,7 @@
                 </div>
                 <div class="grid-juz-30" id="muhaffiz-grid-juz-30"></div>
                 <input type="hidden" id="input-juz-hidden" value="">
-<button type="button" onclick="updateJuzKhusus()" style="background:#E0F2FE; color:#0284C7; font-size:12px; padding:10px; margin-top:10px; box-shadow:none; border:1px dashed #7DD3FC;">🔄 Simpan Perubahan Angka Juz Saja</button>
+<button type="button" onclick="updateJuzKhusus()" class="btn-icon-mobile" style="background:#E0F2FE; color:#0284C7; font-size:12px; padding:10px; margin-top:10px; box-shadow:none; border:1px dashed #7DD3FC;">🎓 <span class="text-mobile">Simpan Tasmi' Juz</span></button>
 
                 <div class="section-title" style="margin-top:20px;">Batas Hafalan</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1822,15 +1822,10 @@
                 document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
                 
                 // MENGGABUNGKAN TOMBOL SERTIFIKAT DAN TOMBOL RESET ANAK
-                let btnSertif = jC >= 1 ? `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); flex:1; font-size:12px; padding:10px; box-shadow:none;">🎓 Cetak Sertifikat</button>` : '';
-                ws.innerHTML = `<div style="display:flex; gap:10px; margin-top:15px;">
-                    ${btnSertif}
-                    <button onclick="resetRiwayatMurid('${s}')" style="background:#FEE2E2; color:#EF4444; flex:1; font-size:12px; padding:10px; box-shadow:none; border:1px solid #FCA5A5;">🗑️ Reset Data Anak Ini</button>
-                </div>`;
+                let btnSertif = jC >= 1 ? `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); width:100%; margin-top:15px; font-size:12px; padding:10px; box-shadow:none;">🎓 Cetak Sertifikat</button>` : '';
+                ws.innerHTML = btnSertif;
             } else { 
                 setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; 
-                // MUNCULKAN TOMBOL RESET WALAUPUN BELUM ADA JUZ
-                ws.innerHTML = `<button onclick="resetRiwayatMurid('${s}')" style="background:#FEE2E2; color:#EF4444; width:100%; margin-top:15px; font-size:12px; padding:10px; box-shadow:none; border:1px solid #FCA5A5;">🗑️ Reset Data Anak Ini</button>`;
             }
             
             let h = ''; 
@@ -1907,7 +1902,7 @@
             
             dRiw.filter(i => i.santri === s).forEach(i => {
                 let badge = i.jenis === 'Murojaah' ? `<span style="color:#0284C7; font-weight:800; font-size:11px;">🔄 Muroja'ah</span>` : `<span style="color:#059669; font-weight:800; font-size:11px;">⭐ Ziyadah</span>`;
-                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat})</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'PASS':'RE-TAKE'}</div></div>`;
+                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat})</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div></div>`;
             }); 
             document.getElementById('list-ortu-quran').innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat setoran.</p></div>';
 
@@ -2115,26 +2110,32 @@
         async function updateJuzKhusus() {
             let h = document.getElementById('muhaffiz-pilih-halaqah').value;
             let s = document.getElementById('muhaffiz-pilih-santri').value;
+            // Ambil tanggal dari inputan guru
+            let tglKirim = new Date(document.getElementById('tgl-quran').value).toLocaleDateString('id-ID');
+            
             if(!h || !s) return alert("Pilih kelas dan murid dulu!");
             
             let j = document.getElementById('input-juz-hidden').value || "-";
-            let rec = dRiw.find(i => i.santri === s && i.jenis === 'Ziyadah'); // Cari setoran ziyadah terakhir anak ini
+            let rec = dRiw.find(i => i.santri === s && i.jenis === 'Ziyadah'); 
+            
+            let btn = document.querySelector('button[onclick="updateJuzKhusus()"]');
+            let oldText = btn.innerHTML; btn.innerHTML = "⏳..."; btn.disabled = true;
             
             try {
                 if(rec) {
-                    // Update riwayat yang sudah ada secara diam-diam
-                    let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran?id=eq.${rec.id}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({ juz: j }) });
-                    if(!res.ok) throw new Error();
-                } else {
-                    // Bikin riwayat baru dummy kalau belum ada riwayat sama sekali
-                    let pay = { waktu: new Date().toLocaleDateString('id-ID'), kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: "Ziyadah", juz: j, surah: "-", ayat: "-", tajwid: 3, lancar: 3, makhraj: 3, status: "Lanjut", catatan: "Update Juz Manual" };
-                    let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                    if(!res.ok) throw new Error();
+                    // Update Juz di latar belakang agar progress bar anak tidak ter-reset
+                    await fetch(`${SUPABASE_URL}/rest/v1/setoran?id=eq.${rec.id}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({ juz: j }) });
                 }
-                alert("✅ Pilihan Angka Juz berhasil diperbarui!");
+                
+                // Buat Riwayat Baru khusus Tasmi' agar tercatat rapi dan indah di layar
+                let teksSurah = j === "-" ? "Batal Juz (Reset)" : "Tasmi' Juz (" + j + ")";
+                let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: "Tasmi'", juz: j, surah: teksSurah, ayat: "Lulus", tajwid: 5, lancar: 5, makhraj: 5, status: "Lanjut", catatan: "Ujian Tasmi'" };
+                await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+
+                alert("✅ Tasmi' Juz berhasil dicatat!");
                 await muatUlangDataDiamDiam();
                 tampilkanKartuPrestasi();
-            } catch(e) { alert("❌ Gagal menyimpan perubahan Juz!"); }
+            } catch(e) { alert("❌ Gagal menyimpan Tasmi' Juz!"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
         }
 
         // FUNGSI RESET TOTAL DATA MURID
