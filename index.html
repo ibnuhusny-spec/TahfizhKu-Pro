@@ -480,8 +480,8 @@
             <h1 style="color:var(--emerald-logo); font-weight:900; font-size:28px; margin:0;">TahfizhKu Pro</h1>
             <span style="display:block; color:var(--text-mute); font-weight:700; margin-bottom:30px;">SDIT Qurratu A'yun Al-Islami</span>
             
-            <label>Pilih Akun Guru Al-Qur'an</label>
-            <select id="select-muhaffiz" style="text-align-last:center;"></select>
+            <label>Email Guru Al-Qur'an</label>
+            <input type="email" id="email-muhaffiz" placeholder="Ketik email dari Supabase..." style="text-align:center; letter-spacing:1px;">
             <label>Kata Sandi</label>
             <input type="password" id="sandi-muhaffiz" placeholder="••••••••" style="text-align:center; letter-spacing:3px;">
             
@@ -496,6 +496,7 @@
     <div id="modal-admin-login" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 style="margin-top:0; color:var(--text-dark);">Akses Pusat</h3>
+            <input type="email" id="admin-email" placeholder="Email Admin..." style="margin-bottom:10px;">
             <input type="password" id="admin-password" placeholder="Sandi Admin...">
             <div style="display:flex; gap:10px; margin-top:10px;">
                 <button class="btn-danger" onclick="tutupModalAdminLogin()">Batal</button>
@@ -902,9 +903,10 @@
 <script>
         const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
-        const REQ_HEADERS = { 
+        let savedToken = getSafeStorage('supabase_token');
+        let REQ_HEADERS = { 
             'apikey': SUPABASE_ANON_KEY, 
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 
+            'Authorization': `Bearer ${savedToken ? savedToken : SUPABASE_ANON_KEY}`, 
             'Content-Type': 'application/json' 
         };
 
@@ -1455,41 +1457,67 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
         function bukaModalAdminLogin() { document.getElementById('modal-admin-login').classList.remove('hidden'); }
         function tutupModalAdminLogin() { document.getElementById('modal-admin-login').classList.add('hidden'); }
         
-        function loginAdmin() { 
+        async function loginAdmin() { 
+            let e = document.getElementById('admin-email').value;
             let p = document.getElementById('admin-password').value;
-            if(!p) return alert("Masukkan sandi!");
-            if(p === '@lQur4nKu77') { 
+            if(!e || !p) return alert("Masukkan Email dan Sandi!");
+            
+            let btn = document.getElementById('btn-login-admin');
+            let oldText = btn.innerText; btn.innerText = "⏳ Memeriksa..."; btn.disabled = true;
+
+            try {
+                let res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p }) });
+                let data = await res.json();
+                if(!res.ok) throw new Error("Akses Ditolak! Email atau Sandi Salah.");
+                
+                // Simpan kunci baja RLS
+                setSafeStorage('supabase_token', data.access_token);
+                REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
+
                 setSafeStorage('sesi_halaman', 'admin'); 
                 tutupModalAdminLogin(); 
                 document.getElementById('login-page').classList.add('hidden'); 
                 document.getElementById('admin-page').classList.remove('hidden'); 
                 renderTabelAdmin(); 
-            } else { 
-                alert("⛔ Sandi Admin Salah!"); 
-            }
+            } catch(err) { alert("⛔ " + err.message); } 
+            finally { btn.innerText = oldText; btn.disabled = false; }
         }
 
-        function loginMuhaffiz() {
-            let n = document.getElementById('select-muhaffiz').value;
+        async function loginMuhaffiz() {
+            let e = document.getElementById('email-muhaffiz').value;
             let p = document.getElementById('sandi-muhaffiz').value;
+            if(!e || !p) return alert("Masukkan Email dan Sandi!");
             
-            if(!n) return alert("Pilih nama Anda!");
-            if(window.akunSandiMap[n] === p || p === 'guru123') { 
+            let btn = document.getElementById('btn-login-guru');
+            let oldText = btn.innerText; btn.innerText = "⏳ Memeriksa..."; btn.disabled = true;
+
+            try {
+                let res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, { method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: e, password: p }) });
+                let data = await res.json();
+                if(!res.ok) throw new Error("Email atau Sandi salah!");
+                
+                // Simpan kunci baja RLS
+                setSafeStorage('supabase_token', data.access_token);
+                REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
+                
+                // Ambil nama depan dari email (contoh: ahmad@sdit.com jadi ahmad)
+                let n = e.split('@')[0]; 
                 guruAktif = n; 
                 setSafeStorage('sesi_halaman', 'muhaffiz'); 
                 setSafeStorage('sesi_user', n); 
+                
                 document.getElementById('login-page').classList.add('hidden'); 
                 document.getElementById('muhaffiz-page').classList.remove('hidden'); 
                 document.getElementById('nama-guru-aktif').innerText = "Ustadz/ah " + n; 
-                renderHalaqahDropdowns(); 
-            } else { 
-                alert("⛔ Sandi Guru Salah!"); 
-            }
+                renderHalaqahDropdowns();
+            } catch(err) { alert("⛔ Login Gagal: " + err.message); } 
+            finally { btn.innerText = oldText; btn.disabled = false; }
         }
 
         function logout() { 
             removeSafeStorage('sesi_halaman'); 
             removeSafeStorage('sesi_user'); 
+            removeSafeStorage('supabase_token'); // Hapus Kunci
             location.reload(); 
         }
 
