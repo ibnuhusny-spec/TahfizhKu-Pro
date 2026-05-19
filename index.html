@@ -1069,15 +1069,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
                 dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
 
-                dProg = {};
-                for(let i = dRiw.length-1; i >= 0; i--) {
-                    let r = dRiw[i];
-                    if(r.status === 'Lanjut') {
-                        if(!dProg[r.santri]) dProg[r.santri] = { juz: "-", surah: "-", ayat: "-" };
-                        if(r.juz) dProg[r.santri].juz = r.juz;
-                        if(r.jenis === 'Ziyadah') { dProg[r.santri].surah = r.surah; dProg[r.santri].ayat = r.ayat; }
-                    }
-                }
+                kalkulasiProgress();
             } catch (e) { console.error("Gagal refresh data"); }
         }
         async function tarikDataServer() {
@@ -2224,6 +2216,29 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 tampilkanKartuPrestasi();
             } catch(e) { alert("❌ Gagal mereset data!"); }
         }
-    </script>
+    function kalkulasiProgress() {
+            dProg = {};
+            // Membaca dari data paling lama ke paling baru
+            for(let i = dRiw.length-1; i >= 0; i--) {
+                let r = dRiw[i];
+                if(r.status === 'Lanjut') {
+                    if(!dProg[r.santri]) dProg[r.santri] = { juz: "-", surah: "-", ayat: "-" };
+                    
+                    // JANGAN TIMPA JUZ JIKA KOSONG, KECUALI ITU PERINTAH RESET
+                    if(r.juz && r.juz !== "-") {
+                        dProg[r.santri].juz = r.juz;
+                    } else if (r.jenis === "Tasmi'" && r.surah === "Reset Pilihan Juz") {
+                        dProg[r.santri].juz = "-";
+                    }
+                    
+                    // UPDATE SURAH & AYAT HANYA JIKA ZIYADAH
+                    if(r.jenis === 'Ziyadah') { 
+                        dProg[r.santri].surah = r.surah; 
+                        dProg[r.santri].ayat = r.ayat; 
+                    }
+                }
+            }
+        }
+</script>
 </body>
 </html>
