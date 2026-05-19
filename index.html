@@ -594,8 +594,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin: 0; color: var(--emerald-logo);">Panel Guru</h2>
             <div style="display:flex; gap:10px;">
-                <input type="file" id="file-ttd-guru" accept="image/png" style="display:none;" onchange="simpanTTDGuru(event)">
-                <button onclick="document.getElementById('file-ttd-guru').click()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #F8FAFC; color: #D97706; border: 1px solid #E2E8F0; font-size:18px; box-shadow:none;" title="Upload Tanda Tangan">✍️</button>
+                <button onclick="bukaModalTTD()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #F8FAFC; color: #D97706; border: 1px solid #E2E8F0; font-size:18px; box-shadow:none;" title="Pengaturan Tanda Tangan">✍️</button>
                 <button onclick="bukaModalWallpaper()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #F8FAFC; color: var(--cerulean-logo); border: 1px solid #E2E8F0; font-size:18px; box-shadow:none;" title="Ganti Wallpaper">🖼️</button>
                 <button onclick="bukaModalGantiSandi()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #F8FAFC; color: var(--emerald-logo); border: 1px solid #E2E8F0; font-size:18px; box-shadow:none;" title="Ganti Sandi">🔑</button>
                 <button onclick="logout()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #FEE2E2; color: #EF4444; border: 1px solid #FCA5A5; font-size:14px; box-shadow:none;" title="Keluar">❌</button>
@@ -879,6 +878,24 @@
     </div>
 
     <div id="modal-wallpaper" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Latar Belakang</div><div style="display:flex; gap:10px; margin-bottom:20px; overflow-x:auto; padding-bottom:10px;"><div style="min-width:60px; height:60px; background:var(--ivory-bg); border-radius:12px; cursor:pointer; border:2px solid #ccc; position:relative;" onclick="setWallpaper('')"><span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:10px; font-weight:bold; color:#ccc;">RESET</span></div><div style="min-width:60px; height:60px; background:#0F172A; border-radius:12px; cursor:pointer;" onclick="setWallpaper('#0F172A')"></div><div style="min-width:60px; height:60px; background:#064E3B; border-radius:12px; cursor:pointer;" onclick="setWallpaper('#064E3B')"></div><div style="min-width:60px; height:60px; background:url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560'); background-size:cover; border-radius:12px; cursor:pointer;" onclick="setWallpaper('url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560)')"></div></div><label>Atau Unggah Foto Sendiri:</label><input type="file" accept="image/*" onchange="uploadWallpaper(event)" style="padding:10px; margin-bottom:25px;"><button class="btn-danger" style="padding:14px; border-radius:14px;" onclick="tutupModalWallpaper()">Tutup</button></div></div>
+    <div id="modal-ttd" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Tanda Tangan</div>
+        <p style="font-size:12px; color:var(--text-mute); margin-top:0;">Gunakan foto berformat <b>PNG transparan</b> (tanpa background putih) agar hasil cetak maksimal.</p>
+        
+        <label>Tanda Tangan Guru Pembimbing</label>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="file" id="file-ttd-guru" accept="image/png" style="display:none;" onchange="simpanTTD(event, 'guru')">
+            <button onclick="document.getElementById('file-ttd-guru').click()" style="flex:1; padding:12px; font-size:13px;">Upload TTD Guru</button>
+            <button onclick="hapusTTD('guru')" class="btn-danger" style="width:auto; padding:12px; border-radius:12px;">🗑️ Hapus</button>
+        </div>
+
+        <label>Tanda Tangan Kepala Sekolah</label>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <input type="file" id="file-ttd-kepsek" accept="image/png" style="display:none;" onchange="simpanTTD(event, 'kepsek')">
+            <button onclick="document.getElementById('file-ttd-kepsek').click()" style="flex:1; padding:12px; font-size:13px; background:linear-gradient(135deg, #FBBF24, #D97706);">Upload TTD Kepsek</button>
+            <button onclick="hapusTTD('kepsek')" class="btn-danger" style="width:auto; padding:12px; border-radius:12px;">🗑️ Hapus</button>
+        </div>
+        <button class="btn-danger" style="padding:14px; border-radius:14px; background:#F1F5F9; color:#64748B; border:none;" onclick="tutupModalTTD()">Tutup</button>
+    </div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 5)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
     
     <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
@@ -981,16 +998,28 @@
                 document.getElementById('login-page').classList.remove('hidden'); 
             }
         }
-function simpanTTDGuru(e) { 
+function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove('hidden'); }
+        function tutupModalTTD() { document.getElementById('modal-ttd').classList.add('hidden'); }
+
+        function simpanTTD(e, jenis) { 
             let f = e.target.files[0]; 
             if(f){ 
                 let r = new FileReader(); 
                 r.onload = (ev) => { 
-                    setSafeStorage('ttd_' + guruAktif, ev.target.result); 
-                    alert("✅ Tanda Tangan berhasil disimpan!\nSertifikat yang dicetak sekarang akan memiliki tanda tangan Anda."); 
+                    let key = jenis === 'guru' ? 'ttd_' + guruAktif : 'ttd_kepsek';
+                    setSafeStorage(key, ev.target.result); 
+                    alert(`✅ Tanda Tangan ${jenis === 'guru' ? 'Guru' : 'Kepala Sekolah'} berhasil disimpan!`); 
                 }; 
                 r.readAsDataURL(f); 
             } 
+        }
+
+        function hapusTTD(jenis) {
+            if(confirm(`Yakin ingin menghapus tanda tangan ${jenis === 'guru' ? 'Guru' : 'Kepala Sekolah'}?`)) {
+                let key = jenis === 'guru' ? 'ttd_' + guruAktif : 'ttd_kepsek';
+                removeSafeStorage(key);
+                alert("🗑️ Tanda tangan berhasil dihapus dari memori!");
+            }
         }
         
     window.onload = () => {
@@ -1987,14 +2016,22 @@ function simpanTTDGuru(e) {
             let namaPembimbing = guruAktif ? guruAktif : "________________________"; doc.setFont("helvetica", "normal"); doc.text("Guru Pembimbing", 195, 169, {align: "center"}); doc.setFont("helvetica", "bold"); doc.text(namaPembimbing, 195, 193, {align: "center"});
 
             // MENGAMBIL DAN MENEMPEL TANDA TANGAN (JIKA ADA)
-            let fotoTTD = getSafeStorage('ttd_' + guruAktif);
-            if(fotoTTD) {
-                // Koordinat gambar: (X, Y, Lebar, Tinggi)
-                doc.addImage(fotoTTD, 'PNG', 175, 172, 40, 18);
+            let namaPembimbing = guruAktif ? guruAktif : "________________________"; doc.setFont("helvetica", "normal"); doc.text("Guru Pembimbing", 195, 169, {align: "center"}); doc.setFont("helvetica", "bold"); doc.text(namaPembimbing, 195, 193, {align: "center"});
+
+            // MENGAMBIL DAN MENEMPEL TANDA TANGAN KEPSEK (Sebelah Kiri)
+            let fotoTTDKepsek = getSafeStorage('ttd_kepsek');
+            if(fotoTTDKepsek) {
+                // doc.addImage(gambar, format, koordinat X, koordinat Y, lebar, tinggi)
+                doc.addImage(fotoTTDKepsek, 'PNG', 75, 172, 40, 18);
+            }
+
+            // MENGAMBIL DAN MENEMPEL TANDA TANGAN GURU (Sebelah Kanan)
+            let fotoTTDGuru = getSafeStorage('ttd_' + guruAktif);
+            if(fotoTTDGuru) {
+                doc.addImage(fotoTTDGuru, 'PNG', 175, 172, 40, 18);
             }
 
             doc.save(`Sertifikat_${nama}_Juz_${juz}.pdf`);
-        }
 
         // --- SISTEM CETAK EXCEL/PDF ---
         function unduhTemplate() { 
