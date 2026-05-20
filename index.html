@@ -1027,7 +1027,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             }
         }
         
-    window.onload = () => {
+    window.onload = async () => {
             let wp = getSafeStorage('wp'); 
             if(wp) setWallpaper(wp);
             
@@ -1057,7 +1057,8 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             document.getElementById('muhaffiz-grid-juz-30').innerHTML = gM; 
             document.getElementById('ortu-grid-juz-30').innerHTML = gO;
             
-            tarikDataServer();
+            await perbaruiTokenSesi(); // Jalankan mesin penyegar token dulu!
+            tarikDataServer(); // Baru tarik data dari Supabase
         };
 
         // --- SISTEM KOMUNIKASI DATABASE ---
@@ -1475,6 +1476,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 
                 // Simpan kunci baja RLS
                 setSafeStorage('supabase_token', data.access_token);
+                setSafeStorage('supabase_refresh_token', data.refresh_token);
                 REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
 
                 setSafeStorage('sesi_halaman', 'admin'); 
@@ -1501,6 +1503,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 
                 // Simpan kunci baja RLS
                 setSafeStorage('supabase_token', data.access_token);
+                setSafeStorage('supabase_refresh_token', data.refresh_token);
                 REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
                 
                 // Ambil nama asli dari dropdown
@@ -1522,9 +1525,35 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             removeSafeStorage('sesi_halaman'); 
             removeSafeStorage('sesi_user'); 
             removeSafeStorage('supabase_token'); // Hapus Kunci
+            removeSafeStorage('supabase_refresh_token');
             location.reload(); 
         }
 
+    async function perbaruiTokenSesi() {
+            let refreshToken = getSafeStorage('supabase_refresh_token');
+            if (!refreshToken) return; // Jika belum pernah login, abaikan saja
+
+            try {
+                let res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+                    method: 'POST',
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: refreshToken })
+                });
+                
+                if (!res.ok) throw new Error("Sesi benar-benar hangus");
+                
+                let data = await res.json();
+                
+                // Simpan kunci baru yang sudah diperpanjang umurnya
+                setSafeStorage('supabase_token', data.access_token);
+                setSafeStorage('supabase_refresh_token', data.refresh_token);
+                REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
+            } catch (err) {
+                // Jika Ustadz tidak buka aplikasi lebih dari 7 hari, bersihkan memori agar login ulang
+                removeSafeStorage('supabase_token');
+                removeSafeStorage('supabase_refresh_token');
+            }
+        }
         function bukaModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.remove('hidden'); }
         function tutupModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.add('hidden'); }
         
