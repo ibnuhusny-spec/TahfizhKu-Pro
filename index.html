@@ -1562,18 +1562,48 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             let sBaru = document.getElementById('input-sandi-baru').value;
             let sKon = document.getElementById('input-sandi-konfirmasi').value; 
             
-            if(sBaru.length < 5 || sBaru !== sKon) return alert("Sandi baru tidak valid!"); 
+            // Supabase Auth mewajibkan sandi minimal 6 karakter
+            if(sBaru.length < 6) return alert("⚠️ Sandi baru minimal 6 karakter!"); 
+            if(sBaru !== sKon) return alert("⚠️ Konfirmasi sandi tidak cocok!"); 
             
-            let btn = document.getElementById('btn-proses-sandi'); btn.innerText = "⏳"; btn.disabled = true;
+            let btn = document.getElementById('btn-proses-sandi'); 
+            btn.innerText = "⏳ Memproses..."; btn.disabled = true;
+
             try { 
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(guruAktif)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({sandi: sBaru}) }); 
-                if(res.ok) {
-                    window.akunSandiMap[guruAktif] = sBaru; 
-                    alert("Sandi berhasil diperbarui!"); 
-                    tutupModalGantiSandi(); 
+                // 1. UPDATE SANDI DI PINTU UTAMA (Supabase Auth)
+                // Kita gunakan method PUT ke endpoint /auth/v1/user
+                let resAuth = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+                    method: 'PUT',
+                    headers: REQ_HEADERS, // Sudah membawa Token Digital Ustadz yang sedang aktif
+                    body: JSON.stringify({ password: sBaru })
+                });
+
+                if(!resAuth.ok) {
+                    let err = await resAuth.json();
+                    throw new Error(err.msg || "Gagal mengubah sandi di server Auth.");
                 }
+
+                // 2. UPDATE SANDI DI TABEL GURU (Agar Admin Pusat tetap bisa melihat perubahannya)
+                let resDb = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(guruAktif)}`, { 
+                    method: 'PATCH', 
+                    headers: REQ_HEADERS, 
+                    body: JSON.stringify({sandi: sBaru}) 
+                }); 
+                
+                if(resDb.ok) {
+                    window.akunSandiMap[guruAktif] = sBaru; 
+                }
+
+                alert("✅ Sandi berhasil diperbarui dengan aman!"); 
+                tutupModalGantiSandi(); 
+
+                // Bersihkan kolom inputan setelah berhasil
+                document.getElementById('input-sandi-lama').value = '';
+                document.getElementById('input-sandi-baru').value = '';
+                document.getElementById('input-sandi-konfirmasi').value = '';
+
             } catch (e) { 
-                alert("Error Ganti Sandi!"); 
+                alert("⛔ Error: " + e.message); 
             } finally { 
                 btn.innerText = "Simpan"; btn.disabled = false; 
             }
