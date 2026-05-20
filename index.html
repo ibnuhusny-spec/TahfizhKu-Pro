@@ -1977,7 +1977,10 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                     gayaKartu = i.jenis === 'Murojaah' ? `border-left: 5px solid #0284C7;` : `border-left: 5px solid var(--emerald-logo);`;
                 }
 
-                h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}</div><div class="list-card-title">📖 ${i.surah}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
+                // KUNCI UTAMANYA DI SINI: Tampilkan nomor ayat jika jenis setoran adalah Ziyadah / Murojaah
+                let teksAyat = i.jenis === "Tasmi'" ? "" : ` (Ayat: ${i.ayat})`;
+
+                h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}</div><div class="list-card-title">📖 ${i.surah}${teksAyat}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
             }); 
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
