@@ -2066,6 +2066,15 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
 
         // --- DESAIN CETAK SERTIFIKAT FULL ELEGANT ---
         function cetakSertifikat(nama, juz) {
+            let juzCetak = juz.toString();
+            
+            // Cek apakah ada lebih dari 1 juz (ditandai dengan adanya koma)
+            if (juzCetak.includes(',')) {
+                let pilihan = prompt(`Ananda ${nama} memiliki hafalan Juz: ${juzCetak}\n\nKetik SATU nomor Juz saja yang ingin dicetak di sertifikat ini (Misal: 29):`, "");
+                if (pilihan === null || pilihan.trim() === "") return; // Batal cetak jika dikosongkan atau di-cancel
+                juzCetak = pilihan.trim();
+            }
+
             const { jsPDF } = window.jspdf; let doc = new jsPDF('l', 'mm', 'a4'); 
             let darkBlue = [26, 60, 96]; let lightBlue = [41, 128, 185]; let gold = [241, 196, 15]; let orange = [230, 126, 34]; let red = [192, 57, 43]; let black = [0, 0, 0]; 
             
@@ -2084,7 +2093,8 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             doc.setTextColor(17, 70, 143); doc.setFont("helvetica", "bold"); doc.setFontSize(30); doc.text(nama.toUpperCase(), 148, 93, {align: "center"});
             doc.setDrawColor(0, 0, 0); doc.setLineWidth(1); doc.line(60, 98, 236, 98);
 
-            doc.setTextColor(...black); doc.setFontSize(16); doc.text(`Telah Menyelesaikan Tahfidzul Qur'an Juz ${juz}`, 148, 111, {align: "center"});
+            // Teks Juz di kalimat tengah
+            doc.setTextColor(...black); doc.setFontSize(16); doc.text(`Telah Menyelesaikan Tahfidzul Qur'an Juz ${juzCetak}`, 148, 111, {align: "center"});
 
             doc.setFont("helvetica", "normal"); doc.setFontSize(12); let tglMasehi = new Date().toLocaleDateString('id-ID', { weekday:'long', year: 'numeric', month: 'long', day: 'numeric' }); doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148, 121, {align: "center"});
             doc.setFontSize(11); let paragraf = "Kepadanya kami berikan penghargaan setinggi - tingginya.\nSemoga tanda penghargaan ini menjadi motivasi untuk\nsenantiasa meningkatkan amal ibadahnya sesuai ketentuan\nAl-Qur'an dan As-Sunnah."; doc.text(paragraf, 148, 133, {align: "center", lineHeightFactor: 1.5});
@@ -2096,17 +2106,27 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             doc.circle(cx, cy, 22, 'F'); doc.setFillColor(...red); doc.circle(cx, cy, 19, 'F'); doc.setDrawColor(255, 255, 255); doc.setLineWidth(0.5); doc.circle(cx, cy, 17, 'S');
 
             doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("JUZ", cx, cy - 3, {align: "center"});
-            let txtJuz = juz.toString(); let sizeJuz = txtJuz.length > 3 ? 14 : 29; doc.setFontSize(sizeJuz); doc.text(txtJuz, cx, cy + 7, {align: "center"});
+            
+            // Angka di dalam lingkaran stempel
+            let txtJuz = juzCetak.toString(); let sizeJuz = txtJuz.length > 3 ? 14 : 29; doc.setFontSize(sizeJuz); doc.text(txtJuz, cx, cy + 7, {align: "center"});
 
             doc.setTextColor(...black); doc.setFontSize(11); doc.setFont("helvetica", "normal");
             doc.text("Mengetahui,", 95, 163, {align: "center"}); doc.text("Kepala SDIT Qurratu A'yun", 95, 169, {align: "center"}); doc.setFont("helvetica", "bold"); doc.text("Radiant Fadli, S.Pd.", 95, 193, {align: "center"});
             let namaPembimbing = guruAktif ? guruAktif : "________________________"; doc.setFont("helvetica", "normal"); doc.text("Guru Pembimbing", 195, 169, {align: "center"}); doc.setFont("helvetica", "bold"); doc.text(namaPembimbing, 195, 193, {align: "center"});
 
-            // MENGAMBIL DAN MENEMPEL TANDA TANGAN KEPSEK (Sebelah Kiri)
             let fotoTTDKepsek = getSafeStorage('ttd_kepsek');
             if(fotoTTDKepsek) {
                 doc.addImage(fotoTTDKepsek, 'PNG', 75, 172, 40, 18);
             }
+
+            let fotoTTDGuru = getSafeStorage('ttd_' + guruAktif);
+            if(fotoTTDGuru) {
+                doc.addImage(fotoTTDGuru, 'PNG', 175, 172, 40, 18);
+            }
+
+            // Nama file hasil cetak disesuaikan dengan juz yang dipilih
+            doc.save(`Sertifikat_${nama}_Juz_${juzCetak}.pdf`);
+        }
 
             // MENGAMBIL DAN MENEMPEL TANDA TANGAN GURU (Sebelah Kanan)
             let fotoTTDGuru = getSafeStorage('ttd_' + guruAktif);
