@@ -2356,7 +2356,10 @@ function tampilkanRiwayatGuruModul(modul) {
             
             // Membuat kontainer riwayat secara otomatis jika belum ada di tab guru
             if (!wadah) {
-                let tabContainer = document.getElementById('tab-guru-' + modul);
+                // KUNCI PERBAIKAN: Menyesuaikan nama tab khusus untuk kosakata arab
+                let idTab = modul === 'kosakata' ? 'tab-guru-arab' : 'tab-guru-' + modul;
+                let tabContainer = document.getElementById(idTab);
+                
                 if (tabContainer) {
                     let judulRiw = document.createElement('div');
                     judulRiw.className = 'section-title';
