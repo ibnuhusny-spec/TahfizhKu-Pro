@@ -1705,7 +1705,29 @@
             } 
         }
         
-        async function editHalaqah(namaLama) { alert("Untuk mengubah Tim Pengajar, hapus dan buat ulang kelasnya."); }
+        async function editHalaqah(namaLama) { 
+            let guruLama = dbKelasGuru[namaLama] || "";
+            let n = prompt(`Ubah Tim Pengajar untuk Kelas: ${namaLama}\n\nMasukkan nama-nama guru dengan TEPAT sesuai database, dan pisahkan dengan tanda KOMA (,)\n\nContoh: Radiant Fadli, S.Pd., Ibnu Husny, S.Pd.`, guruLama); 
+            
+            if(n !== null && n.trim() !== guruLama) { 
+                try { 
+                    // Menembak data baru ke Supabase
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(namaLama)}`, { 
+                        method: 'PATCH', 
+                        headers: REQ_HEADERS, 
+                        body: JSON.stringify({nama_guru: n.trim()}) 
+                    }); 
+                    if(!res.ok) throw new Error(); 
+                    
+                    // Memperbarui tampilan di layar Admin
+                    dbKelasGuru[namaLama] = n.trim(); 
+                    renderTabelAdmin(); 
+                    alert("✅ Tim Pengajar berhasil diperbarui!");
+                } catch(e){ 
+                    alert("❌ Gagal memperbarui Tim Pengajar!"); 
+                } 
+            } 
+        }
         
         async function editSantri(halaqah, namaLama) { 
             let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); 
@@ -1728,7 +1750,7 @@
             });
             for(let n in dbP) { 
                 const escapedHalaqah = n.replace(/'/g, "\\'"); 
-                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
+                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
             }
             document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; 
             document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
