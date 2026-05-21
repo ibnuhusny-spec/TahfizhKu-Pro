@@ -1003,7 +1003,8 @@
                 document.getElementById('login-page').classList.remove('hidden'); 
             }
         }
-function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove('hidden'); }
+        
+        function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove('hidden'); }
         function tutupModalTTD() { document.getElementById('modal-ttd').classList.add('hidden'); }
 
         function simpanTTD(e, jenis) { 
@@ -1027,7 +1028,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             }
         }
         
-    window.onload = async () => {
+        window.onload = async () => {
             let wp = getSafeStorage('wp'); 
             if(wp) setWallpaper(wp);
             
@@ -1062,7 +1063,30 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
         };
 
         // --- SISTEM KOMUNIKASI DATABASE ---
-    async function muatUlangDataDiamDiam() {
+        async function perbaruiTokenSesi() {
+            let refreshToken = getSafeStorage('supabase_refresh_token');
+            if (!refreshToken) return; 
+
+            try {
+                let res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+                    method: 'POST',
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: refreshToken })
+                });
+                
+                if (!res.ok) throw new Error("Sesi hangus");
+                
+                let data = await res.json();
+                setSafeStorage('supabase_token', data.access_token);
+                setSafeStorage('supabase_refresh_token', data.refresh_token);
+                REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
+            } catch (err) {
+                removeSafeStorage('supabase_token');
+                removeSafeStorage('supabase_refresh_token');
+            }
+        }
+
+        async function muatUlangDataDiamDiam() {
             try {
                 const endpoints = ['setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc'];
                 const responses = await Promise.all(endpoints.map(ep => fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS}).then(res => res.ok ? res.json() : []).catch(() => [])));
@@ -1078,6 +1102,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 kalkulasiProgress();
             } catch (e) { console.error("Gagal refresh data"); }
         }
+
         async function tarikDataServer() {
             try {
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc', 'forum_guru?select=*&order=id.asc'];
@@ -1112,7 +1137,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                     if(m.kelas && dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); 
                 });
 
-                // DITAMBAHKAN "id: r.id" UNTUK FITUR HAPUS
                 dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
                 dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
                 dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
@@ -1120,14 +1144,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 dPesan = safe(rP).map(r => ({id: r.id, waktu: r.waktu, kelas: r.kelas, nama_murid: r.nama_murid, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
                 dForum = safe(rF).map(r => ({id: r.id, waktu: r.waktu, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
 
-                dProg = {};
-                for(let i = dRiw.length-1; i >= 0; i--) {
-                    let r = dRiw[i];
-                    if(r.status === 'Lanjut' && r.jenis === 'Ziyadah') {
-                        dProg[r.santri] = { juz: r.juz, surah: r.surah, ayat: r.ayat };
-                    }
-                }
-
+                kalkulasiProgress();
                 renderLogins(); 
                 
                 let loading = document.getElementById('teks-loading');
@@ -1158,18 +1175,10 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
         function renderLogins() { 
             let s = document.getElementById('select-muhaffiz'); 
             if(s) {
-                s.innerHTML = '<option value="">-- Pilih Akun Guru --</option>'; 
+                s.innerHTML = '<option value="">-- Pilih Profil Anda --</option>'; 
                 dAkun.forEach(n => s.appendChild(new Option(n, n))); 
             }
-            function renderHalaqahDropdowns() { 
-            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
-            let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
-            idsGuru.forEach(id => { let s = document.getElementById(id); if(s) { s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) { let gurunya = dbKelasGuru[h] || ''; if(!isGuru || gurunya.includes(guruAktif)) { s.appendChild(new Option(h, h)); } } } }); 
-            let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
-            idsBebas.forEach(id => { let s = document.getElementById(id); if(s) { s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; for(let h in dbP) s.appendChild(new Option(h, h)); } }); 
-            let sSiar = document.getElementById('siar-pilih-kelas');
-            if(sSiar && isGuru) { sSiar.innerHTML = '<option value="GLOBAL">SEMUA KELAS (GLOBAL)</option>'; for(let h in dbP) { let gurunya = dbKelasGuru[h] || ''; if(gurunya.includes(guruAktif)) sSiar.appendChild(new Option(h, h)); } }
-        }
+            
             for(let i=1; i<=5; i++) {
                 let id = i === 1 ? 'admin-kelas-pilih-guru' : `admin-kelas-pilih-guru-${i}`;
                 let cG = document.getElementById(id); 
@@ -1220,7 +1229,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
         function updateDropdownSantri() {
             let elKelas = document.getElementById('muhaffiz-pilih-halaqah');
             let elSantri = document.getElementById('muhaffiz-pilih-santri');
-            
             if(!elKelas || !elSantri) return;
             
             let h = elKelas.value;
@@ -1252,9 +1260,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             }
         }
 
-        function updateChatGuruSantri() {
-            updateDropdownSantriModul('chat-guru');
-        }
+        function updateChatGuruSantri() { updateDropdownSantriModul('chat-guru'); }
 
         // --- SISTEM CHAT & FORUM ---
         function gantiSubPesan(jenis) {
@@ -1286,7 +1292,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                     renderChatOrtu();
                 }
             } catch(e) { } 
-
             if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
         }
         
@@ -1302,7 +1307,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                     renderForum();
                 }
             } catch(e) { } 
-
             if(btn) { btn.innerHTML = oldHTML; btn.disabled = false; }
         }
 
@@ -1324,7 +1328,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 let isGlobal = p.nama_murid === 'SEMUA';
                 let isMyMessage = (p.pengirim === role);
                 
-                // Guru bisa hapus semua pesan di kelas. Ortu hanya pesan miliknya.
                 let bisaHapus = isGuru || isMyMessage;
                 let tombolHapus = bisaHapus && p.id ? `<span onclick="hapusPesanObrolan(${p.id}, 'pesan')" style="cursor:pointer; color:#EF4444; margin-left:8px;" title="Hapus Pesan">🗑️</span>` : '';
 
@@ -1336,20 +1339,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             });
             box.innerHTML = html; box.scrollTop = box.scrollHeight;
         }
-
-            filteredPesan.forEach(p => {
-                let isGlobal = p.nama_murid === 'SEMUA';
-                let isMyMessage = (p.pengirim === role);
-                
-                let bubbleClass = isGlobal ? 'chat-global' : (isMyMessage ? 'chat-me' : 'chat-other'); 
-                let icon = isGlobal ? '📢 ' : '';
-                let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
-                
-                html += `<div class="chat-bubble ${bubbleClass}">${icon}${safeMsg}<span class="chat-meta">${p.waktu} • ${isGlobal ? 'Pengumuman' : p.pengirim}</span></div>`;
-            });
-            
-            box.innerHTML = html;
-            box.scrollTop = box.scrollHeight;
         
         async function kirimChatOrtu(role) {
             let h = role === 'Guru' ? document.getElementById('chat-guru-kelas').value : document.getElementById('ortu-pilih-halaqah').value;
@@ -1414,24 +1403,11 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
                 let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
                 
-                // Guru hanya bisa hapus pesan miliknya sendiri di forum
                 let tombolHapus = isMyMessage && p.id ? `<span onclick="hapusPesanObrolan(${p.id}, 'forum_guru')" style="cursor:pointer; color:#EF4444; margin-left:8px;" title="Hapus Pesan">🗑️</span>` : '';
-
                 html += `<div class="chat-bubble ${bubbleClass}">${safeMsg}<span class="chat-meta">${p.waktu} • ${p.pengirim} ${tombolHapus}</span></div>`;
             });
             box.innerHTML = html; box.scrollTop = box.scrollHeight;
         }
-
-            let html = '';
-            dForum.forEach(p => {
-                let isMyMessage = (p.pengirim === guruAktif);
-                let bubbleClass = isMyMessage ? 'chat-me' : 'chat-other'; 
-                let safeMsg = p.isi_pesan ? escapeHTML(p.isi_pesan.toString()).replace(/\n/g, '<br>') : "";
-                
-                html += `<div class="chat-bubble ${bubbleClass}">${safeMsg}<span class="chat-meta">${p.waktu} • ${p.pengirim}</span></div>`;
-            });
-            box.innerHTML = html;
-            box.scrollTop = box.scrollHeight;
     
         async function kirimForum() {
             let msgInput = document.getElementById('input-pesan-forum');
@@ -1474,7 +1450,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 let data = await res.json();
                 if(!res.ok) throw new Error("Akses Ditolak! Email atau Sandi Salah.");
                 
-                // Simpan kunci baja RLS
                 setSafeStorage('supabase_token', data.access_token);
                 setSafeStorage('supabase_refresh_token', data.refresh_token);
                 REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
@@ -1489,8 +1464,11 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
         }
 
         async function loginMuhaffiz() {
+            let n = document.getElementById('select-muhaffiz').value;
             let e = document.getElementById('email-muhaffiz').value;
             let p = document.getElementById('sandi-muhaffiz').value;
+            
+            if(!n) return alert("Silakan Pilih Profil Database Anda di atas!"); 
             if(!e || !p) return alert("Masukkan Email dan Sandi!");
             
             let btn = document.getElementById('btn-login-guru');
@@ -1501,14 +1479,10 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 let data = await res.json();
                 if(!res.ok) throw new Error("Email atau Sandi salah!");
                 
-                // Simpan kunci baja RLS
                 setSafeStorage('supabase_token', data.access_token);
                 setSafeStorage('supabase_refresh_token', data.refresh_token);
                 REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
                 
-                // Ambil nama asli dari dropdown
-        let n = document.getElementById('select-muhaffiz').value;
-        if(!n) return alert("Silakan Pilih Profil Database Anda di atas!"); 
                 guruAktif = n; 
                 setSafeStorage('sesi_halaman', 'muhaffiz'); 
                 setSafeStorage('sesi_user', n); 
@@ -1524,36 +1498,11 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
         function logout() { 
             removeSafeStorage('sesi_halaman'); 
             removeSafeStorage('sesi_user'); 
-            removeSafeStorage('supabase_token'); // Hapus Kunci
+            removeSafeStorage('supabase_token'); 
             removeSafeStorage('supabase_refresh_token');
             location.reload(); 
         }
 
-    async function perbaruiTokenSesi() {
-            let refreshToken = getSafeStorage('supabase_refresh_token');
-            if (!refreshToken) return; // Jika belum pernah login, abaikan saja
-
-            try {
-                let res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-                    method: 'POST',
-                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ refresh_token: refreshToken })
-                });
-                
-                if (!res.ok) throw new Error("Sesi benar-benar hangus");
-                
-                let data = await res.json();
-                
-                // Simpan kunci baru yang sudah diperpanjang umurnya
-                setSafeStorage('supabase_token', data.access_token);
-                setSafeStorage('supabase_refresh_token', data.refresh_token);
-                REQ_HEADERS['Authorization'] = `Bearer ${data.access_token}`;
-            } catch (err) {
-                // Jika Ustadz tidak buka aplikasi lebih dari 7 hari, bersihkan memori agar login ulang
-                removeSafeStorage('supabase_token');
-                removeSafeStorage('supabase_refresh_token');
-            }
-        }
         function bukaModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.remove('hidden'); }
         function tutupModalGantiSandi() { document.getElementById('modal-ganti-sandi').classList.add('hidden'); }
         
@@ -1562,7 +1511,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             let sBaru = document.getElementById('input-sandi-baru').value;
             let sKon = document.getElementById('input-sandi-konfirmasi').value; 
             
-            // Supabase Auth mewajibkan sandi minimal 6 karakter
             if(sBaru.length < 6) return alert("⚠️ Sandi baru minimal 6 karakter!"); 
             if(sBaru !== sKon) return alert("⚠️ Konfirmasi sandi tidak cocok!"); 
             
@@ -1570,11 +1518,9 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             btn.innerText = "⏳ Memproses..."; btn.disabled = true;
 
             try { 
-                // 1. UPDATE SANDI DI PINTU UTAMA (Supabase Auth)
-                // Kita gunakan method PUT ke endpoint /auth/v1/user
                 let resAuth = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
                     method: 'PUT',
-                    headers: REQ_HEADERS, // Sudah membawa Token Digital Ustadz yang sedang aktif
+                    headers: REQ_HEADERS, 
                     body: JSON.stringify({ password: sBaru })
                 });
 
@@ -1583,7 +1529,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                     throw new Error(err.msg || "Gagal mengubah sandi di server Auth.");
                 }
 
-                // 2. UPDATE SANDI DI TABEL GURU (Agar Admin Pusat tetap bisa melihat perubahannya)
                 let resDb = await fetch(`${SUPABASE_URL}/rest/v1/guru?nama_guru=eq.${encodeURIComponent(guruAktif)}`, { 
                     method: 'PATCH', 
                     headers: REQ_HEADERS, 
@@ -1596,12 +1541,9 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
 
                 alert("✅ Sandi berhasil diperbarui dengan aman!"); 
                 tutupModalGantiSandi(); 
-
-                // Bersihkan kolom inputan setelah berhasil
                 document.getElementById('input-sandi-lama').value = '';
                 document.getElementById('input-sandi-baru').value = '';
                 document.getElementById('input-sandi-konfirmasi').value = '';
-
             } catch (e) { 
                 alert("⛔ Error: " + e.message); 
             } finally { 
@@ -1806,7 +1748,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             document.getElementById('tabel-santri').innerHTML = s || '<p style="text-align:center;">Kosong</p>';
         }
 
-        // --- SISTEM HAPUS RIWAYAT HAFALAN TUNGGAL (FITUR BARU) ---
         async function hapusRiwayat(id, tabel) {
             if(confirm("Hapus riwayat hafalan ini? Data yang dihapus tidak bisa dikembalikan.")) {
                 try {
@@ -1910,7 +1851,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 
                 if(!res.ok) {
                     let errStr = await res.text();
-                    throw new Error(errStr); // Lempar error aslinya!
+                    throw new Error(errStr); 
                 }
                 
                 alert("✅ Data Setoran Tersimpan!"); 
@@ -1953,7 +1894,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 document.getElementById('infoTotalJuz').innerText = jC; 
                 document.getElementById('infoSurah').innerHTML = p.surah + `<br><span style="display:inline-block; font-size:12px; color:var(--text-mute); font-weight:800; opacity:0.8; white-space:nowrap;">(Ayat: ${p.ayat})</span>`; 
                 
-                // MENGGABUNGKAN TOMBOL SERTIFIKAT DAN TOMBOL RESET ANAK
                 let btnSertif = jC >= 1 ? `<button onclick="cetakSertifikat('${s}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); width:100%; margin-top:15px; font-size:12px; padding:10px; box-shadow:none;">🎓 Cetak Sertifikat</button>` : '';
                 ws.innerHTML = btnSertif;
             } else { 
@@ -1965,7 +1905,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 let statusLabel = i.status === 'Lanjut' ? 'LULUS' : 'ULANG';
                 let statusColor = i.status === 'Lanjut' ? 'var(--emerald-logo)' : '#EF4444';
                 
-                // Pembeda Desain Warna untuk Ujian Tasmi' (Warna Ungu Premium / Indigo)
                 let badge = '';
                 let gayaKartu = '';
                 
@@ -1977,10 +1916,7 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                     gayaKartu = i.jenis === 'Murojaah' ? `border-left: 5px solid #0284C7;` : `border-left: 5px solid var(--emerald-logo);`;
                 }
 
-                // Tampilkan nomor ayat jika jenis setoran adalah Ziyadah / Murojaah
                 let teksAyat = i.jenis === "Tasmi'" ? "" : ` (Ayat: ${i.ayat})`;
-                
-                // Tampilkan detail bintang penilaian (Sama persis seperti halaman Ortu)
                 let teksNilai = i.jenis === "Tasmi'" ? "" : `<div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div>`;
 
                 h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}</div><div class="list-card-title">📖 ${i.surah}${teksAyat}</div>${teksNilai}</div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
@@ -2064,14 +2000,12 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘'); renderRiwayatLain(dRiwH, 'list-ortu-hadits', '📜'); renderRiwayatLain(dRiwK, 'list-ortu-arab', '🔤');
         }
 
-        // --- DESAIN CETAK SERTIFIKAT FULL ELEGANT ---
         function cetakSertifikat(nama, juz) {
             let juzCetak = juz.toString();
             
-            // Cek apakah ada lebih dari 1 juz (ditandai dengan adanya koma)
             if (juzCetak.includes(',')) {
                 let pilihan = prompt(`Ananda ${nama} memiliki hafalan Juz: ${juzCetak}\n\nKetik SATU nomor Juz saja yang ingin dicetak di sertifikat ini (Misal: 29):`, "");
-                if (pilihan === null || pilihan.trim() === "") return; // Batal cetak jika dikosongkan atau di-cancel
+                if (pilihan === null || pilihan.trim() === "") return; 
                 juzCetak = pilihan.trim();
             }
 
@@ -2093,7 +2027,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             doc.setTextColor(17, 70, 143); doc.setFont("helvetica", "bold"); doc.setFontSize(30); doc.text(nama.toUpperCase(), 148, 93, {align: "center"});
             doc.setDrawColor(0, 0, 0); doc.setLineWidth(1); doc.line(60, 98, 236, 98);
 
-            // Teks Juz di kalimat tengah
             doc.setTextColor(...black); doc.setFontSize(16); doc.text(`Telah Menyelesaikan Tahfidzul Qur'an Juz ${juzCetak}`, 148, 111, {align: "center"});
 
             doc.setFont("helvetica", "normal"); doc.setFontSize(12); let tglMasehi = new Date().toLocaleDateString('id-ID', { weekday:'long', year: 'numeric', month: 'long', day: 'numeric' }); doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148, 121, {align: "center"});
@@ -2107,7 +2040,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
 
             doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("JUZ", cx, cy - 3, {align: "center"});
             
-            // Angka di dalam lingkaran stempel
             let txtJuz = juzCetak.toString(); let sizeJuz = txtJuz.length > 3 ? 14 : 29; doc.setFontSize(sizeJuz); doc.text(txtJuz, cx, cy + 7, {align: "center"});
 
             doc.setTextColor(...black); doc.setFontSize(11); doc.setFont("helvetica", "normal");
@@ -2115,29 +2047,13 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             let namaPembimbing = guruAktif ? guruAktif : "________________________"; doc.setFont("helvetica", "normal"); doc.text("Guru Pembimbing", 195, 169, {align: "center"}); doc.setFont("helvetica", "bold"); doc.text(namaPembimbing, 195, 193, {align: "center"});
 
             let fotoTTDKepsek = getSafeStorage('ttd_kepsek');
-            if(fotoTTDKepsek) {
-                doc.addImage(fotoTTDKepsek, 'PNG', 75, 172, 40, 18);
-            }
-
+            if(fotoTTDKepsek) { doc.addImage(fotoTTDKepsek, 'PNG', 75, 172, 40, 18); }
             let fotoTTDGuru = getSafeStorage('ttd_' + guruAktif);
-            if(fotoTTDGuru) {
-                doc.addImage(fotoTTDGuru, 'PNG', 175, 172, 40, 18);
-            }
+            if(fotoTTDGuru) { doc.addImage(fotoTTDGuru, 'PNG', 175, 172, 40, 18); }
 
-            // Nama file hasil cetak disesuaikan dengan juz yang dipilih
             doc.save(`Sertifikat_${nama}_Juz_${juzCetak}.pdf`);
         }
 
-            // MENGAMBIL DAN MENEMPEL TANDA TANGAN GURU (Sebelah Kanan)
-            let fotoTTDGuru = getSafeStorage('ttd_' + guruAktif);
-            if(fotoTTDGuru) {
-                doc.addImage(fotoTTDGuru, 'PNG', 175, 172, 40, 18);
-            }
-
-            doc.save(`Sertifikat_${nama}_Juz_${juz}.pdf`);
-        }
-
-        // --- SISTEM CETAK EXCEL/PDF ---
         function unduhTemplate() { 
             let wb = XLSX.utils.book_new(); 
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Kelas","Nama Murid"],["Kelas 1A","01 - Ahmad Zaid"],["Kelas 1A","02 - Budi"]]), "Murid"); 
@@ -2193,37 +2109,23 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             
             if(t==='Excel'){ 
                 let wb = XLSX.utils.book_new(); 
-                
-                // 1. Membuat Kop Surat & Informasi Laporan di baris atas Excel
                 let finalData = [
                     ["SDIT QURRATU A'YUN AL-ISLAMI MAROS"],
                     ["LAPORAN CAPAIAN TAHFIZH QUR'AN"],
                     ["Tanggal Cetak:", tgl, "", "Penanggung Jawab:", pj],
-                    [] // Baris kosong sebagai pemisah
+                    [] 
                 ];
-                
-                // 2. Gabungkan Kop Surat dengan Header Tabel dan Isi Data
                 finalData = finalData.concat([h[0]], b);
-                
                 let ws = XLSX.utils.aoa_to_sheet(finalData); 
                 
-                // 3. Mengatur Lebar Kolom (Width) agar rapi
                 ws['!cols'] = [
-                    {wch: 5},   // A: No
-                    {wch: 15},  // B: Waktu
-                    {wch: 28},  // C: Kelas 
-                    {wch: 28},  // D: Nama Murid
-                    {wch: 15},  // E: Jenis 
-                    {wch: 10},  // F: Juz
-                    {wch: 25},  // G: Surah/Ayat
-                    {wch: 18},  // H: Nilai 
-                    {wch: 12}   // I: Status 
+                    {wch: 5}, {wch: 15}, {wch: 28}, {wch: 28}, {wch: 15}, 
+                    {wch: 10}, {wch: 25}, {wch: 18}, {wch: 12} 
                 ];
                 
                 XLSX.utils.book_append_sheet(wb, ws, "Laporan_Tahfizh"); 
                 XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); 
             } else { 
-                // Bagian cetak PDF tetap aman dan utuh
                 const {jsPDF}=window.jspdf; let doc=new jsPDF('l'); 
                 doc.setFontSize(16); doc.setTextColor(4, 120, 87); doc.text("Laporan Capaian Tahfiz - SDIT Qurratu A'yun", 14, 15); 
                 doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 23); 
@@ -2232,42 +2134,12 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             }
             tutupModalLaporan();
         }
-    function getV(n) { 
+
+        function getV(n) { 
             let r = document.querySelector(`input[name="${n}"]:checked`); 
             return r ? r.value : "3"; 
         }
 
-        function renderHalaqahDropdowns() { 
-            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
-            let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
-            idsGuru.forEach(id => { 
-                let s = document.getElementById(id); 
-                if(s) { 
-                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
-                    for(let h in dbP) { 
-                        let gurunya = dbKelasGuru[h] || ''; 
-                        if(!isGuru || gurunya.includes(guruAktif)) { s.appendChild(new Option(h, h)); } 
-                    } 
-                } 
-            }); 
-            let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
-            idsBebas.forEach(id => { 
-                let s = document.getElementById(id); 
-                if(s) { 
-                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
-                    for(let h in dbP) s.appendChild(new Option(h, h)); 
-                } 
-            }); 
-            let sSiar = document.getElementById('siar-pilih-kelas');
-            if(sSiar && isGuru) { 
-                sSiar.innerHTML = '<option value="GLOBAL">SEMUA KELAS (GLOBAL)</option>'; 
-                for(let h in dbP) { 
-                    let gurunya = dbKelasGuru[h] || ''; 
-                    if(gurunya.includes(guruAktif)) sSiar.appendChild(new Option(h, h)); 
-                } 
-            }
-        }
-    // FUNGSI HAPUS 1 PESAN
         async function hapusPesanObrolan(id, tabel) {
             if(confirm("Hapus pesan ini secara permanen?")) {
                 try {
@@ -2285,7 +2157,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             }
         }
 
-        // FUNGSI BERSIHKAN SELURUH CHAT (CLEAR CHAT)
         async function bersihkanChat(jenis) {
             if(jenis === 'Ortu') {
                 let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
@@ -2317,11 +2188,10 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 }
             }
         }
-    // FUNGSI SIMPAN JUZ TANPA SURAH
+
         async function updateJuzKhusus() {
             let h = document.getElementById('muhaffiz-pilih-halaqah').value;
             let s = document.getElementById('muhaffiz-pilih-santri').value;
-            // Ambil tanggal dari inputan guru
             let tglKirim = new Date(document.getElementById('tgl-quran').value).toLocaleDateString('id-ID');
             
             if(!h || !s) return alert("Pilih kelas dan murid dulu!");
@@ -2334,11 +2204,9 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             
             try {
                 if(rec) {
-                    // Update Juz di latar belakang agar progress bar anak tidak ter-reset
                     await fetch(`${SUPABASE_URL}/rest/v1/setoran?id=eq.${rec.id}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({ juz: j }) });
                 }
                 
-                // Buat Riwayat Baru khusus Tasmi' agar tercatat rapi dan indah di layar
                 let teksSurah = j === "-" ? "Reset Pilihan Juz" : "Lulus Tasmi' Juz " + j;
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: "Tasmi'", juz: j, surah: teksSurah, ayat: "Lulus", tajwid: 5, lancar: 5, makhraj: 5, status: "Lanjut", catatan: "Ujian Tasmi'" };
                 await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
@@ -2349,7 +2217,6 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             } catch(e) { alert("❌ Gagal menyimpan Tasmi' Juz!"); } finally { btn.innerHTML = oldText; btn.disabled = false; }
         }
 
-        // FUNGSI RESET TOTAL DATA MURID
         async function resetRiwayatMurid(nama) {
             let h = document.getElementById('muhaffiz-pilih-halaqah').value;
             if(!confirm(`⚠️ PERINGATAN BAHAYA!\n\nYakin ingin MENGHAPUS SELURUH RIWAYAT Al-Qur'an milik ${nama}?\n\nData akan kembali menjadi 0 (Kosong) dan tidak bisa dikembalikan.`)) return;
@@ -2363,22 +2230,20 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
                 tampilkanKartuPrestasi();
             } catch(e) { alert("❌ Gagal mereset data!"); }
         }
-    function kalkulasiProgress() {
+
+        function kalkulasiProgress() {
             dProg = {};
-            // Membaca dari data paling lama ke paling baru
             for(let i = dRiw.length-1; i >= 0; i--) {
                 let r = dRiw[i];
                 if(r.status === 'Lanjut') {
                     if(!dProg[r.santri]) dProg[r.santri] = { juz: "-", surah: "-", ayat: "-" };
                     
-                    // JANGAN TIMPA JUZ JIKA KOSONG, KECUALI ITU PERINTAH RESET
                     if(r.juz && r.juz !== "-") {
                         dProg[r.santri].juz = r.juz;
                     } else if (r.jenis === "Tasmi'" && r.surah === "Reset Pilihan Juz") {
                         dProg[r.santri].juz = "-";
                     }
                     
-                    // UPDATE SURAH & AYAT HANYA JIKA ZIYADAH
                     if(r.jenis === 'Ziyadah') { 
                         dProg[r.santri].surah = r.surah; 
                         dProg[r.santri].ayat = r.ayat; 
