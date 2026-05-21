@@ -64,16 +64,15 @@
             height: 170px; 
             object-fit: contain; 
             opacity: 0; 
-            animation: fadeInLogo 1.5s ease-out forwards, cinematicBreathing 4s ease-in-out infinite alternate 1.5s; 
+            /* Menjalankan satu animasi penuh dengan durasi yang pas dengan loading JavaScript */
+            animation: fokusLembut 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
         }
 
-        @keyframes fadeInLogo { 
-            0% { opacity: 0; transform: scale(0.85); filter: drop-shadow(0 0 0px rgba(255,255,255,0)); } 
-            100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 15px rgba(255,255,255,0.1)); } 
-        }
-        @keyframes cinematicBreathing { 
-            0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255,255,255,0.1)); } 
-            100% { transform: scale(1.08); filter: drop-shadow(0 0 40px rgba(255,255,255,0.25)); } 
+        @keyframes fokusLembut { 
+            0% { opacity: 0; transform: scale(0.85); filter: blur(15px) drop-shadow(0 0 0px rgba(255,255,255,0)); } 
+            40% { opacity: 1; transform: scale(1); filter: blur(0px) drop-shadow(0 0 15px rgba(255,255,255,0.2)); } 
+            70% { opacity: 1; transform: scale(1.02); filter: blur(0px) drop-shadow(0 0 15px rgba(255,255,255,0.2)); } 
+            100% { opacity: 0; transform: scale(1.1); filter: blur(15px) drop-shadow(0 0 0px rgba(255,255,255,0)); } 
         }
         /* ============================================================== */
 
