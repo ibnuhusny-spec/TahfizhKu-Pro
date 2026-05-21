@@ -1270,6 +1270,11 @@
             if(elSantri) {
                 elSantri.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
                 if(h && dbP[h]) dbP[h].forEach(n => elSantri.appendChild(new Option(n, n))); 
+                
+                // KUNCI UTAMA: Pasang pemicu onchange otomatis untuk modul guru
+                if(['aisar', 'hadits', 'kosakata'].includes(prefix)) {
+                    elSantri.onchange = () => tampilkanRiwayatGuruModul(prefix);
+                }
             }
             
             if(prefix.includes('chat')) {
@@ -1946,7 +1951,6 @@
             let h = document.getElementById(modul+'-pilih-halaqah').value, s = document.getElementById(modul+'-pilih-santri').value;
             if(!h || !s) return alert("Pilih Kelas dan Murid!");
             
-            // Cek apakah tombolnya punya ID, kalau tidak ada, jangan sampai crash!
             let btn = document.getElementById('btn-simpan-'+modul); 
             let old = btn ? btn.innerText : "Simpan"; 
             if(btn) { btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true; }
@@ -1964,6 +1968,9 @@
                 document.getElementById('in-'+modul).value = '';
                 document.getElementById('cat-'+modul).value = '';
                 await muatUlangDataDiamDiam();
+                
+                // LANGSUNG SEGERKAN LAYAR GURU SETELAH SIMPAN
+                tampilkanRiwayatGuruModul(modul);
             } catch(e) { 
                 alert("⚠️ Gagal menyimpan!\n\nDetail Error: " + e.message); 
             } finally { 
@@ -2341,6 +2348,41 @@
                     }
                 }
             }
+        }
+function tampilkanRiwayatGuruModul(modul) {
+            let s = document.getElementById(modul + '-pilih-santri').value;
+            let wadahId = 'tempat-riwayat-' + modul;
+            let wadah = document.getElementById(wadahId);
+            
+            // Membuat kontainer riwayat secara otomatis jika belum ada di tab guru
+            if (!wadah) {
+                let tabContainer = document.getElementById('tab-guru-' + modul);
+                if (tabContainer) {
+                    let judulRiw = document.createElement('div');
+                    judulRiw.className = 'section-title';
+                    judulRiw.style.cssText = 'justify-content:center; margin-top:30px;';
+                    judulRiw.innerText = "Riwayat Input Terakhir";
+                    
+                    wadah = document.createElement('div');
+                    wadah.id = wadahId;
+                    wadah.style.cssText = 'max-height: 280px; overflow-y: auto; padding-right: 5px;';
+                    
+                    tabContainer.appendChild(judulRiw);
+                    tabContainer.appendChild(wadah);
+                }
+            }
+            
+            if (!wadah) return;
+            if (!s) { wadah.innerHTML = '<p style="text-align:center; color:var(--text-mute); font-size:13px;">Pilih murid untuk melihat riwayat.</p>'; return; }
+            
+            let arr = modul === 'aisar' ? dRiwA : (modul === 'hadits' ? dRiwH : dRiwK);
+            let ikon = modul === 'aisar' ? '📘' : (modul === 'hadits' ? '📜' : '🔤');
+            
+            let html = '';
+            arr.filter(i => i.santri === s).forEach(i => {
+                html += `<div class="list-card" style="border-left: 5px solid var(--emerald-logo);"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">Catatan: ${i.catatan}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center;"><div style="font-weight:900; color:var(--emerald-logo);">${i.status}</div><button onclick="hapusRiwayat(${i.id}, '${modul}'); setTimeout(() => tampilkanRiwayatGuruModul('${modul}'), 800);" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; margin-top:5px; box-shadow:none;">🗑️ Batal</button></div></div>`;
+            });
+            wadah.innerHTML = html || '<p style="text-align:center; color:var(--text-mute); font-size:13px;">Belum ada riwayat untuk murid ini.</p>';
         }
 </script>
 </body>
