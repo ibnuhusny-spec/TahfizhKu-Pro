@@ -2172,8 +2172,38 @@ function bukaModalTTD() { document.getElementById('modal-ttd').classList.remove(
             let b = d.map((i,idx)=>[idx+1,i.tgl,i.halaqah,i.santri,i.jenis,i.juz,`${i.surah}:${i.ayat}`,`T:${i.tajwid},L:${i.lancar},M:${i.makhraj}`,i.status]);
             
             if(t==='Excel'){ 
-                let wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([...h,...b]), "Laporan"); XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); 
+                let wb = XLSX.utils.book_new(); 
+                
+                // 1. Membuat Kop Surat & Informasi Laporan di baris atas Excel
+                let finalData = [
+                    ["SDIT QURRATU A'YUN AL-ISLAMI MAROS"],
+                    ["LAPORAN CAPAIAN TAHFIZH QUR'AN"],
+                    ["Tanggal Cetak:", tgl, "", "Penanggung Jawab:", pj],
+                    [] // Baris kosong sebagai pemisah
+                ];
+                
+                // 2. Gabungkan Kop Surat dengan Header Tabel dan Isi Data
+                finalData = finalData.concat([h[0]], b);
+                
+                let ws = XLSX.utils.aoa_to_sheet(finalData); 
+                
+                // 3. Mengatur Lebar Kolom (Width) agar rapi
+                ws['!cols'] = [
+                    {wch: 5},   // A: No
+                    {wch: 15},  // B: Waktu
+                    {wch: 28},  // C: Kelas 
+                    {wch: 28},  // D: Nama Murid
+                    {wch: 15},  // E: Jenis 
+                    {wch: 10},  // F: Juz
+                    {wch: 25},  // G: Surah/Ayat
+                    {wch: 18},  // H: Nilai 
+                    {wch: 12}   // I: Status 
+                ];
+                
+                XLSX.utils.book_append_sheet(wb, ws, "Laporan_Tahfizh"); 
+                XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); 
             } else { 
+                // Bagian cetak PDF tetap aman dan utuh
                 const {jsPDF}=window.jspdf; let doc=new jsPDF('l'); 
                 doc.setFontSize(16); doc.setTextColor(4, 120, 87); doc.text("Laporan Capaian Tahfiz - SDIT Qurratu A'yun", 14, 15); 
                 doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 23); 
