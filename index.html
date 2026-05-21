@@ -1945,17 +1945,30 @@
         async function simpanModulLain(modul) {
             let h = document.getElementById(modul+'-pilih-halaqah').value, s = document.getElementById(modul+'-pilih-santri').value;
             if(!h || !s) return alert("Pilih Kelas dan Murid!");
-            let btn = document.getElementById('btn-simpan-'+modul); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
+            
+            // Cek apakah tombolnya punya ID, kalau tidak ada, jangan sampai crash!
+            let btn = document.getElementById('btn-simpan-'+modul); 
+            let old = btn ? btn.innerText : "Simpan"; 
+            if(btn) { btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true; }
+            
             try {
                 let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
-                if(!res.ok) throw new Error(); 
+                
+                if(!res.ok) {
+                    let errStr = await res.text();
+                    throw new Error(errStr);
+                } 
                 
                 alert("✅ Data Tersimpan!"); 
                 document.getElementById('in-'+modul).value = '';
                 document.getElementById('cat-'+modul).value = '';
                 await muatUlangDataDiamDiam();
-            } catch(e) { alert("⚠️ Gagal menyimpan."); } finally { btn.innerText = old; btn.disabled = false; }
+            } catch(e) { 
+                alert("⚠️ Gagal menyimpan!\n\nDetail Error: " + e.message); 
+            } finally { 
+                if(btn) { btn.innerText = old; btn.disabled = false; } 
+            }
         }
 
         function tampilkanKartuPrestasi() {
