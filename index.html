@@ -495,7 +495,26 @@
             <button type="button" onclick="bukaModalAdminLogin()" style="background:transparent; color:#64748B; border:2px dashed #CBD5E1; margin-top:25px; box-shadow:none;">⚙️ Akses Administrator Pusat</button>
         </div>
     </div>
-
+<div id="modal-edit-kelas" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="section-title">✏️ Edit Tim Pengajar</div>
+            <h3 id="edit-nama-kelas-teks" style="margin-top:0; color:var(--emerald-logo); font-size: 15px;">Nama Kelas</h3>
+            <p style="font-size: 12px; color: var(--text-mute); margin-top: -10px; margin-bottom: 15px;">Silakan atur ulang susunan guru untuk kelas ini.</p>
+            
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
+                <select id="edit-kelas-guru-1" style="margin:0;"></select>
+                <select id="edit-kelas-guru-2" style="margin:0;"></select>
+                <select id="edit-kelas-guru-3" style="margin:0;"></select>
+                <select id="edit-kelas-guru-4" style="margin:0;"></select>
+                <select id="edit-kelas-guru-5" style="margin:0;"></select>
+            </div>
+            
+            <div style="display:flex; gap:10px;">
+                <button class="btn-danger" onclick="document.getElementById('modal-edit-kelas').classList.add('hidden')">Batal</button>
+                <button id="btn-simpan-edit-kelas" onclick="simpanEditKelas()">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
     <div id="modal-admin-login" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 style="margin-top:0; color:var(--text-dark);">Akses Pusat</h3>
@@ -1705,28 +1724,66 @@
             } 
         }
         
-        async function editHalaqah(namaLama) { 
+        let kelasYangDiedit = ""; // Pengingat memori kelas mana yang sedang diedit
+
+        function editHalaqah(namaLama) { 
+            kelasYangDiedit = namaLama;
+            document.getElementById('edit-nama-kelas-teks').innerText = "Kelas: " + namaLama;
+
+            // Munculkan semua daftar guru terbaru ke dalam 5 dropdown
+            for(let i=1; i<=5; i++) {
+                let sel = document.getElementById('edit-kelas-guru-'+i);
+                sel.innerHTML = `<option value="">-- Kosongkan (Hapus Guru ${i}) --</option>`;
+                dAkun.forEach(n => sel.appendChild(new Option(n, n)));
+            }
+
+            // Baca siapa saja guru yang sedang mengajar saat ini, lalu pilihkan otomatis di dropdown
             let guruLama = dbKelasGuru[namaLama] || "";
-            let n = prompt(`Ubah Tim Pengajar untuk Kelas: ${namaLama}\n\nMasukkan nama-nama guru dengan TEPAT sesuai database, dan pisahkan dengan tanda KOMA (,)\n\nContoh: Radiant Fadli, S.Pd., Ibnu Husny, S.Pd.`, guruLama); 
-            
-            if(n !== null && n.trim() !== guruLama) { 
-                try { 
-                    // Menembak data baru ke Supabase
-                    let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(namaLama)}`, { 
-                        method: 'PATCH', 
-                        headers: REQ_HEADERS, 
-                        body: JSON.stringify({nama_guru: n.trim()}) 
-                    }); 
-                    if(!res.ok) throw new Error(); 
-                    
-                    // Memperbarui tampilan di layar Admin
-                    dbKelasGuru[namaLama] = n.trim(); 
-                    renderTabelAdmin(); 
-                    alert("✅ Tim Pengajar berhasil diperbarui!");
-                } catch(e){ 
-                    alert("❌ Gagal memperbarui Tim Pengajar!"); 
-                } 
-            } 
+            let arrGuru = guruLama.split(',').map(x => x.trim()); 
+
+            for(let i=0; i<5; i++) {
+                let sel = document.getElementById('edit-kelas-guru-'+(i+1));
+                if(arrGuru[i]) {
+                    sel.value = arrGuru[i]; 
+                }
+            }
+
+            // Tampilkan Jendela Editnya!
+            document.getElementById('modal-edit-kelas').classList.remove('hidden');
+        }
+
+        async function simpanEditKelas() {
+            let g1 = document.getElementById('edit-kelas-guru-1').value;
+            let g2 = document.getElementById('edit-kelas-guru-2').value;
+            let g3 = document.getElementById('edit-kelas-guru-3').value;
+            let g4 = document.getElementById('edit-kelas-guru-4').value;
+            let g5 = document.getElementById('edit-kelas-guru-5').value;
+
+            if(!g1 && !g2 && !g3 && !g4 && !g5) return alert("⚠️ Kelas minimal harus punya 1 Guru pengajar!");
+
+            let gabunganGuru = [g1, g2, g3, g4, g5].filter(x => x !== "").join(', ');
+
+            let btn = document.getElementById('btn-simpan-edit-kelas');
+            btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
+
+            try {
+                let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(kelasYangDiedit)}`, { 
+                    method: 'PATCH', 
+                    headers: REQ_HEADERS, 
+                    body: JSON.stringify({nama_guru: gabunganGuru}) 
+                }); 
+                if(!res.ok) throw new Error(); 
+
+                dbKelasGuru[kelasYangDiedit] = gabunganGuru; 
+                renderTabelAdmin(); 
+
+                document.getElementById('modal-edit-kelas').classList.add('hidden');
+                alert("✅ Tim Pengajar berhasil diperbarui!");
+            } catch(e) { 
+                alert("❌ Gagal memperbarui Tim Pengajar di database!"); 
+            } finally {
+                btn.innerText = "Simpan Perubahan"; btn.disabled = false;
+            }
         }
         
         async function editSantri(halaqah, namaLama) { 
