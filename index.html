@@ -671,12 +671,14 @@
 
                 <div class="section-title" style="margin-top:20px;">Batas Hafalan</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <select id="input-surah" onchange="updateMateriUI('Awal')"></select>
-                    <select id="input-surah-akhir" onchange="updateMateriUI('Akhir')"></select>
+                    <input list="list-surah" id="input-surah" placeholder="🔍 Ketik Surah..." onchange="updateMateriUI('Awal')" onfocus="this.value=''">
+                    <input list="list-surah-akhir" id="input-surah-akhir" placeholder="🔍 Surah Akhir..." onchange="updateMateriUI('Akhir')" onfocus="this.value=''">
+                    <datalist id="list-surah"></datalist>
+                    <datalist id="list-surah-akhir"></datalist>
                 </div>
                 <div id="wadah-ayat" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <select id="input-ayat-awal"></select>
-                    <select id="input-ayat-akhir"></select>
+                    <input type="number" id="input-ayat-awal" placeholder="Ayat Awal" min="1" style="text-align:center;">
+                    <input type="number" id="input-ayat-akhir" placeholder="Ayat Akhir" min="1" style="text-align:center;">
                 </div>
 
                 <div class="section-title" style="margin-top:20px;">Penilaian Mutu</div>
@@ -1061,11 +1063,11 @@
                 document.getElementById('stars-'+id).innerHTML = h;
             });
             
-            let s1 = document.getElementById('input-surah'), s2 = document.getElementById('input-surah-akhir');
-            s1.innerHTML = s2.innerHTML = '<option value="">-- Surah --</option>';
+            let dls1 = document.getElementById('list-surah'), dls2 = document.getElementById('list-surah-akhir');
+            dls1.innerHTML = dls2.innerHTML = '';
             for(let k in dataSurahLengkap) { 
-                s1.appendChild(new Option(k,k)); 
-                s2.appendChild(new Option(k,k)); 
+                dls1.appendChild(new Option(k,k)); 
+                dls2.appendChild(new Option(k,k)); 
             }
             
             let gM = '', gO = '';
@@ -1872,23 +1874,30 @@
         function updateMateriUI(jenisTrigger) { 
             let a = document.getElementById('input-surah').value;
             let b = document.getElementById('input-surah-akhir').value; 
-            let selAkhir = document.getElementById('input-surah-akhir');
+            let listAkhir = document.getElementById('list-surah-akhir');
             
-            if(jenisTrigger === 'Awal' && a) {
-                selAkhir.innerHTML = '<option value="">-- Surah Akhir --</option>';
+            // Jika Ustadz mengetik Surah Awal, filter daftar Surah Akhir
+            if(jenisTrigger === 'Awal' && a && dataSurahLengkap[a]) {
+                listAkhir.innerHTML = '';
                 let isPassed = false;
                 for(let k in dataSurahLengkap) {
                     if (k === a) isPassed = true;
-                    if (isPassed) selAkhir.appendChild(new Option(k, k));
+                    if (isPassed) listAkhir.appendChild(new Option(k, k));
                 }
-                selAkhir.value = a; b = a;
+                document.getElementById('input-surah-akhir').value = a; 
+                b = a;
             }
 
+            // Sembunyikan kolom ayat jika Ustadz memilih murojaah penuh beda surah
             document.getElementById('wadah-ayat').style.display = (a && b && a!==b) ? 'none' : 'grid'; 
-            if(a) { 
+            
+            // Ubah tulisan bayangan (placeholder) agar Guru tahu batas maksimal ayat surah tersebut
+            if(a && dataSurahLengkap[a]) { 
                 let aw = document.getElementById('input-ayat-awal'), ak = document.getElementById('input-ayat-akhir'); 
-                aw.innerHTML = ak.innerHTML = '<option value="">-</option>'; 
-                for(let i=1; i<=dataSurahLengkap[a]; i++) { aw.appendChild(new Option(i,i)); ak.appendChild(new Option(i,i)); } 
+                aw.max = dataSurahLengkap[a]; 
+                ak.max = dataSurahLengkap[a]; 
+                aw.placeholder = `Ayat (1 - ${dataSurahLengkap[a]})`; 
+                ak.placeholder = `Ayat (1 - ${dataSurahLengkap[a]})`; 
             } 
         }
 
@@ -1921,10 +1930,21 @@
             let tglKirim = new Date(document.getElementById('tgl-quran').value).toLocaleDateString('id-ID');
             
             if(!h || !s || !sa) return alert("Lengkapi data!");
+            
+            // PROTEKSI 1: Cek apakah nama surah yang diketik valid
+            if(!dataSurahLengkap[sa]) return alert("⚠️ Nama Surah tidak valid! Pastikan Anda memilih dari daftar yang muncul saat mengetik.");
+
             if(sa && sk && sa !== sk) { aya = "Penuh"; sa = sa + " s/d " + sk; } 
             else { 
                 let aw = document.getElementById('input-ayat-awal').value, ak = document.getElementById('input-ayat-akhir').value; 
-                if(!aw || !ak) return alert("Pilih ayat!"); aya = aw === ak ? aw : aw + "-" + ak; 
+                if(!aw || !ak) return alert("Ketik nomor ayat!"); 
+                
+                // PROTEKSI 2: Cegah Guru menginput nomor ayat yang melebihi jumlah ayat surah
+                if(parseInt(aw) > dataSurahLengkap[sa] || parseInt(ak) > dataSurahLengkap[sa]) {
+                    return alert(`⚠️ Ayat maksimal untuk Surah ${sa} adalah ${dataSurahLengkap[sa]}!`);
+                }
+                
+                aya = aw === ak ? aw : aw + "-" + ak; 
             }
             
             let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
@@ -1932,19 +1952,14 @@
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
                 
-                if(!res.ok) {
-                    let errStr = await res.text();
-                    throw new Error(errStr); 
-                }
+                if(!res.ok) { let errStr = await res.text(); throw new Error(errStr); }
                 
                 alert("✅ Data Setoran Tersimpan!"); 
                 await muatUlangDataDiamDiam(); 
                 tampilkanKartuPrestasi();
             } catch(e) { 
                 alert("⚠️ GAGAL MENYIMPAN!\n\nAlasan Asli:\n" + e.message); 
-            } finally { 
-                btn.innerText = old; btn.disabled = false; 
-            }
+            } finally { btn.innerText = old; btn.disabled = false; }
         }
         
         async function simpanModulLain(modul) {
