@@ -1812,7 +1812,46 @@
                 } catch(e){ alert("Error"); } 
             } 
         }
+async function gantiNamaKelas(namaLama) { 
+            let namaBaru = prompt(`KENAIKAN KELAS / UBAH NAMA\n\nUbah nama kelas "${namaLama}" menjadi apa?\n(Perhatian: Semua murid dan riwayatnya akan otomatis dipindahkan ke kelas yang baru)`, namaLama); 
+            if(namaBaru && namaBaru.trim() !== "" && namaBaru !== namaLama) { 
+                let n = namaBaru.trim(); 
+                if(dbP[n]) return alert("⚠️ Nama kelas baru sudah ada di database!"); 
+                
+                try { 
+                    // Tembak 7 Tabel Supabase sekaligus!
+                    const tabel = ['kelas', 'murid', 'setoran', 'aisar', 'hadits', 'kosakata', 'pesan'];
+                    const queries = tabel.map(tbl => {
+                        let kolom = (tbl === 'kelas') ? 'nama_kelas' : 'kelas';
+                        return fetch(`${SUPABASE_URL}/rest/v1/${tbl}?${kolom}=eq.${encodeURIComponent(namaLama)}`, { 
+                            method: 'PATCH', 
+                            headers: REQ_HEADERS, 
+                            body: JSON.stringify({ [kolom]: n }) 
+                        });
+                    });
+                    
+                    await Promise.all(queries); 
 
+                    // Pindah data di memori antarmuka
+                    dbP[n] = dbP[namaLama]; 
+                    delete dbP[namaLama]; 
+                    dbKelasGuru[n] = dbKelasGuru[namaLama]; 
+                    delete dbKelasGuru[namaLama]; 
+                    
+                    // Segarkan riwayat di memori lokal agar guru tidak perlu refresh
+                    dRiw.forEach(r => { if(r.halaqah === namaLama) r.halaqah = n; });
+                    dRiwA.forEach(r => { if(r.halaqah === namaLama) r.halaqah = n; });
+                    dRiwH.forEach(r => { if(r.halaqah === namaLama) r.halaqah = n; });
+                    dRiwK.forEach(r => { if(r.halaqah === namaLama) r.halaqah = n; });
+                    dPesan.forEach(r => { if(r.kelas === namaLama) r.kelas = n; });
+
+                    renderTabelAdmin(); 
+                    alert(`✅ Mantap! Seluruh murid ${namaLama} telah resmi naik/pindah ke ${n}!`);
+                } catch(e) { 
+                    alert("❌ Gagal memindahkan kelas! Pastikan internet stabil dan SQL UPDATE sudah dijalankan."); 
+                } 
+            } 
+        }
         function renderTabelAdmin() {
             let g = '', h = '';
             dAkun.forEach(n => { 
@@ -1821,7 +1860,8 @@
             });
             for(let n in dbP) { 
                 const escapedHalaqah = n.replace(/'/g, "\\'"); 
-                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
+                // KUNCI PERUBAHAN: Penambahan tombol Ganti Nama Kelas (warna kuning)
+                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="gantiNamaKelas('${escapedHalaqah}')" class="btn-kecil" style="background:#FEF3C7; color:#D97706;" title="Ubah Nama/Kenaikan Kelas">🏷️</button><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;" title="Ubah Tim Pengajar">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;" title="Hapus Kelas">🗑️</button></div></div>`; 
             }
             document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; 
             document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
