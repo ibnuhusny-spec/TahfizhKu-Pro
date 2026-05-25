@@ -848,9 +848,17 @@
         </div>
 
         <div id="ortu-leaderboard" style="display:none; background: linear-gradient(135deg, #FFFBEB, #FFFFFF); border: 2px solid #FDE68A; border-radius:24px; padding:20px; position: relative; overflow: hidden; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(217,119,6,0.1);">
-            <div style="position:absolute; right:-10px; top:-10px; font-size:80px; opacity:0.05; filter:grayscale(100%);">🏆</div>
+            <div style="position:absolute; right:-10px; top:-10px; font-size:80px; opacity:0.05; filter:grayscale(100%);" id="ikon-bg-leaderboard">🏆</div>
+            
+            <div class="toggle-container" style="background: rgba(253, 230, 138, 0.4); border-radius: 12px; padding: 4px; margin-bottom:15px;">
+                <div id="btn-lb-quran" class="toggle-btn aktif-pilih" onclick="gantiLeaderboard('quran')" style="font-size:11px; padding:8px;">🏆 Qur'an</div>
+                <div id="btn-lb-aisar" class="toggle-btn" onclick="gantiLeaderboard('aisar')" style="font-size:11px; padding:8px;">📘 AISAR</div>
+                <div id="btn-lb-hadits" class="toggle-btn" onclick="gantiLeaderboard('hadits')" style="font-size:11px; padding:8px;">📜 Hadis</div>
+                <div id="btn-lb-arab" class="toggle-btn" onclick="gantiLeaderboard('arab')" style="font-size:11px; padding:8px;">🔤 Arab</div>
+            </div>
+
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; border-bottom: 2px dashed #FCD34D; padding-bottom:10px;">
-                <span style="font-size:24px;">🏆</span>
+                <span style="font-size:24px;" id="ikon-judul-leaderboard">🏆</span>
                 <div><h3 id="teks-judul-leaderboard" style="margin:0; color:#B45309; font-size:15px;">Bintang Hafalan Kelas</h3><span style="font-size:10px; color:#D97706; font-weight:800; text-transform:uppercase;">Top 10 Capaian Terbaik</span></div>
             </div>
             <div id="leaderboard-list"></div>
@@ -2070,21 +2078,115 @@
             let chatBox = document.getElementById('chat-box-ortu'); if(chatBox) chatBox.innerHTML = '';
         }
 
+        // Memori pengingat tab Leaderboard mana yang sedang dibuka
+        let lbModulAktif = 'quran';
+
+        // Fungsi baru untuk mengganti tab peringkat
+        function gantiLeaderboard(modul) {
+            lbModulAktif = modul;
+            
+            // Ubah warna tombol yang ditekan
+            ['quran', 'aisar', 'hadits', 'arab'].forEach(m => {
+                let btn = document.getElementById('btn-lb-' + m);
+                if(btn) {
+                    if(m === modul) btn.classList.add('aktif-pilih');
+                    else btn.classList.remove('aktif-pilih');
+                }
+            });
+            
+            // Render ulang peringkat sesuai tab yang diklik
+            let h = document.getElementById('ortu-pilih-halaqah').value;
+            if(h) renderLeaderboard(h);
+        }
+
+        // Fungsi Kalkulator Raksasa (Versi Baru)
         function renderLeaderboard(halaqah) {
             let lb = document.getElementById('ortu-leaderboard'), list = document.getElementById('leaderboard-list'), santris = dbP[halaqah] || [];
-            let teksJudul = document.getElementById('teks-judul-leaderboard'); if(teksJudul) teksJudul.innerText = "Bintang Hafalan - " + halaqah;
+            let teksJudul = document.getElementById('teks-judul-leaderboard'); 
+            let ikonKecil = document.getElementById('ikon-judul-leaderboard');
+            let ikonBesar = document.getElementById('ikon-bg-leaderboard');
+
+            // Atur Judul dan Ikon berdasarkan modul
+            let namaModul = "Bintang Hafalan"; let ikon = "🏆";
+            if (lbModulAktif === 'aisar') { namaModul = "Bintang AISAR"; ikon = "📘"; }
+            else if (lbModulAktif === 'hadits') { namaModul = "Bintang Hadis"; ikon = "📜"; }
+            else if (lbModulAktif === 'arab') { namaModul = "Bintang Kosakata"; ikon = "🔤"; }
+            
+            if(teksJudul) teksJudul.innerText = namaModul + " - " + halaqah;
+            if(ikonKecil) ikonKecil.innerText = ikon;
+            if(ikonBesar) ikonBesar.innerText = ikon;
+            
             let scores = santris.map(nama => {
-                let p = dProg[nama], jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0, poinMutu = 0;
-                dRiw.forEach(r => { if(r.santri === nama && r.status === 'Lanjut') { let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); poinMutu += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); } });
-                return { nama: nama, jCount: jCount, surah: (p ? p.surah : "-"), poin: poinMutu };
+                let poin = 0; let subTeks = ""; let jCount = 0;
+
+                // Hitung Poin Al-Qur'an (Berdasarkan Bintang Mutu x 2 jika Murojaah)
+                if (lbModulAktif === 'quran') {
+                    let p = dProg[nama];
+                    jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0;
+                    dRiw.forEach(r => { 
+                        if(r.santri === nama && r.status === 'Lanjut') { 
+                            let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); 
+                            poin += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); 
+                        } 
+                    });
+                    subTeks = jCount > 0 ? `${jCount} Juz` : "-";
+                } 
+                // Hitung Poin AISAR (Lanjut = +10, Ulang = +2)
+                else if (lbModulAktif === 'aisar') {
+                    dRiwA.forEach(r => {
+                        if (r.santri === nama) {
+                            if (r.status === 'Lanjut') poin += 10;
+                            else if (r.status === 'Ulang') poin += 2;
+                        }
+                    });
+                    subTeks = `${poin} Poin`;
+                }
+                // Hitung Poin Hadis (Sangat Lancar = +15, Cukup = +10, Ulang = +2)
+                else if (lbModulAktif === 'hadits') {
+                    dRiwH.forEach(r => {
+                        if (r.santri === nama) {
+                            if (r.status === 'Sangat Lancar') poin += 15;
+                            else if (r.status === 'Cukup') poin += 10;
+                            else if (r.status === 'Ulang') poin += 2;
+                        }
+                    });
+                    subTeks = `${poin} Poin`;
+                }
+                // Hitung Poin Kosakata Arab (Hafal = +10, Proses = +5)
+                else if (lbModulAktif === 'arab') {
+                    dRiwK.forEach(r => {
+                        if (r.santri === nama) {
+                            if (r.status === 'Hafal') poin += 10;
+                            else if (r.status === 'Proses') poin += 5;
+                        }
+                    });
+                    subTeks = `${poin} Poin`;
+                }
+
+                return { nama: nama, jCount: jCount, poin: poin, subTeks: subTeks };
             });
-            scores = scores.filter(x => x.jCount > 0 || x.poin > 0); scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || a.nama.localeCompare(b.nama)); 
+
+            // Seleksi dan Urutkan
+            if (lbModulAktif === 'quran') {
+                scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
+                scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || a.nama.localeCompare(b.nama)); 
+            } else {
+                scores = scores.filter(x => x.poin > 0);
+                scores.sort((a,b) => b.poin - a.poin || a.nama.localeCompare(b.nama));
+            }
+
             let top10 = scores.slice(0, 10);
-            if(top10.length === 0) { lb.style.display = 'none'; return; }
-            lb.style.display = 'block'; let html = '';
+            if(top10.length === 0) { list.innerHTML = '<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:20px;">Belum ada data peringkat untuk modul ini.</p>'; lb.style.display = 'block'; return; }
+            
+            lb.style.display = 'block'; 
+            let html = '';
             top10.forEach((item, index) => {
                 let medali = ''; if(index === 0) medali = '🥇'; else if(index === 1) medali = '🥈'; else if(index === 2) medali = '🥉'; else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;"><div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.jCount} Juz</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div></div></div>`;
+                
+                // Desain teks pembeda antara Qur'an (Juz + Poin) dengan Modul lain (Hanya Poin)
+                let highlightText = lbModulAktif === 'quran' ? `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks}</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div>` : `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks} ✨</div>`;
+
+                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;">${highlightText}</div></div>`;
             }); 
             list.innerHTML = html;
         }
