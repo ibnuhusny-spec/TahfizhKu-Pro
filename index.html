@@ -2100,13 +2100,35 @@
         }
 
         // Fungsi Kalkulator Raksasa (Versi Baru)
+        // Memori pengingat tab Leaderboard mana yang sedang dibuka
+        let lbModulAktif = 'quran';
+
+        // Fungsi untuk mengganti tab peringkat
+        function gantiLeaderboard(modul) {
+            lbModulAktif = modul;
+            
+            // Ubah warna aktif pada tombol toggle peringkat
+            ['quran', 'aisar', 'hadits', 'arab'].forEach(m => {
+                let btn = document.getElementById('btn-lb-' + m);
+                if(btn) {
+                    if(m === modul) btn.classList.add('aktif-pilih');
+                    else btn.classList.remove('aktif-pilih');
+                }
+            });
+            
+            // Panggil ulang data kelas yang sedang aktif dipantau orang tua
+            let h = document.getElementById('ortu-pilih-halaqah').value;
+            if(h) renderLeaderboard(h);
+        }
+
+        // KONTROLLER UTAMA: Kalkulator Peringkat Kronologis Dan Kebal Error
         function renderLeaderboard(halaqah) {
             let lb = document.getElementById('ortu-leaderboard'), list = document.getElementById('leaderboard-list'), santris = dbP[halaqah] || [];
             let teksJudul = document.getElementById('teks-judul-leaderboard'); 
             let ikonKecil = document.getElementById('ikon-judul-leaderboard');
             let ikonBesar = document.getElementById('ikon-bg-leaderboard');
 
-            // Atur Judul dan Ikon berdasarkan modul
+            // Atur nama judul dan ikon latar belakang secara otomatis
             let namaModul = "Bintang Hafalan"; let ikon = "🏆";
             if (lbModulAktif === 'aisar') { namaModul = "Bintang AISAR"; ikon = "📘"; }
             else if (lbModulAktif === 'hadits') { namaModul = "Bintang Hadis"; ikon = "📜"; }
@@ -2118,8 +2140,9 @@
             
             let scores = santris.map(nama => {
                 let poin = 0; let subTeks = ""; let jCount = 0;
+                let maxId = 0; // KUNCI UTAMA: Mencatat ID setoran terakhir murid untuk penentu kecepatan
 
-                // Hitung Poin Al-Qur'an (Berdasarkan Bintang Mutu x 2 jika Murojaah)
+                // 1. KALKULASI MODUL QUR'AN
                 if (lbModulAktif === 'quran') {
                     let p = dProg[nama];
                     jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0;
@@ -2127,63 +2150,97 @@
                         if(r.santri === nama && r.status === 'Lanjut') { 
                             let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); 
                             poin += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); 
+                            maxId = Math.max(maxId, parseInt(r.id) || 0); // Rekam ID barisnya
                         } 
                     });
                     subTeks = jCount > 0 ? `${jCount} Juz` : "-";
                 } 
-                // Hitung Poin AISAR (Lanjut = +10, Ulang = +2)
+                // 2. KALKULASI MODUL AISAR (Sistem Pembaca Kebal Error)
                 else if (lbModulAktif === 'aisar') {
                     dRiwA.forEach(r => {
                         if (r.santri === nama) {
-                            if (r.status === 'Lanjut') poin += 10;
-                            else if (r.status === 'Ulang') poin += 2;
+                            let st = r.status ? r.status.toString().toLowerCase() : '';
+                            if (st.includes('lanjut') || st.includes('lulus') || st.includes('selesai')) { 
+                                poin += 10; 
+                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            } else if (st.includes('ulang')) { 
+                                poin += 2; 
+                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            }
                         }
                     });
                     subTeks = `${poin} Poin`;
                 }
-                // Hitung Poin Hadis (Sangat Lancar = +15, Cukup = +10, Ulang = +2)
+                // 3. KALKULASI MODUL HADIS
                 else if (lbModulAktif === 'hadits') {
                     dRiwH.forEach(r => {
                         if (r.santri === nama) {
-                            if (r.status === 'Sangat Lancar') poin += 15;
-                            else if (r.status === 'Cukup') poin += 10;
-                            else if (r.status === 'Ulang') poin += 2;
+                            let st = r.status ? r.status.toString().toLowerCase() : '';
+                            if (st.includes('sangat') || st.includes('lancar')) { 
+                                poin += 15; 
+                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            } else if (st.includes('cukup')) { 
+                                poin += 10; 
+                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            } else if (st.includes('ulang') || st.includes('perlu')) { 
+                                poin += 2; 
+                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            }
                         }
                     });
                     subTeks = `${poin} Poin`;
                 }
-                // Hitung Poin Kosakata Arab (Hafal = +10, Proses = +5)
+                // 4. KALKULASI MODUL KOSAKATA ARAB (Perbaikan Kunci & Aktif Total)
                 else if (lbModulAktif === 'arab') {
                     dRiwK.forEach(r => {
                         if (r.santri === nama) {
-                            if (r.status === 'Hafal') poin += 10;
-                            else if (r.status === 'Proses') poin += 5;
+                            let st = r.status ? r.status.toString().toLowerCase() : '';
+                            // Mencakup kata "Hafal", "Sudah Hafal", "Lulus", dll.
+                            if (st.includes('hafal') && !st.includes('sedang')) { 
+                                poin += 10; 
+                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            } else if (st.includes('sedang') || st.includes('proses')) { 
+                                poin += 5; 
+                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            } else if (st === 'lanjut' || st === 'lulus' || st === 'selesai') {
+                                poin += 10;
+                                maxId = Math.max(maxId, parseInt(r.id) || 0);
+                            }
                         }
                     });
                     subTeks = `${poin} Poin`;
                 }
 
-                return { nama: nama, jCount: jCount, poin: poin, subTeks: subTeks };
+                return { nama: nama, jCount: jCount, poin: poin, subTeks: subTeks, maxId: maxId };
             });
 
-            // Seleksi dan Urutkan
+            // ELEMEN EMAS: Penyaringan dan Pengurutan Berdasarkan Kecepatan Waktu Menyetor
             if (lbModulAktif === 'quran') {
                 scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
-                scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || a.nama.localeCompare(b.nama)); 
+                // Urutan: Juz Terbanyak -> Poin Tertinggi -> ID Terkecil (Yang Mengisi Duluan) -> Alfabet Nama
+                scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || a.maxId - b.maxId || a.nama.localeCompare(b.nama)); 
             } else {
                 scores = scores.filter(x => x.poin > 0);
-                scores.sort((a,b) => b.poin - a.poin || a.nama.localeCompare(b.nama));
+                // Urutan: Poin Tertinggi -> ID Terkecil (Siapa Cepat Dia Di Atas!) -> Alfabet Nama
+                scores.sort((a,b) => b.poin - a.poin || a.maxId - b.maxId || a.nama.localeCompare(b.nama));
             }
 
             let top10 = scores.slice(0, 10);
-            if(top10.length === 0) { list.innerHTML = '<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:20px;">Belum ada data peringkat untuk modul ini.</p>'; lb.style.display = 'block'; return; }
+            if(top10.length === 0) { 
+                list.innerHTML = '<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:20px;">Belum ada riwayat capaian di papan peringkat ini.</p>'; 
+                lb.style.display = 'block'; 
+                return; 
+            }
             
             lb.style.display = 'block'; 
             let html = '';
             top10.forEach((item, index) => {
-                let medali = ''; if(index === 0) medali = '🥇'; else if(index === 1) medali = '🥈'; else if(index === 2) medali = '🥉'; else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
+                let medali = ''; 
+                if(index === 0) medali = '🥇'; 
+                else if(index === 1) medali = '🥈'; 
+                else if(index === 2) medali = '🥉'; 
+                else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
                 
-                // Desain teks pembeda antara Qur'an (Juz + Poin) dengan Modul lain (Hanya Poin)
                 let highlightText = lbModulAktif === 'quran' ? `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks}</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div>` : `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks} ✨</div>`;
 
                 html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;">${highlightText}</div></div>`;
