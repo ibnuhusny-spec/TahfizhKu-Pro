@@ -864,6 +864,13 @@
             <div id="leaderboard-list"></div>
         </div>
 
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; border-bottom: 2px dashed #FCD34D; padding-bottom:10px;">
+                <span style="font-size:24px;" id="ikon-judul-leaderboard">🏆</span>
+                <div><h3 id="teks-judul-leaderboard" style="margin:0; color:#B45309; font-size:15px;">Bintang Hafalan Kelas</h3><span style="font-size:10px; color:#D97706; font-weight:800; text-transform:uppercase;">Top 10 Capaian Terbaik</span></div>
+            </div>
+            <div id="leaderboard-list"></div>
+        </div>
+
         <div id="tab-ortu-quran" class="tab-content active">
             <div id="ortu-kartuPrestasi" class="card" style="display:none; border:2px dashed #E2E8F0; padding:20px;">
                 <div class="section-title" style="font-size:15px; margin-bottom:15px;">Pencapaian Ananda</div>
@@ -2115,8 +2122,7 @@
             if(ikonBesar) ikonBesar.innerText = ikon;
             
             let scores = santris.map(nama => {
-                let poin = 0; let subTeks = ""; let jCount = 0;
-                let maxId = 0; 
+                let poin = 0; let subTeks = ""; let jCount = 0; let maxId = 0; 
 
                 if (lbModulAktif === 'quran') {
                     let p = dProg[nama];
@@ -2125,7 +2131,7 @@
                         if(r.santri === nama && r.status === 'Lanjut') { 
                             let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); 
                             poin += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); 
-                            maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            maxId = Math.max(maxId, r.id || 0); 
                         } 
                     });
                     subTeks = jCount > 0 ? `${jCount} Juz` : "-";
@@ -2134,12 +2140,11 @@
                     dRiwA.forEach(r => {
                         if (r.santri === nama) {
                             let st = r.status ? r.status.toString().toLowerCase() : '';
-                            if (st.includes('lanjut') || st.includes('lulus') || st.includes('selesai')) { 
-                                poin += 10; 
-                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
-                            } else if (st.includes('ulang')) { 
-                                poin += 2; 
-                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            // SISTEM KEBAL: Cek apakah mengulang. Jika tidak, pasti dianggap lulus (+10)
+                            if (st.includes('ulang') || st.includes('belum')) { 
+                                poin += 2; maxId = Math.max(maxId, r.id || 0); 
+                            } else { 
+                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
                             }
                         }
                     });
@@ -2149,15 +2154,12 @@
                     dRiwH.forEach(r => {
                         if (r.santri === nama) {
                             let st = r.status ? r.status.toString().toLowerCase() : '';
-                            if (st.includes('sangat') || st.includes('lancar')) { 
-                                poin += 15; 
-                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                            if (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) { 
+                                poin += 2; maxId = Math.max(maxId, r.id || 0); 
                             } else if (st.includes('cukup')) { 
-                                poin += 10; 
-                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
-                            } else if (st.includes('ulang') || st.includes('perlu')) { 
-                                poin += 2; 
-                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
+                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
+                            } else { 
+                                poin += 15; maxId = Math.max(maxId, r.id || 0); 
                             }
                         }
                     });
@@ -2167,15 +2169,11 @@
                     dRiwK.forEach(r => {
                         if (r.santri === nama) {
                             let st = r.status ? r.status.toString().toLowerCase() : '';
-                            if (st.includes('hafal') && !st.includes('sedang')) { 
-                                poin += 10; 
-                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
-                            } else if (st.includes('sedang') || st.includes('proses')) { 
-                                poin += 5; 
-                                maxId = Math.max(maxId, parseInt(r.id) || 0); 
-                            } else if (st === 'lanjut' || st === 'lulus' || st === 'selesai') {
-                                poin += 10;
-                                maxId = Math.max(maxId, parseInt(r.id) || 0);
+                            // SISTEM KEBAL: Pokoknya kalau ada data Arab, otomatis dapat poin
+                            if (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) { 
+                                poin += 5; maxId = Math.max(maxId, r.id || 0); 
+                            } else { 
+                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
                             }
                         }
                     });
