@@ -1659,27 +1659,45 @@
             let d = document.getElementById('data-santri-baru').value.trim(); 
             if(!h || !d) return alert("⚠️ Pilih Kelas dan ketik nama!"); 
             
-            let lines = d.split('\n'); let arr = []; 
+            let lines = d.split('\n'); 
+            let arr = []; 
+            let adaDuplikat = false; // Detektor nama kembar
+            
             let btn = document.querySelector('#tab-admin-murid button'); 
             if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             
             try {
                 lines.forEach(n => { 
                     let nm = n.trim(); 
-                    if(nm !== "" && (!dbP[h] || !dbP[h].includes(nm))) { 
-                        arr.push({kelas: h, nama_murid: nm}); 
-                        if(dbP[h]) dbP[h].push(nm); 
+                    if(nm !== "") { 
+                        // Jika nama sudah ada di kelas tersebut, aktifkan alarm duplikat
+                        if (dbP[h] && dbP[h].includes(nm)) {
+                            adaDuplikat = true;
+                        } else {
+                            // Jika nama aman (unik), masukkan ke antrean
+                            arr.push({kelas: h, nama_murid: nm}); 
+                            if(dbP[h]) dbP[h].push(nm); 
+                        }
                     } 
                 }); 
                 
+                // Peringatkan admin jika ada nama yang ditolak
+                if (adaDuplikat) {
+                    alert("⚠️ INFO SISTEM:\nAda nama murid yang sama persis!\nSistem hanya menyimpan salah satu untuk mencegah data hafalan tertukar.\n\nSilakan bedakan nama yang kembar (Misal: 'Ahmad A' dan 'Ahmad B').");
+                }
+
+                // Lanjut menyimpan nama-nama yang lolos seleksi
                 if(arr.length > 0) { 
                     let res = await fetch(`${SUPABASE_URL}/rest/v1/murid`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
                     if(!res.ok) throw new Error(); 
                     document.getElementById('data-santri-baru').value = ''; 
                     renderTabelSantriAdmin(); 
                 }
-            } catch(e) { alert("Gagal menyimpan!"); } 
-            finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
+            } catch(e) { 
+                alert("Gagal menyimpan data ke Supabase!"); 
+            } finally { 
+                if(btn){ btn.innerText = "+"; btn.disabled = false; } 
+            }
         }
 
         async function hapusMaster(id, sh) { 
