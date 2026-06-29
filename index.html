@@ -485,6 +485,15 @@
 </head>
 <body>
 
+    <!-- === WADAH TERSEMBUNYI UNTUK LOGO SERTIFIKAT === -->
+    <img id="img-logo-sekolah" src="logo.png" style="display:none;" crossorigin="anonymous">
+    <img id="img-logo-kabupaten" src="logo_maros.png" style="display:none;" crossorigin="anonymous">
+    <!-- =============================================== -->
+
+    <div id="splash-screen">
+        <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23ffffff\' stroke-width=\'2\'><path d=\'M12 2L2 22h20L12 2z\'/></svg>'">
+        <div style="font-size: 13px; margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display:none;" id="teks-loading">Memuat Database...</div>
+    </div>
     <div id="splash-screen">
         <img src="logo.png" alt="Logo" class="splash-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23ffffff\' stroke-width=\'2\'><path d=\'M12 2L2 22h20L12 2z\'/></svg>'">
         <div style="font-size: 13px; margin-top: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; display:none;" id="teks-loading">Memuat Database...</div>
@@ -2331,6 +2340,22 @@ async function gantiNamaKelas(namaLama) {
             doc.setFillColor(250, 250, 250); doc.rect(0, 0, 297, 210, 'F');
             doc.setFillColor(...darkBlue); doc.triangle(0, 0, 90, 0, 0, 90, 'F'); doc.setFillColor(...lightBlue); doc.triangle(0, 0, 60, 0, 0, 60, 'F'); doc.setFillColor(...gold); doc.triangle(0, 30, 70, 100, 0, 170, 'F'); doc.setFillColor(...orange); doc.triangle(0, 110, 80, 210, 0, 210, 'F'); doc.setFillColor(...darkBlue); doc.triangle(0, 160, 50, 210, 0, 210, 'F'); doc.setFillColor(...darkBlue); doc.triangle(10, 80, 35, 105, 10, 130, 'F'); doc.triangle(10, 80, -15, 105, 10, 130, 'F');
             doc.setFillColor(...darkBlue); doc.triangle(297, 0, 230, 0, 297, 60, 'F'); doc.setFillColor(...gold); doc.triangle(297, 0, 260, 0, 297, 30, 'F'); doc.setFillColor(...darkBlue); doc.triangle(297, 100, 200, 210, 297, 210, 'F'); doc.setFillColor(...lightBlue); doc.triangle(297, 150, 240, 210, 297, 210, 'F');
+
+            // === KODE BARU: RENDER LOGO KOP ===
+            let logoSekolah = document.getElementById('img-logo-sekolah');
+            let logoKabupaten = document.getElementById('img-logo-kabupaten');
+
+            // Posisi X, Y, Lebar, Tinggi (dalam satuan milimeter)
+            if(logoSekolah && logoSekolah.complete && logoSekolah.naturalWidth !== 0) {
+                // Kiri Atas (Logo Sekolah)
+                doc.addImage(logoSekolah, 'PNG', 20, 12, 24, 24); 
+            }
+
+            if(logoKabupaten && logoKabupaten.complete && logoKabupaten.naturalWidth !== 0) {
+                // Kanan Atas (Logo Kabupaten)
+                doc.addImage(logoKabupaten, 'PNG', 253, 12, 24, 24); 
+            }
+            // ===================================
             
             doc.setTextColor(...black); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.text("YAYASAN PENDIDIKAN QURRATU A'YUN AL-ISLAMI MAROS", 148, 20, {align: "center"});
             doc.setTextColor(4, 120, 87); doc.setFontSize(22); doc.text("SDIT QURRATU A'YUN AL-ISLAMI", 148, 30, {align: "center"});
