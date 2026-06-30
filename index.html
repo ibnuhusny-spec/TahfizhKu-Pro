@@ -2368,7 +2368,21 @@ async function gantiNamaKelas(namaLama) {
 
             doc.setTextColor(...black); doc.setFontSize(16); doc.text(`Telah Menyelesaikan Tahfidzul Qur'an Juz ${juzCetak}`, 148, 111, {align: "center"});
 
-            doc.setFont("helvetica", "normal"); doc.setFontSize(12); let tglMasehi = new Date().toLocaleDateString('id-ID', { weekday:'long', year: 'numeric', month: 'long', day: 'numeric' }); doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148, 121, {align: "center"});
+            doc.setFont("helvetica", "normal"); 
+doc.setFontSize(12); 
+
+// --- AWAL MODIFIKASI TANGGAL CUSTOM ---
+let tglOtomatis = new Date().toLocaleDateString('id-ID', { weekday:'long', year: 'numeric', month: 'long', day: 'numeric' }); 
+let inputTgl = prompt(`Masukkan tanggal sertifikat untuk ananda ${nama}:\n(Anda bisa mengubahnya ke tanggal tasmi' masa lalu)`, tglOtomatis);
+
+// Jika pengguna menekan tombol Cancel/Batal, hentikan proses cetak
+if (inputTgl === null) return; 
+
+// Gunakan teks inputan, tapi jika dikosongkan secara tidak sengaja, kembali ke tanggal hari ini
+let tglMasehi = inputTgl.trim() !== "" ? inputTgl.trim() : tglOtomatis;
+// --- AKHIR MODIFIKASI TANGGAL CUSTOM ---
+
+doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148, 121, {align: "center"});
             doc.setFontSize(11); let paragraf = "Kepadanya kami berikan penghargaan setinggi - tingginya.\nSemoga tanda penghargaan ini menjadi motivasi untuk\nsenantiasa meningkatkan amal ibadahnya sesuai ketentuan\nAl-Qur'an dan As-Sunnah."; doc.text(paragraf, 148, 133, {align: "center", lineHeightFactor: 1.5});
 
             let cx = 248; let cy = 160;
