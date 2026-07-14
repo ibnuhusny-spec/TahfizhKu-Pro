@@ -723,6 +723,9 @@
                     <div id="p-ulang" class="status-pill" onclick="pilihStatus('Ulangi')">🔄 ULANG</div>
                 </div>
                 
+                <label style="margin-top:20px;">Catatan (Opsional)</label>
+                <textarea id="cat-quran" placeholder="Pesan evaluasi hafalan untuk wali murid..."></textarea>
+
                 <button id="btn-simpan-utama" onclick="simpanSetoran()" style="margin-top:25px;">💾 SIMPAN AL-QUR'AN</button>
             </div>
             <div class="section-title" style="justify-content:center; margin-top:30px;">Riwayat Input Terakhir</div>
@@ -2076,12 +2079,21 @@ async function gantiNamaKelas(namaLama) {
             
             let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
             try {
-                let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: "-" };
+                // MODIFIKASI 1: Menangkap isi catatan dari form html
+                let isiCatatan = document.getElementById('cat-quran').value || "-";
+                
+                // MODIFIKASI 2: Memasukkan isi catatan ke dalam payload yang dikirim ke Supabase
+                let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: isiCatatan };
+                
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
                 
                 if(!res.ok) { let errStr = await res.text(); throw new Error(errStr); }
                 
                 alert("✅ Data Setoran Tersimpan!"); 
+                
+                // MODIFIKASI 3: Mengosongkan kembali kolom catatan setelah berhasil disimpan
+                document.getElementById('cat-quran').value = ''; 
+                
                 await muatUlangDataDiamDiam(); 
                 tampilkanKartuPrestasi();
             } catch(e) { 
@@ -2156,7 +2168,8 @@ async function gantiNamaKelas(namaLama) {
                 }
 
                 let teksAyat = i.jenis === "Tasmi'" ? "" : ` (Ayat: ${i.ayat})`;
-                let teksNilai = i.jenis === "Tasmi'" ? "" : `<div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div>`;
+                let catatanTeks = i.catatan && i.catatan !== "-" ? `<div style="font-size:12px; font-style:italic; color:#D97706; margin-top:4px;">✏️ Catatan: ${i.catatan}</div>` : "";
+                let teksNilai = i.jenis === "Tasmi'" ? catatanTeks : `<div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div>${catatanTeks}`;
 
                 h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}</div><div class="list-card-title">📖 ${i.surah}${teksAyat}</div>${teksNilai}</div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
             }); 
