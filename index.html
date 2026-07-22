@@ -465,6 +465,31 @@
             .text-mobile { display: none; }
             .btn-icon-mobile { width: auto; padding: 12px; }
         }
+
+        /* DROPDOWN KUSTOM SURAH */
+        .dropdown-custom {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            border: 2px solid var(--emerald-light);
+            border-radius: 16px;
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.15);
+            margin-top: 5px;
+        }
+        .dropdown-item {
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .dropdown-item:hover { background: #ECFDF5; color: var(--emerald-logo); }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -690,8 +715,14 @@
 
                 <div class="section-title" style="margin-top:20px;">Batas Hafalan</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <select id="input-surah" onchange="updateMateriUI('Awal')"></select>
-                    <select id="input-surah-akhir" onchange="updateMateriUI('Akhir')"></select>
+                    <div style="position: relative;">
+                        <input type="text" id="input-surah" placeholder="🔍 Surah Awal..." onkeyup="filterSurah('Awal')" onclick="toggleListSurah('Awal')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-surah-awal" class="dropdown-custom hidden"></div>
+                    </div>
+                    <div style="position: relative;">
+                        <input type="text" id="input-surah-akhir" placeholder="🔍 Surah Akhir..." onkeyup="filterSurah('Akhir')" onclick="toggleListSurah('Akhir')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-surah-akhir" class="dropdown-custom hidden"></div>
+                    </div>
                 </div>
                 <div id="wadah-ayat" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <select id="input-ayat-awal" onchange="updateAyatAkhir()"></select>
@@ -1119,15 +1150,17 @@
                 document.getElementById('stars-'+id).innerHTML = h;
             });
             
-            let dls1 = document.getElementById('input-surah'), dls2 = document.getElementById('input-surah-akhir');
-            if(dls1 && dls2) {
-                dls1.innerHTML = '<option value="">🔍 Surah Awal...</option>';
-                dls2.innerHTML = '<option value="">🔍 Surah Akhir...</option>';
-                for(let k in dataSurahLengkap) { 
-                    dls1.appendChild(new Option(k,k)); 
-                    dls2.appendChild(new Option(k,k)); 
-                }
-            }
+            // Inisialisasi daftar surah custom
+            renderListSurah('Awal', Object.keys(dataSurahLengkap));
+            renderListSurah('Akhir', Object.keys(dataSurahLengkap));
+
+            // Perintah untuk menutup dropdown saat guru mengklik di luar kotak
+            document.addEventListener('click', function(e) {
+                let inAwal = document.getElementById('input-surah'), dropAwal = document.getElementById('dropdown-surah-awal');
+                let inAkhir = document.getElementById('input-surah-akhir'), dropAkhir = document.getElementById('dropdown-surah-akhir');
+                if(inAwal && dropAwal && !inAwal.contains(e.target) && !dropAwal.contains(e.target)) dropAwal.classList.add('hidden');
+                if(inAkhir && dropAkhir && !inAkhir.contains(e.target) && !dropAkhir.contains(e.target)) dropAkhir.classList.add('hidden');
+            });
             
             let gM = '', gO = '';
             for(let i=1; i<=30; i++){ 
@@ -1994,16 +2027,16 @@ async function gantiNamaKelas(namaLama) {
         function updateMateriUI(jenisTrigger) { 
             let a = document.getElementById('input-surah').value;
             let b = document.getElementById('input-surah-akhir').value; 
-            // Diarahkan langsung ke elemen select
-            let listAkhir = document.getElementById('input-surah-akhir'); 
             
+            // Menyortir batas surah akhir agar tidak mundur dari surah awal
             if(jenisTrigger === 'Awal' && a && dataSurahLengkap[a]) {
-                if(listAkhir) listAkhir.innerHTML = '<option value="">🔍 Surah Akhir...</option>';
                 let isPassed = false;
+                let validKeys = [];
                 for(let k in dataSurahLengkap) {
                     if (k === a) isPassed = true;
-                    if (isPassed && listAkhir) listAkhir.appendChild(new Option(k, k));
+                    if (isPassed) validKeys.push(k);
                 }
+                renderListSurah('Akhir', validKeys);
                 document.getElementById('input-surah-akhir').value = a; 
                 b = a;
             }
@@ -2011,7 +2044,7 @@ async function gantiNamaKelas(namaLama) {
             let wadah = document.getElementById('wadah-ayat');
             if(wadah) wadah.style.display = (a && b && a!==b) ? 'none' : 'grid'; 
             
-            // Mengisi menu pilihan Ayat Awal dan Akhir secara standar
+            // Mengisi menu pilihan Ayat Awal dan Akhir
             if(a && dataSurahLengkap[a]) { 
                 let aw = document.getElementById('input-ayat-awal'), ak = document.getElementById('input-ayat-akhir'); 
                 if(aw && ak) {
@@ -2022,6 +2055,52 @@ async function gantiNamaKelas(namaLama) {
                     } 
                 }
             } 
+        }
+
+        // ===============================================================
+        // FUNGSI BARU MESIN PENCARI SURAH (CUSTOM DROPDOWN)
+        // ===============================================================
+        function toggleListSurah(jenis) {
+            let dropId = jenis === 'Awal' ? 'dropdown-surah-awal' : 'dropdown-surah-akhir';
+            document.getElementById(dropId).classList.remove('hidden');
+        }
+
+        function filterSurah(jenis) {
+            let inputId = jenis === 'Awal' ? 'input-surah' : 'input-surah-akhir';
+            let val = document.getElementById(inputId).value.toLowerCase();
+            let arr = Object.keys(dataSurahLengkap).filter(k => k.toLowerCase().includes(val));
+            
+            if(jenis === 'Akhir') {
+                let a = document.getElementById('input-surah').value;
+                let keys = Object.keys(dataSurahLengkap);
+                let startIndex = keys.indexOf(a);
+                if(startIndex > -1) {
+                    let validKeys = keys.slice(startIndex);
+                    arr = validKeys.filter(k => k.toLowerCase().includes(val));
+                }
+            }
+            renderListSurah(jenis, arr);
+            toggleListSurah(jenis);
+        }
+
+        function pilihSurahCustom(nama, jenis) {
+            let inputId = jenis === 'Awal' ? 'input-surah' : 'input-surah-akhir';
+            let dropId = jenis === 'Awal' ? 'dropdown-surah-awal' : 'dropdown-surah-akhir';
+            
+            document.getElementById(inputId).value = nama;
+            document.getElementById(dropId).classList.add('hidden');
+            updateMateriUI(jenis);
+        }
+
+        function renderListSurah(jenis, arraySurah) {
+            let dropId = jenis === 'Awal' ? 'dropdown-surah-awal' : 'dropdown-surah-akhir';
+            let html = '';
+            arraySurah.forEach(s => {
+                let escapedS = s.replace(/'/g, "\\'");
+                html += `<div class="dropdown-item" onclick="pilihSurahCustom('${escapedS}', '${jenis}')">${s}</div>`;
+            });
+            if(html === '') html = `<div class="dropdown-item" style="color:var(--text-mute); text-align:center;">Surah tidak ditemukan</div>`;
+            document.getElementById(dropId).innerHTML = html;
         }
 
         // Menyortir Ayat Akhir berdasarkan Ayat Awal
