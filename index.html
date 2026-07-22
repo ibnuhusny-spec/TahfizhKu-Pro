@@ -2216,6 +2216,23 @@ async function gantiNamaKelas(namaLama) {
             document.getElementById('kartuPrestasi').style.display = s ? 'block' : 'none';
             let ws = document.getElementById('wadah-sertif-guru'); ws.innerHTML = '';
             
+            // === KODE TAMBAHAN: BERSIHKAN FORM SAAT GANTI MURID ===
+            document.getElementById('input-surah').value = '';
+            document.getElementById('input-surah-akhir').value = '';
+            document.getElementById('input-ayat-awal').innerHTML = '<option value="">- Ayat -</option>';
+            document.getElementById('input-ayat-akhir').innerHTML = '<option value="">- Ayat -</option>';
+            
+            let wadahAyat = document.getElementById('wadah-ayat');
+            if(wadahAyat) wadahAyat.style.display = 'grid';
+            
+            let catQuran = document.getElementById('cat-quran');
+            if(catQuran) catQuran.value = ''; // Membersihkan kolom catatan
+            
+            clearRating('tajwid');  // Mereset bintang tajwid
+            clearRating('lancar');  // Mereset bintang kelancaran
+            clearRating('makhraj'); // Mereset bintang makhraj
+            // =======================================================
+
             if(p) { 
                 setJuzUI(p.juz, false); 
                 let arrJuz = p.juz && p.juz !== "-" && p.juz !== "" ? p.juz.split(',').filter(x => x.trim() !== '') : []; 
