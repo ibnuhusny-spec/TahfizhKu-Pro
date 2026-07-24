@@ -768,10 +768,17 @@
         <div id="tab-guru-aisar" class="tab-content">
             <div class="card">
                 <div class="section-title">📘 Bimbingan AISAR</div>
-                <div style="position: relative;">
+                
+                <!-- INI ADALAH BLOK KELAS DAN MURID YANG BENAR -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="aisar-pilih-halaqah" onchange="updateDropdownSantriModul('aisar')"></select>
+                    <div style="position: relative;">
                         <input type="text" id="aisar-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('aisar')" onclick="toggleListSantri('aisar')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-aisar-santri" class="dropdown-custom hidden"></div>
                     </div>
+                </div>
+                <!-- ========================================== -->
+
                 <label>Tanggal</label><input type="date" id="tgl-aisar">
                 <label>Jilid & Halaman</label><input type="text" id="in-aisar" placeholder="Contoh: Jilid 2 Hal 15">
                 <label>Status</label>
@@ -787,10 +794,13 @@
         <div id="tab-guru-hadits" class="tab-content">
             <div class="card">
                 <div class="section-title" style="color:var(--gold-accent)">📜 Hafalan Hadis</div>
-                <div style="position: relative;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="hadits-pilih-halaqah" onchange="updateDropdownSantriModul('hadits')"></select>
+                    <div style="position: relative;">
                         <input type="text" id="hadits-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('hadits')" onclick="toggleListSantri('hadits')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-hadits-santri" class="dropdown-custom hidden"></div>
                     </div>
+                </div>
                 <label>Tanggal</label><input type="date" id="tgl-hadits">
                 <label>Nama Hadits</label><input type="text" id="in-hadits" placeholder="Contoh: Hadits Niat">
                 <label>Status</label>
@@ -807,10 +817,13 @@
         <div id="tab-guru-doa" class="tab-content">
             <div class="card">
                 <div class="section-title" style="color:#10B981">🤲 Hafalan Doa</div>
-                <div style="position: relative;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="doa-pilih-halaqah" onchange="updateDropdownSantriModul('doa')"></select>
+                    <div style="position: relative;">
                         <input type="text" id="doa-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('doa')" onclick="toggleListSantri('doa')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-doa-santri" class="dropdown-custom hidden"></div>
                     </div>
+                </div>
                 <label>Tanggal</label><input type="date" id="tgl-doa">
                 <label>Nama Doa Harian</label><input type="text" id="in-doa" placeholder="Contoh: Doa Sebelum Tidur">
                 <label>Status</label>
@@ -827,10 +840,13 @@
         <div id="tab-guru-arab" class="tab-content">
             <div class="card">
                 <div class="section-title" style="color:var(--cerulean-logo)">🔤 Kosakata Arab</div>
-                <div style="position: relative;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <select id="kosakata-pilih-halaqah" onchange="updateDropdownSantriModul('kosakata')"></select>
+                    <div style="position: relative;">
                         <input type="text" id="kosakata-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('kosakata')" onclick="toggleListSantri('kosakata')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-kosakata-santri" class="dropdown-custom hidden"></div>
                     </div>
+                </div>
                 <label>Tanggal</label><input type="date" id="tgl-kosakata">
                 <label>Materi / Kosakata</label><input type="text" id="in-kosakata" placeholder="Contoh: Anggota Tubuh (1-5)">
                 <label>Status</label>
