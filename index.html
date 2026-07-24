@@ -1139,7 +1139,26 @@
             }
         }
         
-        // Perintah untuk menutup dropdown saat guru mengklik di luar kotak
+        window.onload = async () => {
+            let wp = getSafeStorage('wp'); 
+            if(wp) setWallpaper(wp);
+            
+            let tzoffset = (new Date()).getTimezoneOffset() * 60000; 
+            let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+            let ds = localISOTime.split('T')[0]; 
+            document.querySelectorAll('input[type="date"]').forEach(e => e.value = ds);
+            
+            ['tajwid', 'lancar', 'makhraj'].forEach(id => {
+                let h = ''; 
+                for(let i=5; i>=1; i--) h += `<input type="radio" id="s${i}${id}" name="${id}" value="${i}"><label for="s${i}${id}">★</label>`;
+                document.getElementById('stars-'+id).innerHTML = h;
+            });
+            
+            // Inisialisasi daftar surah custom
+            renderListSurah('Awal', Object.keys(dataSurahLengkap));
+            renderListSurah('Akhir', Object.keys(dataSurahLengkap));
+
+            // Perintah untuk menutup dropdown saat guru mengklik di luar kotak
             document.addEventListener('click', function(e) {
                 // Penutup untuk Daftar Surah
                 let inAwal = document.getElementById('input-surah'), dropAwal = document.getElementById('dropdown-surah-awal');
@@ -1155,18 +1174,6 @@
                         dropSantri.classList.add('hidden');
                     }
                 });
-            });
-            
-            // Inisialisasi daftar surah custom
-            renderListSurah('Awal', Object.keys(dataSurahLengkap));
-            renderListSurah('Akhir', Object.keys(dataSurahLengkap));
-
-            // Perintah untuk menutup dropdown saat guru mengklik di luar kotak
-            document.addEventListener('click', function(e) {
-                let inAwal = document.getElementById('input-surah'), dropAwal = document.getElementById('dropdown-surah-awal');
-                let inAkhir = document.getElementById('input-surah-akhir'), dropAkhir = document.getElementById('dropdown-surah-akhir');
-                if(inAwal && dropAwal && !inAwal.contains(e.target) && !dropAwal.contains(e.target)) dropAwal.classList.add('hidden');
-                if(inAkhir && dropAkhir && !inAkhir.contains(e.target) && !dropAkhir.contains(e.target)) dropAkhir.classList.add('hidden');
             });
             
             let gM = '', gO = '';
