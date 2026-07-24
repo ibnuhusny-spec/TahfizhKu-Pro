@@ -676,7 +676,11 @@
             <div class="card">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div><label>Pilih Kelas</label><select id="muhaffiz-pilih-halaqah" onchange="updateDropdownSantriModul('muhaffiz')"></select></div>
-                    <div><label>Pilih Murid</label><select id="muhaffiz-pilih-santri" onchange="tampilkanKartuPrestasi()"><option value="">-- Murid --</option></select></div>
+                    <div style="position: relative;">
+                        <label>Pilih Murid</label>
+                        <input type="text" id="muhaffiz-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('muhaffiz')" onclick="toggleListSantri('muhaffiz')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-muhaffiz-santri" class="dropdown-custom hidden"></div>
+                    </div>
                 </div>
             </div>
 
@@ -1135,19 +1139,22 @@
             }
         }
         
-        window.onload = async () => {
-            let wp = getSafeStorage('wp'); 
-            if(wp) setWallpaper(wp);
-            
-            let tzoffset = (new Date()).getTimezoneOffset() * 60000; 
-            let localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
-            let ds = localISOTime.split('T')[0]; 
-            document.querySelectorAll('input[type="date"]').forEach(e => e.value = ds);
-            
-            ['tajwid', 'lancar', 'makhraj'].forEach(id => {
-                let h = ''; 
-                for(let i=5; i>=1; i--) h += `<input type="radio" id="s${i}${id}" name="${id}" value="${i}"><label for="s${i}${id}">★</label>`;
-                document.getElementById('stars-'+id).innerHTML = h;
+        // Perintah untuk menutup dropdown saat guru mengklik di luar kotak
+            document.addEventListener('click', function(e) {
+                // Penutup untuk Daftar Surah
+                let inAwal = document.getElementById('input-surah'), dropAwal = document.getElementById('dropdown-surah-awal');
+                let inAkhir = document.getElementById('input-surah-akhir'), dropAkhir = document.getElementById('dropdown-surah-akhir');
+                if(inAwal && dropAwal && !inAwal.contains(e.target) && !dropAwal.contains(e.target)) dropAwal.classList.add('hidden');
+                if(inAkhir && dropAkhir && !inAkhir.contains(e.target) && !dropAkhir.contains(e.target)) dropAkhir.classList.add('hidden');
+
+                // Penutup untuk Daftar Murid (Mendukung semua tab)
+                ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata'].forEach(prefix => {
+                    let inSantri = document.getElementById(prefix + '-pilih-santri');
+                    let dropSantri = document.getElementById('dropdown-' + prefix + '-santri');
+                    if(inSantri && dropSantri && !inSantri.contains(e.target) && !dropSantri.contains(e.target)) {
+                        dropSantri.classList.add('hidden');
+                    }
+                });
             });
             
             // Inisialisasi daftar surah custom
@@ -1372,11 +1379,25 @@
             let h = elKelas ? elKelas.value : '';
             
             if(elSantri) {
-                elSantri.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
-                if(h && dbP[h]) dbP[h].forEach(n => elSantri.appendChild(new Option(n, n))); 
-                
-                if(['aisar', 'hadits', 'doa', 'kosakata'].includes(prefix)) {
-                    elSantri.onchange = () => tampilkanRiwayatGuruModul(prefix);
+                // Deteksi jika elSantri adalah Dropdown Kustom (Input Text)
+                if (elSantri.tagName.toLowerCase() === 'input') {
+                    elSantri.value = ''; // Kosongkan teks pencarian
+                    let arrSantri = (h && dbP[h]) ? dbP[h] : [];
+                    renderListSantri(prefix, arrSantri);
+                    
+                    if(prefix === 'muhaffiz') {
+                        let kp = document.getElementById('kartuPrestasi');
+                        if(kp) kp.style.display = 'none'; 
+                        setJuzUI("", false);
+                    }
+                } else {
+                    // Logika bawaan untuk Dropdown Select biasa (Tab lain)
+                    elSantri.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
+                    if(h && dbP[h]) dbP[h].forEach(n => elSantri.appendChild(new Option(n, n))); 
+                    
+                    if(['aisar', 'hadits', 'doa', 'kosakata'].includes(prefix)) {
+                        elSantri.onchange = () => tampilkanRiwayatGuruModul(prefix);
+                    }
                 }
             }
             
@@ -1385,7 +1406,6 @@
                 if(box) box.innerHTML = '';
             }
         }
-
         function updateChatGuruSantri() { updateDropdownSantriModul('chat-guru'); }
 
         // --- SISTEM CHAT & FORUM ---
@@ -2101,6 +2121,53 @@ async function gantiNamaKelas(namaLama) {
             });
             if(html === '') html = `<div class="dropdown-item" style="color:var(--text-mute); text-align:center;">Surah tidak ditemukan</div>`;
             document.getElementById(dropId).innerHTML = html;
+        }
+
+    // ===============================================================
+        // FUNGSI MESIN PENCARI MURID (CUSTOM DROPDOWN)
+        // ===============================================================
+        function toggleListSantri(prefix) {
+            let dropId = 'dropdown-' + prefix + '-santri';
+            document.getElementById(dropId).classList.remove('hidden');
+        }
+
+        function filterSantri(prefix) {
+            let inputId = prefix + '-pilih-santri';
+            let val = document.getElementById(inputId).value.toLowerCase();
+            let elKelas = document.getElementById(prefix+'-pilih-halaqah') || document.getElementById(prefix+'-kelas');
+            let h = elKelas ? elKelas.value : '';
+            
+            let arrSantri = (h && dbP[h]) ? dbP[h] : [];
+            let filteredArr = arrSantri.filter(n => n.toLowerCase().includes(val));
+            renderListSantri(prefix, filteredArr);
+            toggleListSantri(prefix);
+        }
+
+        function pilihSantriCustom(nama, prefix) {
+            let inputId = prefix + '-pilih-santri';
+            let dropId = 'dropdown-' + prefix + '-santri';
+            
+            document.getElementById(inputId).value = nama;
+            document.getElementById(dropId).classList.add('hidden');
+            
+            if(prefix === 'muhaffiz') {
+                tampilkanKartuPrestasi();
+            }
+        }
+
+        function renderListSantri(prefix, arraySantri) {
+            let dropId = 'dropdown-' + prefix + '-santri';
+            let dropEl = document.getElementById(dropId);
+            if(!dropEl) return;
+
+            let html = '';
+            arraySantri.forEach(s => {
+                let escapedS = s.replace(/'/g, "\\'");
+                html += `<div class="dropdown-item" onclick="pilihSantriCustom('${escapedS}', '${prefix}')">${s}</div>`;
+            });
+            if(html === '') html = `<div class="dropdown-item" style="color:var(--text-mute); text-align:center;">${arraySantri.length === 0 ? "Pilih kelas dulu" : "Nama tidak ditemukan"}</div>`;
+            
+            dropEl.innerHTML = html;
         }
 
         // Menyortir Ayat Akhir berdasarkan Ayat Awal
