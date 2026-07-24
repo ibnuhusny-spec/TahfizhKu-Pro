@@ -875,10 +875,17 @@
                             <button onclick="muatUlangPesanOrtu()" style="background:var(--cerulean-logo); color:white; font-size:11px; padding:6px 12px; width:auto; margin:0; border-radius:8px; box-shadow:none;">🔄 <span class="text-mobile">Refresh</span></button>
                         </div>
                     </div>
+                    
+                    <!-- BLOK PENCARIAN MURID DI BUKU PENGHUBUNG -->
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                         <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
-                        <select id="chat-guru-santri" onchange="renderChatOrtu()"><option value="">-- Murid --</option></select>
+                        <div style="position: relative;">
+                            <input type="text" id="chat-guru-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('chat-guru')" onclick="toggleListSantri('chat-guru')" autocomplete="off" style="margin:0;">
+                            <div id="dropdown-chat-guru-santri" class="dropdown-custom hidden"></div>
+                        </div>
                     </div>
+                    <!-- ======================================== -->
+
                     <div class="chat-box" id="chat-box-guru"></div>
                     <div style="display:flex; gap:10px; align-items: flex-end;">
                         <textarea id="input-pesan-guru" placeholder="Ketik/Paste pesan untuk Orang Tua..." style="margin:0; resize:vertical; flex:1; height:60px;" rows="3"></textarea>
@@ -1183,7 +1190,7 @@
                 if(inAkhir && dropAkhir && !inAkhir.contains(e.target) && !dropAkhir.contains(e.target)) dropAkhir.classList.add('hidden');
 
                 // Penutup untuk Daftar Murid (Mendukung semua tab)
-                ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata'].forEach(prefix => {
+                ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata', 'chat-guru'].forEach(prefix => {
                     let inSantri = document.getElementById(prefix + '-pilih-santri');
                     let dropSantri = document.getElementById('dropdown-' + prefix + '-santri');
                     if(inSantri && dropSantri && !inSantri.contains(e.target) && !dropSantri.contains(e.target)) {
@@ -2173,8 +2180,13 @@ async function gantiNamaKelas(namaLama) {
             document.getElementById(inputId).value = nama;
             document.getElementById(dropId).classList.add('hidden');
             
+            // PENTING: Memicu pemuatan data sesuai tab yang sedang aktif
             if(prefix === 'muhaffiz') {
                 tampilkanKartuPrestasi();
+            } else if(['aisar', 'hadits', 'doa', 'kosakata'].includes(prefix)) {
+                tampilkanRiwayatGuruModul(prefix);
+            } else if(prefix === 'chat-guru') {
+                renderChatOrtu(); // Memuat chat saat nama diklik
             }
         }
 
