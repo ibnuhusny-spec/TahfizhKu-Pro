@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TahfizhKu Pro - SDIT Qurratu A'yun Al-Islami</title>
+    <title>TahfizhKu Pro v2.0 (Cetak Semua Modul) - SDIT Qurratu A'yun Al-Islami</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -660,6 +660,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="margin: 0; color: var(--emerald-logo);">Panel Guru</h2>
             <div style="display:flex; gap:10px;">
+                <button onclick="bukaModalLaporan()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; font-size:18px; box-shadow:none;" title="Pusat Cetak Laporan">🖨️</button>
                 <button onclick="bukaModalTTD()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #F8FAFC; color: #D97706; border: 1px solid #E2E8F0; font-size:18px; box-shadow:none;" title="Pengaturan Tanda Tangan">✍️</button>
                 <button onclick="bukaModalWallpaper()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #F8FAFC; color: var(--cerulean-logo); border: 1px solid #E2E8F0; font-size:18px; box-shadow:none;" title="Ganti Wallpaper">🖼️</button>
                 <button onclick="bukaModalGantiSandi()" style="width: 45px; height: 42px; padding: 0; border-radius: 50%; background: #F8FAFC; color: var(--emerald-logo); border: 1px solid #E2E8F0; font-size:18px; box-shadow:none;" title="Ganti Sandi">🔑</button>
@@ -1035,7 +1036,7 @@
     </div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 6)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
     
-    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
+    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 <script>
         const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
@@ -2272,8 +2273,9 @@ async function gantiNamaKelas(namaLama) {
                 
                 alert("✅ Data Setoran Tersimpan!"); 
                 
-                // MODIFIKASI 3: Mengosongkan kembali kolom catatan setelah berhasil disimpan
+                // MODIFIKASI 3: Mengosongkan kembali kolom catatan & nama santri setelah berhasil disimpan
                 document.getElementById('cat-quran').value = ''; 
+                document.getElementById('muhaffiz-pilih-santri').value = '';
                 
                 await muatUlangDataDiamDiam(); 
                 tampilkanKartuPrestasi();
@@ -2302,6 +2304,7 @@ async function gantiNamaKelas(namaLama) {
                 alert("✅ Data Tersimpan!"); 
                 document.getElementById('in-'+modul).value = '';
                 document.getElementById('cat-'+modul).value = '';
+                document.getElementById(modul+'-pilih-santri').value = '';
                 await muatUlangDataDiamDiam();
                 
                 tampilkanRiwayatGuruModul(modul);
@@ -2698,38 +2701,105 @@ doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148
         }
         
         function prosesCetak(t) {
-            let j = document.getElementById('jenis-laporan').value, th = document.getElementById('pilih-halaqah-laporan').value, ts = document.getElementById('pilih-santri-laporan').value, pj = document.getElementById('penanggung-jawab').value || "Admin Pusat"; 
+            let j = document.getElementById('jenis-laporan').value, 
+                th = document.getElementById('pilih-halaqah-laporan').value, 
+                ts = document.getElementById('pilih-santri-laporan').value, 
+                pj = document.getElementById('penanggung-jawab').value || "Admin Pusat",
+                kat = document.getElementById('kategori-laporan') ? document.getElementById('kategori-laporan').value : "quran"; 
             let tgl = document.getElementById('tanggal-laporan').value || new Date().toLocaleDateString('id-ID');
-            let d = dRiw.filter(i => (j==='halaqah' ? i.halaqah===th : j==='santri' ? (i.halaqah===th && i.santri===ts) : true)); 
-            if(d.length===0) return alert("Tidak ada data untuk dicetak!");
             
-            let h = [["No","Waktu","Kelas","Nama Murid","Jenis","Juz","Surah/Ayat","Nilai(T,L,M)","Status"]]; 
-            let b = d.map((i,idx)=>[idx+1,i.tgl,i.halaqah,i.santri,i.jenis,i.juz,`${i.surah}:${i.ayat}`,`T:${i.tajwid},L:${i.lancar},M:${i.makhraj}`,i.status]);
+            const filterFn = (arr) => arr.filter(i => (j === 'halaqah' ? i.halaqah === th : j === 'santri' ? (i.halaqah === th && i.santri === ts) : true));
+
+            let titleDoc = "";
+            let sheetName = "";
+            let h = [];
+            let b = [];
+            let colWidths = [];
+
+            if (kat === 'quran') {
+                titleDoc = "LAPORAN CAPAIAN TAHFIZH AL-QUR'AN";
+                sheetName = "Laporan_Quran";
+                let d = filterFn(dRiw);
+                if (d.length === 0) return alert("Tidak ada data Al-Qur'an untuk dicetak!");
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Jenis", "Juz", "Surah/Ayat", "Nilai(T,L,M)", "Status"]];
+                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.jenis, i.juz, `${i.surah}:${i.ayat}`, `T:${i.tajwid},L:${i.lancar},M:${i.makhraj}`, i.status]);
+                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 15}, {wch: 10}, {wch: 25}, {wch: 18}, {wch: 12}];
+            } else if (kat === 'hadits') {
+                titleDoc = "LAPORAN CAPAIAN HAFALAN HADIS";
+                sheetName = "Laporan_Hadis";
+                let d = filterFn(dRiwH);
+                if (d.length === 0) return alert("Tidak ada data Hadis untuk dicetak!");
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Hadits", "Status", "Catatan"]];
+                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
+                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+            } else if (kat === 'doa') {
+                titleDoc = "LAPORAN CAPAIAN HAFALAN DOA HARIAN";
+                sheetName = "Laporan_Doa";
+                let d = filterFn(dRiwD);
+                if (d.length === 0) return alert("Tidak ada data Doa Harian untuk dicetak!");
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Doa", "Status", "Catatan"]];
+                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
+                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+            } else if (kat === 'aisar') {
+                titleDoc = "LAPORAN CAPAIAN BACAAN AISAR";
+                sheetName = "Laporan_Aisar";
+                let d = filterFn(dRiwA);
+                if (d.length === 0) return alert("Tidak ada data Aisar untuk dicetak!");
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Halaman / Materi", "Status", "Catatan"]];
+                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
+                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+            } else if (kat === 'kosakata') {
+                titleDoc = "LAPORAN CAPAIAN KOSAKATA BAHASA ARAB";
+                sheetName = "Laporan_Arab";
+                let d = filterFn(dRiwK);
+                if (d.length === 0) return alert("Tidak ada data Bahasa Arab untuk dicetak!");
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Kosakata / Materi", "Status", "Catatan"]];
+                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
+                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+            } else if (kat === 'semua') {
+                titleDoc = "LAPORAN GABUNGAN CAPAIAN SANTRI";
+                sheetName = "Laporan_Gabungan";
+                
+                let combined = [];
+                filterFn(dRiw).forEach(i => combined.push({ modul: "Al-Qur'an", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: `${i.jenis} - Juz ${i.juz} (${i.surah}:${i.ayat}) [T:${i.tajwid},L:${i.lancar},M:${i.makhraj}]`, status: i.status, catatan: i.catatan || "-" }));
+                filterFn(dRiwH).forEach(i => combined.push({ modul: "Hadis", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
+                filterFn(dRiwD).forEach(i => combined.push({ modul: "Doa Harian", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
+                filterFn(dRiwA).forEach(i => combined.push({ modul: "Aisar", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
+                filterFn(dRiwK).forEach(i => combined.push({ modul: "Bahasa Arab", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
+
+                if (combined.length === 0) return alert("Tidak ada data untuk dicetak!");
+                
+                h = [["No", "Kategori Modul", "Waktu", "Kelas", "Nama Murid", "Detail / Materi", "Status", "Catatan"]];
+                b = combined.map((i, idx) => [idx + 1, i.modul, i.tgl, i.halaqah, i.santri, i.detail, i.status, i.catatan]);
+                colWidths = [{wch: 5}, {wch: 15}, {wch: 15}, {wch: 22}, {wch: 22}, {wch: 35}, {wch: 12}, {wch: 25}];
+            }
             
-            if(t==='Excel'){ 
+            if (t === 'Excel') { 
                 let wb = XLSX.utils.book_new(); 
                 let finalData = [
                     ["SDIT QURRATU A'YUN AL-ISLAMI MAROS"],
-                    ["LAPORAN CAPAIAN TAHFIZH QUR'AN"],
+                    [titleDoc],
                     ["Tanggal Cetak:", tgl, "", "Penanggung Jawab:", pj],
                     [] 
                 ];
                 finalData = finalData.concat([h[0]], b);
                 let ws = XLSX.utils.aoa_to_sheet(finalData); 
                 
-                ws['!cols'] = [
-                    {wch: 5}, {wch: 15}, {wch: 28}, {wch: 28}, {wch: 15}, 
-                    {wch: 10}, {wch: 25}, {wch: 18}, {wch: 12} 
-                ];
+                ws['!cols'] = colWidths;
                 
-                XLSX.utils.book_append_sheet(wb, ws, "Laporan_Tahfizh"); 
-                XLSX.writeFile(wb, `Laporan_${tgl}.xlsx`); 
+                XLSX.utils.book_append_sheet(wb, ws, sheetName); 
+                XLSX.writeFile(wb, `${sheetName}_${tgl.replace(/\//g, '-')}.xlsx`); 
             } else { 
-                const {jsPDF}=window.jspdf; let doc=new jsPDF('l'); 
-                doc.setFontSize(16); doc.setTextColor(4, 120, 87); doc.text("Laporan Capaian Tahfiz - SDIT Qurratu A'yun", 14, 15); 
-                doc.setFontSize(11); doc.setTextColor(100, 116, 139); doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 23); 
-                doc.autoTable({head:h, body:b, startY:28, theme:'grid', headStyles:{fillColor:[4,120,87]}}); 
-                doc.save(`Laporan_${tgl}.pdf`); 
+                const { jsPDF } = window.jspdf; 
+                let doc = new jsPDF('l'); 
+                doc.setFontSize(15); 
+                doc.setTextColor(4, 120, 87); 
+                doc.text(`${titleDoc} - SDIT Qurratu A'yun`, 14, 15); 
+                doc.setFontSize(10); 
+                doc.setTextColor(100, 116, 139); 
+                doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 22); 
+                doc.autoTable({ head: h, body: b, startY: 26, theme: 'grid', headStyles: { fillColor: [4, 120, 87] } }); 
+                doc.save(`${sheetName}_${tgl.replace(/\//g, '-')}.pdf`); 
             }
             tutupModalLaporan();
         }
