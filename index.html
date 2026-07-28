@@ -1056,6 +1056,15 @@
         surahStr.split(',').forEach(s => { let p = s.split(':'); dataSurahLengkap[p[0]] = parseInt(p[1]); });
 
         // FUNGSI UTILITIES
+        function formatTanggalId(dateVal) {
+            if(!dateVal) return new Date().toLocaleDateString('id-ID');
+            let parts = String(dateVal).split('-');
+            if(parts.length === 3) {
+                return `${parseInt(parts[2])}/${parseInt(parts[1])}/${parts[0]}`;
+            }
+            return new Date(dateVal).toLocaleDateString('id-ID');
+        }
+
         function getSafeStorage(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
         function setSafeStorage(key, val) { try { localStorage.setItem(key, val); } catch(e) { } }
         function removeSafeStorage(key) { try { localStorage.removeItem(key); } catch(e) { } }
@@ -2164,14 +2173,22 @@ async function gantiNamaKelas(namaLama) {
 
         function filterSantri(prefix) {
             let inputId = prefix + '-pilih-santri';
-            let val = document.getElementById(inputId).value.toLowerCase();
+            let val = document.getElementById(inputId).value.trim();
             let elKelas = document.getElementById(prefix+'-pilih-halaqah') || document.getElementById(prefix+'-kelas');
             let h = elKelas ? elKelas.value : '';
             
             let arrSantri = (h && dbP[h]) ? dbP[h] : [];
-            let filteredArr = arrSantri.filter(n => n.toLowerCase().includes(val));
+            let filteredArr = arrSantri.filter(n => n.toLowerCase().includes(val.toLowerCase()));
             renderListSantri(prefix, filteredArr);
             toggleListSantri(prefix);
+
+            if (val && arrSantri.some(n => n.toLowerCase() === val.toLowerCase())) {
+                if(prefix === 'muhaffiz') {
+                    tampilkanKartuPrestasi();
+                } else if(['aisar', 'hadits', 'doa', 'kosakata'].includes(prefix)) {
+                    tampilkanRiwayatGuruModul(prefix);
+                }
+            }
         }
 
         function pilihSantriCustom(nama, prefix) {
@@ -2247,7 +2264,7 @@ async function gantiNamaKelas(namaLama) {
             let sa = document.getElementById('input-surah').value;
             let sk = document.getElementById('input-surah-akhir').value;
             let aya = "";
-            let tglKirim = new Date(document.getElementById('tgl-quran').value).toLocaleDateString('id-ID');
+            let tglKirim = formatTanggalId(document.getElementById('tgl-quran').value);
             
             if(!h || !s || !sa) return alert("Lengkapi data!");
             if(!dataSurahLengkap[sa]) return alert("⚠️ Nama Surah tidak valid!");
@@ -2261,10 +2278,7 @@ async function gantiNamaKelas(namaLama) {
             
             let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
             try {
-                // MODIFIKASI 1: Menangkap isi catatan dari form html
                 let isiCatatan = document.getElementById('cat-quran').value || "-";
-                
-                // MODIFIKASI 2: Memasukkan isi catatan ke dalam payload yang dikirim ke Supabase
                 let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: isiCatatan };
                 
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
@@ -2273,9 +2287,14 @@ async function gantiNamaKelas(namaLama) {
                 
                 alert("✅ Data Setoran Tersimpan!"); 
                 
-                // MODIFIKASI 3: Mengosongkan kembali kolom catatan & nama santri setelah berhasil disimpan
                 document.getElementById('cat-quran').value = ''; 
-                document.getElementById('muhaffiz-pilih-santri').value = '';
+                document.getElementById('input-surah').value = '';
+                document.getElementById('input-surah-akhir').value = '';
+                document.getElementById('input-ayat-awal').value = '';
+                document.getElementById('input-ayat-akhir').value = '';
+                clearRating('tajwid');
+                clearRating('lancar');
+                clearRating('makhraj');
                 
                 await muatUlangDataDiamDiam(); 
                 tampilkanKartuPrestasi();
@@ -2293,7 +2312,8 @@ async function gantiNamaKelas(namaLama) {
             if(btn) { btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true; }
             
             try {
-                let pay = { waktu: new Date(document.getElementById('tgl-'+modul).value).toLocaleDateString('id-ID'), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
+                let dateVal = document.getElementById('tgl-'+modul).value;
+                let pay = { waktu: formatTanggalId(dateVal), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
                 
                 if(!res.ok) {
@@ -2304,7 +2324,6 @@ async function gantiNamaKelas(namaLama) {
                 alert("✅ Data Tersimpan!"); 
                 document.getElementById('in-'+modul).value = '';
                 document.getElementById('cat-'+modul).value = '';
-                document.getElementById(modul+'-pilih-santri').value = '';
                 await muatUlangDataDiamDiam();
                 
                 tampilkanRiwayatGuruModul(modul);
@@ -2317,11 +2336,11 @@ async function gantiNamaKelas(namaLama) {
 
         function tampilkanKartuPrestasi() {
             let s = document.getElementById('muhaffiz-pilih-santri').value;
-            let p = dProg[s]; 
+            let p = dProg[s] || (s ? Object.values(dProg).find(item => item.nama && item.nama.trim().toLowerCase() === s.trim().toLowerCase()) : null); 
             document.getElementById('kartuPrestasi').style.display = s ? 'block' : 'none';
             let ws = document.getElementById('wadah-sertif-guru'); ws.innerHTML = '';
             
-            // === KODE TAMBAHAN: BERSIHKAN FORM SAAT GANTI MURID ===
+            // === BERSIHKAN FORM SAAT GANTI MURID ===
             document.getElementById('input-surah').value = '';
             document.getElementById('input-surah-akhir').value = '';
             document.getElementById('input-ayat-awal').innerHTML = '<option value="">- Ayat -</option>';
@@ -2331,12 +2350,11 @@ async function gantiNamaKelas(namaLama) {
             if(wadahAyat) wadahAyat.style.display = 'grid';
             
             let catQuran = document.getElementById('cat-quran');
-            if(catQuran) catQuran.value = ''; // Membersihkan kolom catatan
+            if(catQuran) catQuran.value = '';
             
-            clearRating('tajwid');  // Mereset bintang tajwid
-            clearRating('lancar');  // Mereset bintang kelancaran
-            clearRating('makhraj'); // Mereset bintang makhraj
-            // =======================================================
+            clearRating('tajwid');
+            clearRating('lancar');
+            clearRating('makhraj');
 
             if(p) { 
                 setJuzUI(p.juz, false); 
@@ -2353,7 +2371,7 @@ async function gantiNamaKelas(namaLama) {
             }
             
             let h = ''; 
-            dRiw.filter(i => i.santri === s).forEach(i => { 
+            dRiw.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => { 
                 let statusLabel = i.status === 'Lanjut' ? 'LULUS' : 'ULANG';
                 let statusColor = i.status === 'Lanjut' ? 'var(--emerald-logo)' : '#EF4444';
                 
@@ -2562,14 +2580,14 @@ async function gantiNamaKelas(namaLama) {
                 setJuzUI("", true); document.getElementById('ortu-infoJuz').innerText = "0"; document.getElementById('ortu-infoSurah').innerText = "-"; 
             }
             
-            dRiw.filter(i => i.santri === s).forEach(i => {
+            dRiw.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => {
                 let badge = i.jenis === 'Murojaah' ? `<span style="color:#0284C7; font-weight:800; font-size:11px;">🔄 Muroja'ah</span>` : `<span style="color:#059669; font-weight:800; font-size:11px;">⭐ Ziyadah</span>`;
                 h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat})</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div></div>`;
             }); 
             document.getElementById('list-ortu-quran').innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat setoran.</p></div>';
 
             let renderRiwayatLain = (arr, id, ikon) => {
-                let html = ''; arr.filter(i => i.santri === s).forEach(i => { html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan}</div></div><div style="font-weight:900;">${i.status}</div></div>`; });
+                let html = ''; arr.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => { html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan}</div></div><div style="font-weight:900;">${i.status}</div></div>`; });
                 document.getElementById(id).innerHTML = html || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat.</p></div>';
             };
             renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘'); 
@@ -2706,9 +2724,9 @@ doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148
                 ts = document.getElementById('pilih-santri-laporan').value, 
                 pj = document.getElementById('penanggung-jawab').value || "Admin Pusat",
                 kat = document.getElementById('kategori-laporan') ? document.getElementById('kategori-laporan').value : "quran"; 
-            let tgl = document.getElementById('tanggal-laporan').value || new Date().toLocaleDateString('id-ID');
+            let tgl = formatTanggalId(document.getElementById('tanggal-laporan').value);
             
-            const filterFn = (arr) => arr.filter(i => (j === 'halaqah' ? i.halaqah === th : j === 'santri' ? (i.halaqah === th && i.santri === ts) : true));
+            const filterFn = (arr) => arr.filter(i => (j === 'halaqah' ? (i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase()) : j === 'santri' ? (i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase() && i.santri && ts && i.santri.trim().toLowerCase() === ts.trim().toLowerCase()) : true));
 
             let titleDoc = "";
             let sheetName = "";
@@ -2954,7 +2972,7 @@ doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148
             let ikon = modul === 'aisar' ? '📘' : (modul === 'hadits' ? '📜' : (modul === 'doa' ? '🤲' : '🔤'));
             
             let html = '';
-            arr.filter(i => i.santri === s).forEach(i => {
+            arr.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => {
                 html += `<div class="list-card" style="border-left: 5px solid var(--emerald-logo);"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">Catatan: ${i.catatan}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center;"><div style="font-weight:900; color:var(--emerald-logo);">${i.status}</div><button onclick="hapusRiwayat(${i.id}, '${modul}'); setTimeout(() => tampilkanRiwayatGuruModul('${modul}'), 800);" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; margin-top:5px; box-shadow:none;">🗑️ Batal</button></div></div>`;
             });
             wadah.innerHTML = html || '<p style="text-align:center; color:var(--text-mute); font-size:13px;">Belum ada riwayat untuk murid ini.</p>';
