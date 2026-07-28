@@ -970,7 +970,11 @@
                     <input type="text" id="ortu-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('ortu')" onclick="toggleListHalaqah('ortu')" autocomplete="off" style="margin:0;">
                     <div id="dropdown-ortu-halaqah" class="dropdown-custom hidden"></div>
                 </div>
-                <div><label>Pilih Ananda</label><select id="ortu-pilih-santri" onchange="tampilkanDataOrtu()"><option value="">-- Murid --</option></select></div>
+                <div style="position: relative;">
+                    <label>Pilih Ananda</label>
+                    <input type="text" id="ortu-pilih-santri" placeholder="🔍 Cari Ananda..." onkeyup="filterSantri('ortu')" onclick="toggleListSantri('ortu')" autocomplete="off" style="margin:0;">
+                    <div id="dropdown-ortu-santri" class="dropdown-custom hidden"></div>
+                </div>
             </div>
         </div>
 
@@ -1063,7 +1067,7 @@
     </div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 6)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
     
-    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
+    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 <script>
         const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
@@ -1227,8 +1231,9 @@
                 if(inAkhir && dropAkhir && !inAkhir.contains(e.target) && !dropAkhir.contains(e.target)) dropAkhir.classList.add('hidden');
 
                 // Penutup untuk Daftar Murid
-                ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata', 'chat-guru'].forEach(prefix => {
-                    let inSantri = document.getElementById(prefix + '-pilih-santri');
+                ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata', 'chat-guru', 'ortu', 'laporan'].forEach(prefix => {
+                    let inputId = prefix === 'laporan' ? 'pilih-santri-laporan' : prefix + '-pilih-santri';
+                    let inSantri = document.getElementById(inputId);
                     let dropSantri = document.getElementById('dropdown-' + prefix + '-santri');
                     if(inSantri && dropSantri && !inSantri.contains(e.target) && !dropSantri.contains(e.target)) {
                         dropSantri.classList.add('hidden');
@@ -2279,12 +2284,17 @@ async function gantiNamaKelas(namaLama) {
         }
 
         function filterSantri(prefix) {
-            let inputId = prefix + '-pilih-santri';
-            let val = document.getElementById(inputId).value.trim();
-            let elKelas = document.getElementById(prefix+'-pilih-halaqah') || document.getElementById(prefix+'-kelas');
+            let inputId = prefix === 'laporan' ? 'pilih-santri-laporan' : prefix + '-pilih-santri';
+            let elInput = document.getElementById(inputId);
+            if(!elInput) return;
+
+            let val = elInput.value.trim();
+            let elKelas = (prefix === 'laporan') ? document.getElementById('pilih-halaqah-laporan') : (document.getElementById(prefix+'-pilih-halaqah') || document.getElementById(prefix+'-kelas'));
             let h = elKelas ? elKelas.value : '';
             
-            let arrSantri = (h && dbP[h]) ? dbP[h] : [];
+            let matchedKey = h ? (dbP[h] ? h : Object.keys(dbP).find(k => k.trim().toLowerCase() === h.trim().toLowerCase())) : null;
+            let arrSantri = matchedKey && dbP[matchedKey] ? dbP[matchedKey] : [];
+
             let filteredArr = arrSantri.filter(n => n.toLowerCase().includes(val.toLowerCase()));
             renderListSantri(prefix, filteredArr);
             toggleListSantri(prefix);
@@ -2294,24 +2304,30 @@ async function gantiNamaKelas(namaLama) {
                     tampilkanKartuPrestasi();
                 } else if(['aisar', 'hadits', 'doa', 'kosakata'].includes(prefix)) {
                     tampilkanRiwayatGuruModul(prefix);
+                } else if(prefix === 'ortu') {
+                    tampilkanDataOrtu();
                 }
             }
         }
 
         function pilihSantriCustom(nama, prefix) {
-            let inputId = prefix + '-pilih-santri';
+            let inputId = prefix === 'laporan' ? 'pilih-santri-laporan' : prefix + '-pilih-santri';
             let dropId = 'dropdown-' + prefix + '-santri';
             
-            document.getElementById(inputId).value = nama;
-            document.getElementById(dropId).classList.add('hidden');
+            let elInput = document.getElementById(inputId);
+            if(elInput) elInput.value = nama;
             
-            // PENTING: Memicu pemuatan data sesuai tab yang sedang aktif
+            let dropEl = document.getElementById(dropId);
+            if(dropEl) dropEl.classList.add('hidden');
+            
             if(prefix === 'muhaffiz') {
                 tampilkanKartuPrestasi();
             } else if(['aisar', 'hadits', 'doa', 'kosakata'].includes(prefix)) {
                 tampilkanRiwayatGuruModul(prefix);
             } else if(prefix === 'chat-guru') {
-                renderChatOrtu(); // Memuat chat saat nama diklik
+                renderChatOrtu();
+            } else if(prefix === 'ortu') {
+                tampilkanDataOrtu();
             }
         }
 
@@ -2512,17 +2528,30 @@ async function gantiNamaKelas(namaLama) {
 
         function updateSantriOrtu() { 
             let h = document.getElementById('ortu-pilih-halaqah').value;
-            let s = document.getElementById('ortu-pilih-santri'); 
-            s.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
-            if(dbP[h]) dbP[h].forEach(n => s.appendChild(new Option(n,n))); 
-            
+            let elSantri = document.getElementById('ortu-pilih-santri'); 
+            let matchedKey = h ? (dbP[h] ? h : Object.keys(dbP).find(k => k.trim().toLowerCase() === h.trim().toLowerCase())) : null;
+            let arrSantri = matchedKey && dbP[matchedKey] ? dbP[matchedKey] : [];
+
+            if(elSantri) {
+                if(elSantri.tagName.toLowerCase() === 'input') {
+                    elSantri.value = '';
+                    renderListSantri('ortu', arrSantri);
+                } else {
+                    elSantri.innerHTML = '<option value="">-- Pilih Ananda --</option>'; 
+                    arrSantri.forEach(n => elSantri.appendChild(new Option(n,n))); 
+                }
+            }
+
             document.getElementById('ortu-kartuPrestasi').style.display = 'none'; 
             document.getElementById('list-ortu-quran').innerHTML = ''; 
             if(h) renderLeaderboard(h); 
             else { let l = document.getElementById('ortu-leaderboard'); if(l) l.style.display = 'none'; }
             
             let sc = document.getElementById('chat-ortu-santri'); 
-            if(sc) { sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; if(dbP[h]) dbP[h].forEach(n => sc.appendChild(new Option(n,n))); }
+            if(sc) { 
+                sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
+                arrSantri.forEach(n => sc.appendChild(new Option(n,n))); 
+            }
             let chatBox = document.getElementById('chat-box-ortu'); if(chatBox) chatBox.innerHTML = '';
         }
 
@@ -2821,8 +2850,20 @@ doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148
         function aturFormLaporan() { let v = document.getElementById('jenis-laporan').value; document.getElementById('opsi-halaqah-laporan').className = v==='halaqah'||v==='santri'?'':'hidden'; document.getElementById('opsi-santri-laporan').className = v==='santri'?'':'hidden'; }
         
         function updateSantriLaporan() { 
-            let h = document.getElementById('pilih-halaqah-laporan').value; let s = document.getElementById('pilih-santri-laporan'); s.innerHTML=''; 
-            if(dbP[h]) { dbP[h].forEach(n => s.appendChild(new Option(n,n))); } 
+            let h = document.getElementById('pilih-halaqah-laporan').value; 
+            let s = document.getElementById('pilih-santri-laporan'); 
+            let matchedKey = h ? (dbP[h] ? h : Object.keys(dbP).find(k => k.trim().toLowerCase() === h.trim().toLowerCase())) : null;
+            let arrSantri = matchedKey && dbP[matchedKey] ? dbP[matchedKey] : [];
+            
+            if(s) {
+                if(s.tagName.toLowerCase() === 'input') {
+                    s.value = '';
+                    renderListSantri('laporan', arrSantri);
+                } else {
+                    s.innerHTML = '';
+                    arrSantri.forEach(n => s.appendChild(new Option(n, n)));
+                }
+            }
         }
         
         function prosesCetak(t) {
