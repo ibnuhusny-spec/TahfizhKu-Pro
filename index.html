@@ -621,7 +621,10 @@
                     <button onclick="hapusSemua('Murid')" style="background:#FEF2F2; color:#EF4444; border:1px solid #FCA5A5; font-size:11px; padding:6px 12px; width:auto; margin:0; box-shadow:none; border-radius:8px;">🗑️ Hapus Semua</button>
                 </div>
                 <label>Pilih Kelas:</label>
-                <select id="admin-pilih-halaqah" onchange="renderTabelSantriAdmin()"></select>
+                <div style="position: relative; margin-bottom:10px;">
+                    <input type="text" id="admin-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('admin')" onclick="toggleListHalaqah('admin')" autocomplete="off" style="margin:0;">
+                    <div id="dropdown-admin-halaqah" class="dropdown-custom hidden"></div>
+                </div>
                 <label style="margin-top:10px;">Paste/Input Nama (Format: NIS - Nama):</label>
                 <div style="display:flex; gap:10px;">
                     <textarea id="data-santri-baru" placeholder="01 - Ahmad Zaid&#10;02 - Budi Utama" style="margin:0; height:80px;"></textarea>
@@ -676,7 +679,11 @@
         <div id="tab-guru-quran" class="tab-content active">
             <div class="card">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div><label>Pilih Kelas</label><select id="muhaffiz-pilih-halaqah" onchange="updateDropdownSantriModul('muhaffiz')"></select></div>
+                    <div style="position: relative;">
+                        <label>Pilih Kelas</label>
+                        <input type="text" id="muhaffiz-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('muhaffiz')" onclick="toggleListHalaqah('muhaffiz')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-muhaffiz-halaqah" class="dropdown-custom hidden"></div>
+                    </div>
                     <div style="position: relative;">
                         <label>Pilih Murid</label>
                         <input type="text" id="muhaffiz-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('muhaffiz')" onclick="toggleListSantri('muhaffiz')" autocomplete="off" style="margin:0;">
@@ -770,15 +777,16 @@
             <div class="card">
                 <div class="section-title">📘 Bimbingan AISAR</div>
                 
-                <!-- INI ADALAH BLOK KELAS DAN MURID YANG BENAR -->
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <select id="aisar-pilih-halaqah" onchange="updateDropdownSantriModul('aisar')"></select>
+                    <div style="position: relative;">
+                        <input type="text" id="aisar-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('aisar')" onclick="toggleListHalaqah('aisar')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-aisar-halaqah" class="dropdown-custom hidden"></div>
+                    </div>
                     <div style="position: relative;">
                         <input type="text" id="aisar-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('aisar')" onclick="toggleListSantri('aisar')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-aisar-santri" class="dropdown-custom hidden"></div>
                     </div>
                 </div>
-                <!-- ========================================== -->
 
                 <label>Tanggal</label><input type="date" id="tgl-aisar">
                 <label>Jilid & Halaman</label><input type="text" id="in-aisar" placeholder="Contoh: Jilid 2 Hal 15">
@@ -796,7 +804,10 @@
             <div class="card">
                 <div class="section-title" style="color:var(--gold-accent)">📜 Hafalan Hadis</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <select id="hadits-pilih-halaqah" onchange="updateDropdownSantriModul('hadits')"></select>
+                    <div style="position: relative;">
+                        <input type="text" id="hadits-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('hadits')" onclick="toggleListHalaqah('hadits')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-hadits-halaqah" class="dropdown-custom hidden"></div>
+                    </div>
                     <div style="position: relative;">
                         <input type="text" id="hadits-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('hadits')" onclick="toggleListSantri('hadits')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-hadits-santri" class="dropdown-custom hidden"></div>
@@ -819,7 +830,10 @@
             <div class="card">
                 <div class="section-title" style="color:#10B981">🤲 Hafalan Doa</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <select id="doa-pilih-halaqah" onchange="updateDropdownSantriModul('doa')"></select>
+                    <div style="position: relative;">
+                        <input type="text" id="doa-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('doa')" onclick="toggleListHalaqah('doa')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-doa-halaqah" class="dropdown-custom hidden"></div>
+                    </div>
                     <div style="position: relative;">
                         <input type="text" id="doa-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('doa')" onclick="toggleListSantri('doa')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-doa-santri" class="dropdown-custom hidden"></div>
@@ -842,7 +856,10 @@
             <div class="card">
                 <div class="section-title" style="color:var(--cerulean-logo)">🔤 Kosakata Arab</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <select id="kosakata-pilih-halaqah" onchange="updateDropdownSantriModul('kosakata')"></select>
+                    <div style="position: relative;">
+                        <input type="text" id="kosakata-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('kosakata')" onclick="toggleListHalaqah('kosakata')" autocomplete="off" style="margin:0;">
+                        <div id="dropdown-kosakata-halaqah" class="dropdown-custom hidden"></div>
+                    </div>
                     <div style="position: relative;">
                         <input type="text" id="kosakata-pilih-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('kosakata')" onclick="toggleListSantri('kosakata')" autocomplete="off" style="margin:0;">
                         <div id="dropdown-kosakata-santri" class="dropdown-custom hidden"></div>
@@ -879,7 +896,10 @@
                     
                     <!-- BLOK PENCARIAN MURID DI BUKU PENGHUBUNG -->
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                        <select id="chat-guru-kelas" onchange="updateChatGuruSantri()"></select>
+                        <div style="position: relative;">
+                            <input type="text" id="chat-guru-kelas" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('chat-guru')" onclick="toggleListHalaqah('chat-guru')" autocomplete="off" style="margin:0;">
+                            <div id="dropdown-chat-guru-halaqah" class="dropdown-custom hidden"></div>
+                        </div>
                         <div style="position: relative;">
                             <input type="text" id="chat-guru-santri" placeholder="🔍 Cari murid..." onkeyup="filterSantri('chat-guru')" onclick="toggleListSantri('chat-guru')" autocomplete="off" style="margin:0;">
                             <div id="dropdown-chat-guru-santri" class="dropdown-custom hidden"></div>
@@ -914,7 +934,10 @@
                     <div class="section-title" style="color:#D97706;">📢 Pesan Siar (Broadcast)</div>
                     <p style="font-size:12px; color:var(--text-mute); font-weight:600; line-height:1.4; margin-bottom:15px; margin-top:0;">Pesan akan muncul di HP <b style="color:#D97706;">Seluruh Orang Tua</b> di kelas yang dipilih.</p>
                     <label>Tujuan Kelas:</label>
-                    <select id="siar-pilih-kelas" style="border-color:#FDE68A; background:#FFFBEB;"></select>
+                    <div style="position: relative; margin-bottom:15px;">
+                        <input type="text" id="siar-pilih-kelas" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('siar')" onclick="toggleListHalaqah('siar')" autocomplete="off" style="border-color:#FDE68A; background:#FFFBEB; margin:0;">
+                        <div id="dropdown-siar-halaqah" class="dropdown-custom hidden"></div>
+                    </div>
                     <label>Isi Pengumuman:</label>
                     <textarea id="input-pesan-siar" placeholder="Assalamu'alaikum. Diberitahukan kepada seluruh wali murid..." style="margin:0; resize:vertical; height:120px; border-color:#FDE68A; background:#FFFBEB;" rows="5"></textarea>
                     <button id="btn-kirim-siar" onclick="kirimPesanSiar()" class="btn-icon-mobile" style="margin-top:15px; background:linear-gradient(135deg, #FBBF24, #D97706);">🚀 <span class="text-mobile">Kirim Pengumuman</span></button>
@@ -942,7 +965,11 @@
 
         <div class="card" style="padding:20px; margin-bottom:15px;">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>Pilih Kelas</label><select id="ortu-pilih-halaqah" onchange="updateSantriOrtu()"></select></div>
+                <div style="position: relative;">
+                    <label>Pilih Kelas</label>
+                    <input type="text" id="ortu-pilih-halaqah" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('ortu')" onclick="toggleListHalaqah('ortu')" autocomplete="off" style="margin:0;">
+                    <div id="dropdown-ortu-halaqah" class="dropdown-custom hidden"></div>
+                </div>
                 <div><label>Pilih Ananda</label><select id="ortu-pilih-santri" onchange="tampilkanDataOrtu()"><option value="">-- Murid --</option></select></div>
             </div>
         </div>
@@ -1036,7 +1063,7 @@
     </div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 6)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
     
-    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden"><label>Pilih Kelas</label><select id="pilih-halaqah-laporan" onchange="updateSantriLaporan()"></select></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
+    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden"><label>Pilih Murid</label><select id="pilih-santri-laporan"></select></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 <script>
         const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
@@ -1199,12 +1226,22 @@
                 if(inAwal && dropAwal && !inAwal.contains(e.target) && !dropAwal.contains(e.target)) dropAwal.classList.add('hidden');
                 if(inAkhir && dropAkhir && !inAkhir.contains(e.target) && !dropAkhir.contains(e.target)) dropAkhir.classList.add('hidden');
 
-                // Penutup untuk Daftar Murid (Mendukung semua tab)
+                // Penutup untuk Daftar Murid
                 ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata', 'chat-guru'].forEach(prefix => {
                     let inSantri = document.getElementById(prefix + '-pilih-santri');
                     let dropSantri = document.getElementById('dropdown-' + prefix + '-santri');
                     if(inSantri && dropSantri && !inSantri.contains(e.target) && !dropSantri.contains(e.target)) {
                         dropSantri.classList.add('hidden');
+                    }
+                });
+
+                // Penutup untuk Daftar Kelas
+                ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata', 'chat-guru', 'ortu', 'admin', 'laporan', 'siar'].forEach(prefix => {
+                    let inputId = (prefix === 'siar' || prefix === 'chat-guru') ? (prefix === 'siar' ? 'siar-pilih-kelas' : 'chat-guru-kelas') : (prefix === 'laporan' ? 'pilih-halaqah-laporan' : prefix + '-pilih-halaqah');
+                    let inHalaqah = document.getElementById(inputId);
+                    let dropHalaqah = document.getElementById('dropdown-' + prefix + '-halaqah');
+                    if(inHalaqah && dropHalaqah && !inHalaqah.contains(e.target) && !dropHalaqah.contains(e.target)) {
+                        dropHalaqah.classList.add('hidden');
                     }
                 });
             });
@@ -1361,39 +1398,28 @@
         
         function renderHalaqahDropdowns() { 
             let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
-            // TAMBAHKAN doa-pilih-halaqah
-            let idsGuru = ['muhaffiz-pilih-halaqah', 'aisar-pilih-halaqah', 'hadits-pilih-halaqah', 'doa-pilih-halaqah', 'kosakata-pilih-halaqah', 'chat-guru-kelas'];
+            let arrKelas = Object.keys(dbP).sort((a, b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
             
-            idsGuru.forEach(id => { 
-                let s = document.getElementById(id); 
-                if(s) { 
-                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
-                    for(let h in dbP) {
-                        let gurunya = dbKelasGuru[h] || '';
-                        if(!isGuru || gurunya.includes(guruAktif)) {
-                            s.appendChild(new Option(h, h)); 
-                        }
-                    }
-                }
-            }); 
-
-            let idsBebas = ['ortu-pilih-halaqah', 'admin-pilih-halaqah', 'pilih-halaqah-laporan'];
-            idsBebas.forEach(id => { 
-                let s = document.getElementById(id); 
-                if(s) { 
-                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>'; 
-                    for(let h in dbP) s.appendChild(new Option(h, h)); 
-                }
-            }); 
+            let prefixes = ['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata', 'chat-guru', 'ortu', 'admin', 'laporan', 'siar'];
             
-            let sSiar = document.getElementById('siar-pilih-kelas');
-            if(sSiar && isGuru) {
-                sSiar.innerHTML = '<option value="GLOBAL">SEMUA KELAS (GLOBAL)</option>';
-                for(let h in dbP) {
+            prefixes.forEach(prefix => {
+                let idsBebas = ['ortu', 'admin', 'laporan'];
+                let filtered = arrKelas.filter(h => {
                     let gurunya = dbKelasGuru[h] || '';
-                    if(gurunya.includes(guruAktif)) sSiar.appendChild(new Option(h, h)); 
+                    return !isGuru || idsBebas.includes(prefix) || gurunya.includes(guruAktif);
+                });
+                renderListHalaqah(prefix, filtered);
+                
+                let idSelect = (prefix === 'siar' || prefix === 'chat-guru') ? (prefix === 'siar' ? 'siar-pilih-kelas' : 'chat-guru-kelas') : (prefix === 'laporan' ? 'pilih-halaqah-laporan' : prefix + '-pilih-halaqah');
+                let s = document.getElementById(idSelect);
+                if(s && s.tagName.toLowerCase() === 'select') {
+                    let val = s.value;
+                    s.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+                    if(prefix === 'siar') s.innerHTML = '<option value="GLOBAL">SEMUA KELAS (GLOBAL)</option>';
+                    filtered.forEach(h => s.appendChild(new Option(h, h)));
+                    if(val) s.value = val;
                 }
-            }
+            }); 
         }
 
         function updateDropdownSantri() {
@@ -1417,12 +1443,13 @@
             let elKelas = document.getElementById(prefix+'-pilih-halaqah') || document.getElementById(prefix+'-kelas');
             let elSantri = document.getElementById(prefix+'-pilih-santri') || document.getElementById(prefix+'-santri');
             let h = elKelas ? elKelas.value : '';
+            let matchedKey = h ? (dbP[h] ? h : Object.keys(dbP).find(k => k.trim().toLowerCase() === h.trim().toLowerCase())) : null;
+            let arrSantri = matchedKey && dbP[matchedKey] ? dbP[matchedKey] : [];
             
             if(elSantri) {
                 // Deteksi jika elSantri adalah Dropdown Kustom (Input Text)
                 if (elSantri.tagName.toLowerCase() === 'input') {
                     elSantri.value = ''; // Kosongkan teks pencarian
-                    let arrSantri = (h && dbP[h]) ? dbP[h] : [];
                     renderListSantri(prefix, arrSantri);
                     
                     if(prefix === 'muhaffiz') {
@@ -1433,7 +1460,7 @@
                 } else {
                     // Logika bawaan untuk Dropdown Select biasa (Tab lain)
                     elSantri.innerHTML = '<option value="">-- Pilih Murid --</option>'; 
-                    if(h && dbP[h]) dbP[h].forEach(n => elSantri.appendChild(new Option(n, n))); 
+                    arrSantri.forEach(n => elSantri.appendChild(new Option(n, n))); 
                     
                     if(['aisar', 'hadits', 'doa', 'kosakata'].includes(prefix)) {
                         elSantri.onchange = () => tampilkanRiwayatGuruModul(prefix);
@@ -2024,10 +2051,11 @@ async function gantiNamaKelas(namaLama) {
                 const escapedName = n.replace(/'/g, "\\'"); 
                 g += `<div class="list-card"><span class="list-card-title">${n}</span><div style="display:flex; gap:5px;"><button onclick="editGuru('${escapedName}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;">✏️</button><button onclick="hapusMaster('${escapedName}','Guru')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;">🗑️</button></div></div>`; 
             });
-            for(let n in dbP) { 
+            let arrKelas = Object.keys(dbP).sort((a, b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
+            arrKelas.forEach(n => { 
                 const escapedHalaqah = n.replace(/'/g, "\\'"); 
                 h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="gantiNamaKelas('${escapedHalaqah}')" class="btn-kecil" style="background:#FEF3C7; color:#D97706;" title="Ubah Nama/Kenaikan Kelas">🏷️</button><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;" title="Ubah Tim Pengajar">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;" title="Hapus Kelas">🗑️</button></div></div>`; 
-            }
+            });
             document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; 
             document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
             renderTabelSantriAdmin(); 
@@ -2161,6 +2189,85 @@ async function gantiNamaKelas(namaLama) {
             });
             if(html === '') html = `<div class="dropdown-item" style="color:var(--text-mute); text-align:center;">Surah tidak ditemukan</div>`;
             document.getElementById(dropId).innerHTML = html;
+        }
+
+    // ===============================================================
+        // FUNGSI MESIN PENCARI KELAS / HALAQAH (CUSTOM DROPDOWN)
+        // ===============================================================
+        function toggleListHalaqah(prefix) {
+            let dropId = 'dropdown-' + prefix + '-halaqah';
+            let dropEl = document.getElementById(dropId);
+            if(dropEl) dropEl.classList.remove('hidden');
+        }
+
+        function renderListHalaqah(prefix, arrayKelas) {
+            let dropId = 'dropdown-' + prefix + '-halaqah';
+            let dropEl = document.getElementById(dropId);
+            if(!dropEl) return;
+
+            let html = '';
+            if (prefix === 'siar') {
+                html += `<div class="dropdown-item" onclick="pilihHalaqahCustom('GLOBAL', 'siar')">SEMUA KELAS (GLOBAL)</div>`;
+            }
+
+            arrayKelas.forEach(h => {
+                let escapedH = h.replace(/'/g, "\\'");
+                html += `<div class="dropdown-item" onclick="pilihHalaqahCustom('${escapedH}', '${prefix}')">${h}</div>`;
+            });
+            
+            if(html === '' && prefix !== 'siar') html = `<div class="dropdown-item" style="color:var(--text-mute); text-align:center;">Kelas tidak ditemukan</div>`;
+            
+            dropEl.innerHTML = html;
+        }
+
+        function filterHalaqah(prefix) {
+            let inputId = (prefix === 'siar' || prefix === 'chat-guru') ? (prefix === 'siar' ? 'siar-pilih-kelas' : 'chat-guru-kelas') : (prefix === 'laporan' ? 'pilih-halaqah-laporan' : prefix + '-pilih-halaqah');
+            let elInput = document.getElementById(inputId);
+            if(!elInput) return;
+
+            let val = elInput.value.trim().toLowerCase();
+            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
+            let idsBebas = ['ortu', 'admin', 'laporan'];
+
+            let arrKelas = Object.keys(dbP).sort((a, b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
+
+            let filteredArr = arrKelas.filter(h => {
+                let gurunya = dbKelasGuru[h] || '';
+                let passGuru = !isGuru || idsBebas.includes(prefix) || gurunya.includes(guruAktif);
+                let passMatch = h.toLowerCase().includes(val);
+                return passGuru && passMatch;
+            });
+
+            renderListHalaqah(prefix, filteredArr);
+            toggleListHalaqah(prefix);
+
+            if (val && arrKelas.some(h => h.toLowerCase() === val)) {
+                let matchedClass = arrKelas.find(h => h.toLowerCase() === val);
+                pilihHalaqahCustom(matchedClass, prefix, true);
+            }
+        }
+
+        function pilihHalaqahCustom(namaKelas, prefix, skipInputValueSet) {
+            let inputId = (prefix === 'siar' || prefix === 'chat-guru') ? (prefix === 'siar' ? 'siar-pilih-kelas' : 'chat-guru-kelas') : (prefix === 'laporan' ? 'pilih-halaqah-laporan' : prefix + '-pilih-halaqah');
+            let dropId = 'dropdown-' + prefix + '-halaqah';
+
+            let elInput = document.getElementById(inputId);
+            if(elInput && !skipInputValueSet) {
+                elInput.value = namaKelas;
+            }
+
+            let dropEl = document.getElementById(dropId);
+            if(dropEl) dropEl.classList.add('hidden');
+
+            if (['muhaffiz', 'aisar', 'hadits', 'doa', 'kosakata', 'chat-guru'].includes(prefix)) {
+                updateDropdownSantriModul(prefix);
+            } else if (prefix === 'ortu') {
+                updateSantriOrtu();
+            } else if (prefix === 'admin') {
+                renderTabelSantriAdmin();
+            } else if (prefix === 'laporan') {
+                updateSantriLaporan();
+            }
         }
 
     // ===============================================================
