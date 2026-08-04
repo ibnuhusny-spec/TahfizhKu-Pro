@@ -499,10 +499,11 @@
     
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Langsung periksa apakah pengunjung membawa tiket dari Portal
+    // Langsung periksa apakah pengunjung membawa tiket dari Portal (abaikan proteksi jika dijalankan secara lokal/file://)
     _supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        // Jika tidak ada tiket, langsung tendang kembali ke Portal!
+      const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (!data.session && !isLocal) {
+        // Jika tidak ada tiket dan bukan di lokal, langsung tendang kembali ke Portal!
         window.location.replace("https://portal-terpadu.vercel.app/");
       }
     });
@@ -1391,12 +1392,25 @@
                 dAkun.forEach(n => s.appendChild(new Option(n, n))); 
             }
             
+            let extraGuru = [];
+            Object.values(dbKelasGuru || {}).forEach(gStr => {
+                if(gStr) {
+                    gStr.split(',').forEach(g => {
+                        let trimmed = g.trim();
+                        if(trimmed) extraGuru.push(trimmed);
+                    });
+                }
+            });
+            let semuaGuruGlobal = [...new Set([...dAkun, ...extraGuru])];
+
             for(let i=1; i<=5; i++) {
                 let id = i === 1 ? 'admin-kelas-pilih-guru' : `admin-kelas-pilih-guru-${i}`;
                 let cG = document.getElementById(id); 
                 if(cG) { 
+                    let v = cG.value;
                     cG.innerHTML = `<option value="">-- Guru ${i} ${i===1 ? '(Wajib)' : '(Ops)'} --</option>`; 
-                    dAkun.forEach(n => cG.appendChild(new Option(n, n))); 
+                    semuaGuruGlobal.forEach(n => cG.appendChild(new Option(n, n))); 
+                    if(v) cG.value = v;
                 }
             }
         }
@@ -1790,6 +1804,44 @@
             finally { if(btn){ btn.innerText = "+"; btn.disabled = false; } }
         }
 
+        // Helper pintar memecah daftar nama guru tanpa merusak gelar yang mengandung koma (misal: S.Pd., Gr.)
+        function parseDaftarGuru(guruLamaStr) {
+            if (!guruLamaStr || !String(guruLamaStr).trim()) return [];
+            let str = String(guruLamaStr).trim();
+            
+            if (str.includes('|')) {
+                return str.split('|').map(x => x.trim()).filter(Boolean);
+            }
+            if (str.includes(';')) {
+                return str.split(';').map(x => x.trim()).filter(Boolean);
+            }
+
+            let dAkunSorted = [...dAkun].filter(Boolean).sort((a, b) => b.length - a.length);
+            let foundPositions = [];
+
+            dAkunSorted.forEach(nama => {
+                let pos = str.indexOf(nama);
+                if (pos !== -1) {
+                    foundPositions.push({ nama: nama, pos: pos, len: nama.length });
+                }
+            });
+
+            if (foundPositions.length > 0) {
+                foundPositions.sort((a, b) => a.pos - b.pos);
+                let result = [];
+                let lastEnd = -1;
+                foundPositions.forEach(item => {
+                    if (item.pos >= lastEnd) {
+                        result.push(item.nama);
+                        lastEnd = item.pos + item.len;
+                    }
+                });
+                if (result.length > 0) return result;
+            }
+
+            return str.split(',').map(x => x.trim()).filter(Boolean);
+        }
+
         async function tambahHalaqah() { 
             let d = document.getElementById('nama-halaqah-baru').value.trim(); 
             let g1 = document.getElementById('admin-kelas-pilih-guru')?.value || '';
@@ -1798,36 +1850,68 @@
             let g4 = document.getElementById('admin-kelas-pilih-guru-4')?.value || '';
             let g5 = document.getElementById('admin-kelas-pilih-guru-5')?.value || '';
             
-            if(!d || !g1) return alert("⚠️ Pilih minimal Guru 1 dan Ketik Nama Kelas!"); 
+            if(!d) return alert("⚠️ Ketik Nama Kelas!"); 
+            if(!g1 && !g2 && !g3 && !g4 && !g5) return alert("⚠️ Pilih minimal 1 Guru pengajar!"); 
             
-            let gabunganGuru = [g1, g2, g3, g4, g5].filter(x => x !== "").join(', ');
+            let gabunganGuru = [...new Set([g1, g2, g3, g4, g5].filter(x => x !== ""))].join(' | ');
             let lines = d.split('\n'); 
-            let arr = []; 
+            let arrBaru = []; 
+            let arrUpdate = [];
             
             lines.forEach(n => { 
                 let nm = n.trim(); 
-                if(nm !== "" && !dbP[nm]) { arr.push({nama_kelas: nm, nama_guru: gabunganGuru}); } 
+                if(nm !== "") {
+                    if(!dbP[nm]) {
+                        arrBaru.push({nama_kelas: nm, nama_guru: gabunganGuru});
+                    } else {
+                        arrUpdate.push(nm);
+                    }
+                } 
             });
             
-            if(arr.length === 0) return alert("⚠️ Kelas sudah ada atau nama kosong!");
+            if(arrBaru.length === 0 && arrUpdate.length === 0) return alert("⚠️ Nama kelas kosong!");
 
             let btn = document.querySelector('#tab-admin-kelas button'); 
             if(btn){ btn.innerText = "⏳"; btn.disabled = true; }
             
             try {
-                let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arr) }); 
-                if(!res.ok) throw new Error(); 
-                
-                arr.forEach(item => {
-                    dbP[item.nama_kelas] = []; 
-                    dbKelasGuru[item.nama_kelas] = item.nama_guru; 
-                });
+                if(arrBaru.length > 0) {
+                    let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(arrBaru) }); 
+                    if(!res.ok) throw new Error("Gagal menambah kelas baru"); 
+                    
+                    arrBaru.forEach(item => {
+                        dbP[item.nama_kelas] = []; 
+                        dbKelasGuru[item.nama_kelas] = item.nama_guru; 
+                    });
+                }
+
+                if(arrUpdate.length > 0) {
+                    for(let nm of arrUpdate) {
+                        let res = await fetch(`${SUPABASE_URL}/rest/v1/kelas?nama_kelas=eq.${encodeURIComponent(nm)}`, { 
+                            method: 'PATCH', 
+                            headers: REQ_HEADERS, 
+                            body: JSON.stringify({nama_guru: gabunganGuru}) 
+                        });
+                        if(!res.ok) throw new Error("Gagal memperbarui guru kelas " + nm);
+                        dbKelasGuru[nm] = gabunganGuru;
+                    }
+                }
                 
                 document.getElementById('nama-halaqah-baru').value = ''; 
+                for(let i=1; i<=5; i++) {
+                    let id = i === 1 ? 'admin-kelas-pilih-guru' : `admin-kelas-pilih-guru-${i}`;
+                    let cG = document.getElementById(id);
+                    if(cG) cG.value = "";
+                }
+
                 renderTabelAdmin(); 
-                alert("✅ Kelas berhasil disimpan sempurna!");
+                if(arrUpdate.length > 0 && arrBaru.length === 0) {
+                    alert("✅ Tim Pengajar untuk kelas " + arrUpdate.join(', ') + " berhasil diperbarui!");
+                } else {
+                    alert("✅ Kelas berhasil disimpan sempurna!");
+                }
             } catch(e) { 
-                alert("❌ SERVER MENOLAK!\n\nKemungkinan teks gabungan nama Guru terlalu panjang. Buka Supabase dan ubah tipe data 'nama_guru' menjadi 'text'."); 
+                alert("❌ SERVER MENOLAK!\n\nKemungkinan teks gabungan nama Guru terlalu panjang atau terjadi kendala jaringan."); 
             } finally { 
                 if(btn){ btn.innerText = "+"; btn.disabled = false; } 
             }
@@ -1947,19 +2031,22 @@
             kelasYangDiedit = namaLama;
             document.getElementById('edit-nama-kelas-teks').innerText = "Kelas: " + namaLama;
 
+            let guruLama = dbKelasGuru[namaLama] || "";
+            let arrGuru = parseDaftarGuru(guruLama); 
+            let semuaPilihanGuru = [...new Set([...dAkun, ...arrGuru])];
+
             for(let i=1; i<=5; i++) {
                 let sel = document.getElementById('edit-kelas-guru-'+i);
                 sel.innerHTML = `<option value="">-- Kosongkan (Hapus Guru ${i}) --</option>`;
-                dAkun.forEach(n => sel.appendChild(new Option(n, n)));
+                semuaPilihanGuru.forEach(n => sel.appendChild(new Option(n, n)));
             }
-
-            let guruLama = dbKelasGuru[namaLama] || "";
-            let arrGuru = guruLama.split(',').map(x => x.trim()); 
 
             for(let i=0; i<5; i++) {
                 let sel = document.getElementById('edit-kelas-guru-'+(i+1));
                 if(arrGuru[i]) {
                     sel.value = arrGuru[i]; 
+                } else {
+                    sel.value = "";
                 }
             }
             document.getElementById('modal-edit-kelas').classList.remove('hidden');
@@ -1973,7 +2060,7 @@
             let g5 = document.getElementById('edit-kelas-guru-5').value;
 
             if(!g1 && !g2 && !g3 && !g4 && !g5) return alert("⚠️ Kelas minimal harus punya 1 Guru pengajar!");
-            let gabunganGuru = [g1, g2, g3, g4, g5].filter(x => x !== "").join(', ');
+            let gabunganGuru = [...new Set([g1, g2, g3, g4, g5].filter(x => x !== ""))].join(' | ');
             let btn = document.getElementById('btn-simpan-edit-kelas');
             btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
 
@@ -2059,7 +2146,8 @@ async function gantiNamaKelas(namaLama) {
             let arrKelas = Object.keys(dbP).sort((a, b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
             arrKelas.forEach(n => { 
                 const escapedHalaqah = n.replace(/'/g, "\\'"); 
-                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${dbKelasGuru[n]||'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="gantiNamaKelas('${escapedHalaqah}')" class="btn-kecil" style="background:#FEF3C7; color:#D97706;" title="Ubah Nama/Kenaikan Kelas">🏷️</button><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;" title="Ubah Tim Pengajar">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;" title="Hapus Kelas">🗑️</button></div></div>`; 
+                let listG = parseDaftarGuru(dbKelasGuru[n]).join(', ');
+                h += `<div class="list-card"><div><div class="history-meta" style="color:var(--emerald-logo);">Tim Pengajar: ${listG || 'Belum Diatur'}</div><span class="list-card-title">${n}</span></div><div style="display:flex; gap:5px;"><button onclick="gantiNamaKelas('${escapedHalaqah}')" class="btn-kecil" style="background:#FEF3C7; color:#D97706;" title="Ubah Nama/Kenaikan Kelas">🏷️</button><button onclick="editHalaqah('${escapedHalaqah}')" class="btn-kecil" style="background:#E0F2FE; color:#0284C7;" title="Ubah Tim Pengajar">✏️</button><button onclick="hapusMaster('${escapedHalaqah}','Kelas')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444;" title="Hapus Kelas">🗑️</button></div></div>`; 
             });
             document.getElementById('tabel-guru').innerHTML = g || '<p style="text-align:center;">Kosong</p>'; 
             document.getElementById('tabel-halaqah').innerHTML = h || '<p style="text-align:center;">Kosong</p>';
