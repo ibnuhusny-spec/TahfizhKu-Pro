@@ -1332,11 +1332,11 @@
                 const [rS, rA, rH, rKo, rD] = responses;
                 const safe = arr => Array.isArray(arr) ? arr : [];
 
-                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
-                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
-                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
-                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
-                dRiwD = safe(rD).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwD = safe(rD).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
 
                 kalkulasiProgress();
             } catch (e) { console.error("Gagal refresh data"); }
@@ -1384,11 +1384,11 @@
                     if(m.kelas && dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); 
                 });
 
-                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan}));
-                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
-                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
-                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
-                dRiwD = safe(rD).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan}));
+                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwD = safe(rD).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
                 
                 dPesan = safe(rP).map(r => ({id: r.id, waktu: r.waktu, kelas: r.kelas, nama_murid: r.nama_murid, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
                 dForum = safe(rF).map(r => ({id: r.id, waktu: r.waktu, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
@@ -2554,11 +2554,17 @@ async function gantiNamaKelas(namaLama) {
             let btn = document.getElementById('btn-simpan-utama'); let old = btn.innerText; btn.innerText = "⏳ MENGIRIM..."; btn.disabled = true;
             try {
                 let isiCatatan = document.getElementById('cat-quran').value || "-";
-                let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: isiCatatan };
+                let pay = { waktu: tglKirim, kelas: h, nama_murid: s, kehadiran: "Hadir", jenis: modeAktif, juz: document.getElementById('input-juz-hidden').value || "-", surah: sa, ayat: aya, tajwid: getV('tajwid'), lancar: getV('lancar'), makhraj: getV('makhraj'), status: document.getElementById('statusSetoran').value, catatan: isiCatatan, nama_guru: guruAktif };
                 
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
                 
-                if(!res.ok) { let errStr = await res.text(); throw new Error(errStr); }
+                if(!res.ok) { 
+                    // Fallback jika kolom nama_guru belum ada di tabel Supabase
+                    delete pay.nama_guru;
+                    if(guruAktif) pay.catatan = (pay.catatan && pay.catatan !== "-") ? `${pay.catatan} (Guru: ${guruAktif})` : `(Guru: ${guruAktif})`;
+                    res = await fetch(`${SUPABASE_URL}/rest/v1/setoran`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                    if(!res.ok) { let errStr = await res.text(); throw new Error(errStr); }
+                }
                 
                 alert("✅ Data Setoran Tersimpan!"); 
                 
@@ -2589,12 +2595,18 @@ async function gantiNamaKelas(namaLama) {
             
             try {
                 let dateVal = document.getElementById('tgl-'+modul).value;
-                let pay = { waktu: formatTanggalId(dateVal), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-" };
+                let pay = { waktu: formatTanggalId(dateVal), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-", nama_guru: guruAktif };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
                 
                 if(!res.ok) {
-                    let errStr = await res.text();
-                    throw new Error(errStr);
+                    // Fallback jika kolom nama_guru belum ada di tabel Supabase
+                    delete pay.nama_guru;
+                    if(guruAktif) pay.catatan = (pay.catatan && pay.catatan !== "-") ? `${pay.catatan} (Guru: ${guruAktif})` : `(Guru: ${guruAktif})`;
+                    res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: REQ_HEADERS, body: JSON.stringify(pay) });
+                    if(!res.ok) {
+                        let errStr = await res.text();
+                        throw new Error(errStr);
+                    }
                 } 
                 
                 alert("✅ Data Tersimpan!"); 
@@ -2662,11 +2674,16 @@ async function gantiNamaKelas(namaLama) {
                     gayaKartu = i.jenis === 'Murojaah' ? `border-left: 5px solid #0284C7;` : `border-left: 5px solid var(--emerald-logo);`;
                 }
 
+                let bintang = (parseInt(i.tajwid)||0) + (parseInt(i.lancar)||0) + (parseInt(i.makhraj)||0);
+                let poinS = (i.jenis === 'Murojaah') ? (bintang * 2) : bintang;
+                let poinBadge = i.status === 'Lanjut' ? `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poinS} Poin ✨</span>` : '';
+                let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : '';
+
                 let teksAyat = i.jenis === "Tasmi'" ? "" : ` (Ayat: ${i.ayat})`;
                 let catatanTeks = i.catatan && i.catatan !== "-" ? `<div style="font-size:12px; font-style:italic; color:#D97706; margin-top:4px;">✏️ Catatan: ${i.catatan}</div>` : "";
                 let teksNilai = i.jenis === "Tasmi'" ? catatanTeks : `<div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div>${catatanTeks}`;
 
-                h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}</div><div class="list-card-title">📖 ${i.surah}${teksAyat}</div>${teksNilai}</div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
+                h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}${guruMeta}</div><div class="list-card-title">📖 ${i.surah}${teksAyat} ${poinBadge}</div>${teksNilai}</div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
             }); 
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
@@ -2893,18 +2910,38 @@ async function gantiNamaKelas(namaLama) {
             
             dRiw.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => {
                 let badge = i.jenis === 'Murojaah' ? `<span style="color:#0284C7; font-weight:800; font-size:11px;">🔄 Muroja'ah</span>` : `<span style="color:#059669; font-weight:800; font-size:11px;">⭐ Ziyadah</span>`;
-                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat})</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div></div>`;
+                let bintang = (parseInt(i.tajwid)||0) + (parseInt(i.lancar)||0) + (parseInt(i.makhraj)||0);
+                let poinS = (i.jenis === 'Murojaah') ? (bintang * 2) : bintang;
+                let poinBadge = i.status === 'Lanjut' ? `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poinS} Poin ✨</span>` : '';
+                let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : '';
+
+                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}${guruMeta}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat}) ${poinBadge}</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div></div>`;
             }); 
             document.getElementById('list-ortu-quran').innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat setoran.</p></div>';
 
-            let renderRiwayatLain = (arr, id, ikon) => {
-                let html = ''; arr.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => { html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan}</div></div><div style="font-weight:900;">${i.status}</div></div>`; });
+            let renderRiwayatLain = (arr, id, ikon, mod) => {
+                let html = ''; 
+                arr.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => { 
+                    let st = (i.status || '').toLowerCase();
+                    let poin = 0;
+                    if(mod === 'hadits' || mod === 'doa') {
+                        poin = (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) ? 2 : (st.includes('cukup') ? 10 : 15);
+                    } else if(mod === 'aisar') {
+                        poin = (st.includes('ulang') || st.includes('belum')) ? 2 : 10;
+                    } else if(mod === 'arab' || mod === 'kosakata') {
+                        poin = (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) ? 5 : 10;
+                    }
+                    let poinBadge = `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poin} Poin ✨</span>`;
+                    let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : '';
+
+                    html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}${guruMeta}</div><div class="list-card-title">${ikon} ${i.materi} ${poinBadge}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan || ''}</div></div><div style="font-weight:900;">${i.status}</div></div>`; 
+                });
                 document.getElementById(id).innerHTML = html || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat.</p></div>';
             };
-            renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘'); 
-            renderRiwayatLain(dRiwH, 'list-ortu-hadits', '📜'); 
-            renderRiwayatLain(dRiwD, 'list-ortu-doa', '🤲'); // RENDER RIWAYAT DOA ORTU
-            renderRiwayatLain(dRiwK, 'list-ortu-arab', '🔤');
+            renderRiwayatLain(dRiwA, 'list-ortu-aisar', '📘', 'aisar'); 
+            renderRiwayatLain(dRiwH, 'list-ortu-hadits', '📜', 'hadits'); 
+            renderRiwayatLain(dRiwD, 'list-ortu-doa', '🤲', 'doa'); 
+            renderRiwayatLain(dRiwK, 'list-ortu-arab', '🔤', 'arab');
         }
 
         function cetakSertifikat(nama, juz) {
@@ -3304,7 +3341,19 @@ doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148
             
             let html = '';
             arr.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => {
-                html += `<div class="list-card" style="border-left: 5px solid var(--emerald-logo);"><div style="flex:1"><div class="history-meta">${i.tgl}</div><div class="list-card-title">${ikon} ${i.materi}</div><div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">Catatan: ${i.catatan}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center;"><div style="font-weight:900; color:var(--emerald-logo);">${i.status}</div><button onclick="hapusRiwayat(${i.id}, '${modul}'); setTimeout(() => tampilkanRiwayatGuruModul('${modul}'), 800);" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; margin-top:5px; box-shadow:none;">🗑️ Batal</button></div></div>`;
+                let st = (i.status || '').toLowerCase();
+                let poin = 0;
+                if(modul === 'hadits' || modul === 'doa') {
+                    poin = (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) ? 2 : (st.includes('cukup') ? 10 : 15);
+                } else if(modul === 'aisar') {
+                    poin = (st.includes('ulang') || st.includes('belum')) ? 2 : 10;
+                } else if(modul === 'kosakata' || modul === 'arab') {
+                    poin = (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) ? 5 : 10;
+                }
+                let poinBadge = `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poin} Poin ✨</span>`;
+                let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : (guruAktif ? ` • 👨‍🏫 Guru: ${guruAktif}` : '');
+                
+                html += `<div class="list-card" style="border-left: 5px solid var(--emerald-logo);"><div style="flex:1"><div class="history-meta">${i.tgl}${guruMeta}</div><div class="list-card-title">${ikon} ${i.materi} ${poinBadge}</div><div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">Catatan: ${i.catatan || '-'}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center;"><div style="font-weight:900; color:var(--emerald-logo);">${i.status}</div><button onclick="hapusRiwayat(${i.id}, '${modul}'); setTimeout(() => tampilkanRiwayatGuruModul('${modul}'), 800);" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; margin-top:5px; box-shadow:none;">🗑️ Batal</button></div></div>`;
             });
             wadah.innerHTML = html || '<p style="text-align:center; color:var(--text-mute); font-size:13px;">Belum ada riwayat untuk murid ini.</p>';
         }
