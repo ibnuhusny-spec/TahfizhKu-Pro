@@ -1290,9 +1290,10 @@
 
         async function muatUlangDataDiamDiam() {
             try {
-                // TAMBAHKAN ENDPOINT DOA
+                // TAMBAHKAN ENDPOINT DOA DAN RANGE HEADER UNTUK MENCEGAH LIMIT 1000 DATA
                 const endpoints = ['setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc', 'doa?select=*&order=id.desc'];
-                const responses = await Promise.all(endpoints.map(ep => fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS}).then(res => res.ok ? res.json() : []).catch(() => [])));
+                const FETCH_HEADERS = { ...REQ_HEADERS, 'Range': '0-99999' };
+                const responses = await Promise.all(endpoints.map(ep => fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: FETCH_HEADERS}).then(res => res.ok ? res.json() : []).catch(() => [])));
                 
                 const [rS, rA, rH, rKo, rD] = responses;
                 const safe = arr => Array.isArray(arr) ? arr : [];
@@ -1309,11 +1310,12 @@
 
         async function tarikDataServer() {
             try {
-                // TAMBAHKAN ENDPOINT DOA
+                // TAMBAHKAN ENDPOINT DOA DAN RANGE HEADER UNTUK MENCEGAH LIMIT 1000 DATA
                 const endpoints = ['guru','kelas','murid','setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc','pesan?select=*&order=id.asc', 'forum_guru?select=*&order=id.asc', 'doa?select=*&order=id.desc'];
+                const FETCH_HEADERS = { ...REQ_HEADERS, 'Range': '0-99999' };
                 
                 const responses = await Promise.all(endpoints.map(ep => 
-                    fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS})
+                    fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: FETCH_HEADERS})
                     .then(res => res.ok ? res.json() : [])
                     .catch(() => [])
                 ));
@@ -2087,13 +2089,35 @@
         async function editSantri(halaqah, namaLama) { 
             let n = prompt(`Ubah Nama Murid (${halaqah}):`, namaLama); 
             if(n && n.trim() !== "" && n !== namaLama) { 
+                let namaBaru = n.trim();
                 try { 
-                    let res = await fetch(`${SUPABASE_URL}/rest/v1/murid?kelas=eq.${encodeURIComponent(halaqah)}&nama_murid=eq.${encodeURIComponent(namaLama)}`, { method: 'PATCH', headers: REQ_HEADERS, body: JSON.stringify({nama_murid: n.trim()}) }); 
-                    if(!res.ok) throw new Error(); 
-                    let idx = dbP[halaqah].indexOf(namaLama); 
-                    if(idx > -1) dbP[halaqah][idx] = n.trim(); 
+                    const tabel = ['murid', 'setoran', 'aisar', 'hadits', 'doa', 'kosakata', 'pesan'];
+                    const queries = tabel.map(tbl => {
+                        return fetch(`${SUPABASE_URL}/rest/v1/${tbl}?kelas=eq.${encodeURIComponent(halaqah)}&nama_murid=eq.${encodeURIComponent(namaLama)}`, { 
+                            method: 'PATCH', 
+                            headers: REQ_HEADERS, 
+                            body: JSON.stringify({ nama_murid: namaBaru }) 
+                        });
+                    });
+                    
+                    let resArray = await Promise.all(queries); 
+                    if(resArray.some(r => !r.ok)) throw new Error("Gagal memperbarui tabel");
+
+                    // Pindah data di memori antarmuka
+                    let idx = dbP[halaqah] ? dbP[halaqah].indexOf(namaLama) : -1; 
+                    if(idx > -1) dbP[halaqah][idx] = namaBaru; 
+
+                    // Segarkan riwayat di memori lokal agar tidak perlu refresh
+                    dRiw.forEach(r => { if(r.halaqah === halaqah && r.santri === namaLama) r.santri = namaBaru; });
+                    dRiwA.forEach(r => { if(r.halaqah === halaqah && r.santri === namaLama) r.santri = namaBaru; });
+                    dRiwH.forEach(r => { if(r.halaqah === halaqah && r.santri === namaLama) r.santri = namaBaru; });
+                    dRiwK.forEach(r => { if(r.halaqah === halaqah && r.santri === namaLama) r.santri = namaBaru; });
+                    dRiwD.forEach(r => { if(r.halaqah === halaqah && r.santri === namaLama) r.santri = namaBaru; });
+                    dPesan.forEach(r => { if(r.kelas === halaqah && r.nama_murid === namaLama) r.nama_murid = namaBaru; });
+
                     renderTabelSantriAdmin(); 
-                } catch(e){ alert("Error"); } 
+                    alert(`✅ Nama murid berhasil diubah dari "${namaLama}" menjadi "${namaBaru}" beserta seluruh riwayat nilainya!`);
+                } catch(e){ alert("❌ Gagal mengubah nama murid di database!"); } 
             } 
         }
 async function gantiNamaKelas(namaLama) { 
