@@ -2707,6 +2707,26 @@ async function gantiNamaKelas(namaLama) {
             }
         }
 
+        function dapatkanNamaGuru(i) {
+            if(!i) return 'Ustadz/ah';
+            let ng = (i.nama_guru || i.guru || i.penguji || '').trim();
+            if(ng) return ng;
+            
+            if(i.catatan && i.catatan.includes('(Guru:')) {
+                let m = i.catatan.match(/\(Guru:\s*([^)]+)\)/);
+                if(m && m[1]) return m[1].trim();
+            }
+            
+            let h = i.halaqah || i.kelas;
+            if(h && typeof dbKelasGuru !== 'undefined' && dbKelasGuru) {
+                if(dbKelasGuru[h]) return dbKelasGuru[h].trim();
+                let key = Object.keys(dbKelasGuru).find(k => k.trim().toLowerCase() === h.trim().toLowerCase());
+                if(key && dbKelasGuru[key]) return dbKelasGuru[key].trim();
+            }
+            
+            return (window.guruAktif && window.guruAktif.trim()) ? window.guruAktif.trim() : 'Ustadz/ah';
+        }
+
         function tampilkanKartuPrestasi() {
             let s = document.getElementById('muhaffiz-pilih-santri').value;
             let p = getStudentProgress(s); 
@@ -2743,26 +2763,6 @@ async function gantiNamaKelas(namaLama) {
                 setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; 
             }
             
-        function dapatkanNamaGuru(i) {
-            if(!i) return 'Ustadz/ah';
-            let ng = (i.nama_guru || i.guru || i.penguji || '').trim();
-            if(ng) return ng;
-            
-            if(i.catatan && i.catatan.includes('(Guru:')) {
-                let m = i.catatan.match(/\(Guru:\s*([^)]+)\)/);
-                if(m && m[1]) return m[1].trim();
-            }
-            
-            let h = i.halaqah || i.kelas;
-            if(h && typeof dbKelasGuru !== 'undefined' && dbKelasGuru) {
-                if(dbKelasGuru[h]) return dbKelasGuru[h].trim();
-                let key = Object.keys(dbKelasGuru).find(k => k.trim().toLowerCase() === h.trim().toLowerCase());
-                if(key && dbKelasGuru[key]) return dbKelasGuru[key].trim();
-            }
-            
-            return (window.guruAktif && window.guruAktif.trim()) ? window.guruAktif.trim() : 'Ustadz/ah';
-        }
-
             let h = ''; 
             dRiw.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => { 
                 let statusLabel = i.status === 'Lanjut' ? 'LULUS' : 'ULANG';
