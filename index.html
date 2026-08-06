@@ -3272,12 +3272,14 @@ async function gantiNamaKelas(namaLama) {
             doc.setTextColor(180, 83, 9); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
             doc.text(`PREDIKAT : ${predikat}`, 148, 106.5, {align: "center"});
 
-            // Tanggal & Paragraf Persembahan
+            // Tanggal & Paragraf Persembahan (3 Baris Presisi & Simetris)
             doc.setTextColor(...black); doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-            doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148, 118, {align: "center"});
-            doc.setFontSize(10.5); 
-            let paragraf = "Kepadanya kami berikan penghargaan setinggi - tingginya.\nSemoga tanda penghargaan ini meajadi motivasi untuk\nsenantiasa meningkatkan amal ibadahnya sesuai ketentuan\nAl-Qur'an dan As-Sunnah."; 
-            doc.text(paragraf, 148, 129, {align: "center", lineHeightFactor: 1.4});
+            doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148, 117, {align: "center"});
+            
+            doc.setFontSize(10.5);
+            doc.text("Kepadanya kami berikan penghargaan setinggi-tingginya.", 148, 126, {align: "center"});
+            doc.text("Semoga tanda penghargaan ini menjadi motivasi untuk senantiasa", 148, 131.5, {align: "center"});
+            doc.text("meningkatkan amal ibadahnya sesuai ketentuan Al-Qur'an dan As-Sunnah.", 148, 137, {align: "center"});
 
             // Cap Stempel Lencana Medali (Kanan Bawah)
             let cx = 248; let cy = 158;
