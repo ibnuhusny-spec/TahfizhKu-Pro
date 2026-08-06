@@ -2989,23 +2989,20 @@ async function gantiNamaKelas(namaLama) {
                 }
                 
                 lb.style.display = 'block'; 
-                return; 
-            }
-            
-            lb.style.display = 'block'; 
-            let html = '';
-            top10.forEach((item, index) => {
-                let medali = ''; 
-                if(index === 0) medali = '🥇'; 
-                else if(index === 1) medali = '🥈'; 
-                else if(index === 2) medali = '🥉'; 
-                else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
-                
-                let highlightText = lbModulAktif === 'quran' ? `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks}</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div>` : `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks} ✨</div>`;
+                let html = '';
+                top10.forEach((item, index) => {
+                    let medali = ''; 
+                    if(index === 0) medali = '🥇'; 
+                    else if(index === 1) medali = '🥈'; 
+                    else if(index === 2) medali = '🥉'; 
+                    else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
+                    
+                    let highlightText = lbModulAktif === 'quran' ? `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks}</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div>` : `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks} ✨</div>`;
 
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;">${highlightText}</div></div>`;
-            }); 
-            list.innerHTML = html;
+                    html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;">${highlightText}</div></div>`;
+                }); 
+                list.innerHTML = html;
+            }
         }
 
         function tampilkanDataOrtu() {
