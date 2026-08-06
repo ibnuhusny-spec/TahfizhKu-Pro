@@ -790,14 +790,18 @@
                 </div>
 
                 <label>Tanggal</label><input type="date" id="tgl-aisar">
-                <label>Jilid & Halaman</label><input type="text" id="in-aisar" placeholder="Contoh: Jilid 2 Hal 15">
+                <label>Jilid & Halaman</label>
+                <div style="position: relative;">
+                    <input type="text" id="in-aisar" placeholder="🔍 Cari / Ketik Jilid & Halaman..." onkeyup="filterMateri('aisar')" onclick="toggleListMateri('aisar')" autocomplete="off">
+                    <div id="dropdown-aisar-materi" class="dropdown-custom hidden"></div>
+                </div>
                 <label>Status</label>
                 <select id="stat-aisar">
                     <option value="Lanjut">Lanjut</option>
                     <option value="Ulang">Ulang</option>
                 </select>
                 <label>Catatan</label><textarea id="cat-aisar" placeholder="Pesan evaluasi..."></textarea>
-                <button onclick="simpanModulLain('aisar')">Simpan AISAR</button>
+                <button onclick="simpanModulLain('aisar')">💾 Simpan AISAR</button>
             </div>
         </div>
 
@@ -815,7 +819,11 @@
                     </div>
                 </div>
                 <label>Tanggal</label><input type="date" id="tgl-hadits">
-                <label>Nama Hadits</label><input type="text" id="in-hadits" placeholder="Contoh: Hadits Niat">
+                <label>Nama Hadits</label>
+                <div style="position: relative;">
+                    <input type="text" id="in-hadits" placeholder="🔍 Cari / Ketik Nama Hadits..." onkeyup="filterMateri('hadits')" onclick="toggleListMateri('hadits')" autocomplete="off">
+                    <div id="dropdown-hadits-materi" class="dropdown-custom hidden"></div>
+                </div>
                 <label>Status</label>
                 <select id="stat-hadits">
                     <option value="Sangat Lancar">Sangat Lancar</option>
@@ -841,7 +849,11 @@
                     </div>
                 </div>
                 <label>Tanggal</label><input type="date" id="tgl-doa">
-                <label>Nama Doa Harian</label><input type="text" id="in-doa" placeholder="Contoh: Doa Sebelum Tidur">
+                <label>Nama Doa Harian</label>
+                <div style="position: relative;">
+                    <input type="text" id="in-doa" placeholder="🔍 Cari / Ketik Nama Doa..." onkeyup="filterMateri('doa')" onclick="toggleListMateri('doa')" autocomplete="off">
+                    <div id="dropdown-doa-materi" class="dropdown-custom hidden"></div>
+                </div>
                 <label>Status</label>
                 <select id="stat-doa">
                     <option value="Sangat Lancar">Sangat Lancar</option>
@@ -867,7 +879,11 @@
                     </div>
                 </div>
                 <label>Tanggal</label><input type="date" id="tgl-kosakata">
-                <label>Materi / Kosakata</label><input type="text" id="in-kosakata" placeholder="Contoh: Anggota Tubuh (1-5)">
+                <label>Materi / Kosakata</label>
+                <div style="position: relative;">
+                    <input type="text" id="in-kosakata" placeholder="🔍 Cari / Ketik Kosakata Arab..." onkeyup="filterMateri('kosakata')" onclick="toggleListMateri('kosakata')" autocomplete="off">
+                    <div id="dropdown-kosakata-materi" class="dropdown-custom hidden"></div>
+                </div>
                 <label>Status</label>
                 <select id="stat-kosakata">
                     <option value="Hafal">Sudah Hafal</option>
@@ -988,6 +1004,11 @@
                 <div id="btn-lb-hadits" class="toggle-btn" onclick="gantiLeaderboard('hadits')" style="font-size:11px; padding:8px;">📜 Hadis</div>
                 <div id="btn-lb-doa" class="toggle-btn" onclick="gantiLeaderboard('doa')" style="font-size:11px; padding:8px;">🤲 Doa</div>
                 <div id="btn-lb-arab" class="toggle-btn" onclick="gantiLeaderboard('arab')" style="font-size:11px; padding:8px;">🔤 Arab</div>
+            </div>
+
+            <div class="toggle-container" style="background: rgba(253, 230, 138, 0.2); border-radius: 12px; padding: 4px; margin-bottom:15px; display:flex; justify-content:center; gap:5px;">
+                <div id="btn-periode-semua" class="toggle-btn aktif-pilih" onclick="gantiPeriodeLeaderboard('semua')" style="font-size:11px; padding:6px 12px;">🏆 Semua Waktu</div>
+                <div id="btn-periode-minggu" class="toggle-btn" onclick="gantiPeriodeLeaderboard('minggu')" style="font-size:11px; padding:6px 12px;">📅 Minggu Ini</div>
             </div>
 
             
@@ -1248,6 +1269,15 @@
                     let dropHalaqah = document.getElementById('dropdown-' + prefix + '-halaqah');
                     if(inHalaqah && dropHalaqah && !inHalaqah.contains(e.target) && !dropHalaqah.contains(e.target)) {
                         dropHalaqah.classList.add('hidden');
+                    }
+                });
+
+                // Penutup untuk Daftar Materi (Hadits, Doa, AISAR, Kosakata)
+                ['aisar', 'hadits', 'doa', 'kosakata'].forEach(prefix => {
+                    let inMat = document.getElementById('in-' + prefix);
+                    let dropMat = document.getElementById('dropdown-' + prefix + '-materi');
+                    if(inMat && dropMat && !inMat.contains(e.target) && !dropMat.contains(e.target)) {
+                        dropMat.classList.add('hidden');
                     }
                 });
             });
@@ -2498,6 +2528,61 @@ async function gantiNamaKelas(namaLama) {
             dropEl.innerHTML = html;
         }
 
+        // ===============================================================
+        // FUNGSI MESIN PENCARI MATERI / HADITS / DOA (CUSTOM DROPDOWN)
+        // ===============================================================
+        function getDaftarMateriUnik(modul) {
+            let arr = modul === 'aisar' ? dRiwA : (modul === 'hadits' ? dRiwH : (modul === 'doa' ? dRiwD : dRiwK));
+            let setMateri = new Set();
+            arr.forEach(r => {
+                if(r.materi && r.materi !== "-" && r.materi.trim() !== "") {
+                    setMateri.add(r.materi.trim());
+                }
+            });
+            return Array.from(setMateri).sort((a,b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
+        }
+
+        function toggleListMateri(modul) {
+            let dropId = 'dropdown-' + modul + '-materi';
+            let dropEl = document.getElementById(dropId);
+            if(dropEl) {
+                filterMateri(modul);
+                dropEl.classList.remove('hidden');
+            }
+        }
+
+        function filterMateri(modul) {
+            let inputId = 'in-' + modul;
+            let dropId = 'dropdown-' + modul + '-materi';
+            let elInput = document.getElementById(inputId);
+            let dropEl = document.getElementById(dropId);
+            if(!elInput || !dropEl) return;
+
+            let val = elInput.value.trim().toLowerCase();
+            let daftar = getDaftarMateriUnik(modul);
+            let filtered = daftar.filter(m => m.toLowerCase().includes(val));
+
+            let html = '';
+            let ikon = modul === 'aisar' ? '📘' : (modul === 'hadits' ? '📜' : (modul === 'doa' ? '🤲' : '🔤'));
+            filtered.forEach(m => {
+                let escaped = m.replace(/'/g, "\\'");
+                html += `<div class="dropdown-item" onclick="pilihMateriCustom('${escaped}', '${modul}')">${ikon} ${m}</div>`;
+            });
+            if(html === '') {
+                html = `<div class="dropdown-item" style="color:var(--text-mute); text-align:center;">✨ Ketik materi baru...</div>`;
+            }
+            dropEl.innerHTML = html;
+        }
+
+        function pilihMateriCustom(namaMateri, modul) {
+            let inputId = 'in-' + modul;
+            let dropId = 'dropdown-' + modul + '-materi';
+            let elInput = document.getElementById(inputId);
+            if(elInput) elInput.value = namaMateri;
+            let dropEl = document.getElementById(dropId);
+            if(dropEl) dropEl.classList.add('hidden');
+        }
+
         // Menyortir Ayat Akhir berdasarkan Ayat Awal
         function updateAyatAkhir() {
             let sa = document.getElementById('input-surah').value;
@@ -2658,6 +2743,26 @@ async function gantiNamaKelas(namaLama) {
                 setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; 
             }
             
+        function dapatkanNamaGuru(i) {
+            if(!i) return 'Ustadz/ah';
+            let ng = (i.nama_guru || i.guru || i.penguji || '').trim();
+            if(ng) return ng;
+            
+            if(i.catatan && i.catatan.includes('(Guru:')) {
+                let m = i.catatan.match(/\(Guru:\s*([^)]+)\)/);
+                if(m && m[1]) return m[1].trim();
+            }
+            
+            let h = i.halaqah || i.kelas;
+            if(h && typeof dbKelasGuru !== 'undefined' && dbKelasGuru) {
+                if(dbKelasGuru[h]) return dbKelasGuru[h].trim();
+                let key = Object.keys(dbKelasGuru).find(k => k.trim().toLowerCase() === h.trim().toLowerCase());
+                if(key && dbKelasGuru[key]) return dbKelasGuru[key].trim();
+            }
+            
+            return (window.guruAktif && window.guruAktif.trim()) ? window.guruAktif.trim() : 'Ustadz/ah';
+        }
+
             let h = ''; 
             dRiw.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => { 
                 let statusLabel = i.status === 'Lanjut' ? 'LULUS' : 'ULANG';
@@ -2677,13 +2782,14 @@ async function gantiNamaKelas(namaLama) {
                 let bintang = (parseInt(i.tajwid)||0) + (parseInt(i.lancar)||0) + (parseInt(i.makhraj)||0);
                 let poinS = (i.jenis === 'Murojaah') ? (bintang * 2) : bintang;
                 let poinBadge = i.status === 'Lanjut' ? `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poinS} Poin ✨</span>` : '';
-                let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : '';
+                let namaGuruPenilai = dapatkanNamaGuru(i);
+                let guruBadge = `<span style="display:inline-block; font-weight:700; color:#0284C7; background:#E0F2FE; border:1px solid #BAE6FD; padding:2px 6px; border-radius:6px; font-size:11px; margin-left:4px;">👨‍🏫 Guru: ${namaGuruPenilai}</span>`;
 
                 let teksAyat = i.jenis === "Tasmi'" ? "" : ` (Ayat: ${i.ayat})`;
                 let catatanTeks = i.catatan && i.catatan !== "-" ? `<div style="font-size:12px; font-style:italic; color:#D97706; margin-top:4px;">✏️ Catatan: ${i.catatan}</div>` : "";
                 let teksNilai = i.jenis === "Tasmi'" ? catatanTeks : `<div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div>${catatanTeks}`;
 
-                h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge}${guruMeta}</div><div class="list-card-title">📖 ${i.surah}${teksAyat} ${poinBadge}</div>${teksNilai}</div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
+                h += `<div class="list-card" style="${gayaKartu}"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge} ${guruBadge}</div><div class="list-card-title">📖 ${i.surah}${teksAyat} ${poinBadge}</div>${teksNilai}</div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div style="font-weight:900; color:${statusColor}">${statusLabel}</div><button onclick="hapusRiwayat(${i.id}, 'setoran')" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; box-shadow:none;">🗑️ <span class="text-mobile">Batal</span></button></div></div>`; 
             }); 
             document.getElementById('tempat-riwayat').innerHTML = h || '<p style="text-align:center;">Belum ada riwayat.</p>';
         }
@@ -2708,166 +2814,187 @@ async function gantiNamaKelas(namaLama) {
                     renderListSantri('ortu', arrSantri);
                 } else {
                     elSantri.innerHTML = '<option value="">-- Pilih Ananda --</option>'; 
-                    arrSantri.forEach(n => elSantri.appendChild(new Option(n,n))); 
+            arrSantri.forEach(n => elSantri.appendChild(new Option(n,n))); 
                 }
             }
 
             document.getElementById('ortu-kartuPrestasi').style.display = 'none'; 
-            document.getElementById('list-ortu-quran').innerHTML = ''; 
-            if(h) renderLeaderboard(h); 
-            else { let l = document.getElementById('ortu-leaderboard'); if(l) l.style.display = 'none'; }
-            
-            let sc = document.getElementById('chat-ortu-santri'); 
-            if(sc) { 
-                sc.innerHTML='<option value="">-- Pilih Ananda --</option>'; 
-                arrSantri.forEach(n => sc.appendChild(new Option(n,n))); 
+            var lbModulAktif = 'quran';
+            var lbPeriodeAktif = 'semua';
+
+            function gantiPeriodeLeaderboard(periode) {
+                lbPeriodeAktif = periode;
+                let btnSemua = document.getElementById('btn-periode-semua');
+                let btnMinggu = document.getElementById('btn-periode-minggu');
+                if(btnSemua) btnSemua.className = 'toggle-btn ' + (periode === 'semua' ? 'aktif-pilih' : '');
+                if(btnMinggu) btnMinggu.className = 'toggle-btn ' + (periode === 'minggu' ? 'aktif-pilih' : '');
+                
+                let h = document.getElementById('ortu-pilih-halaqah').value;
+                if(h) renderLeaderboard(h);
             }
-            let chatBox = document.getElementById('chat-box-ortu'); if(chatBox) chatBox.innerHTML = '';
-        }
 
-        var lbModulAktif = 'quran';
-
-        // UPDATE GANTI LEADERBOARD UNTUK DOA
-        function gantiLeaderboard(modul) {
-            lbModulAktif = modul;
-            
-            ['quran', 'aisar', 'hadits', 'arab', 'doa'].forEach(m => {
-                let btn = document.getElementById('btn-lb-' + m);
-                if(btn) {
-                    if(m === modul) btn.classList.add('aktif-pilih');
-                    else btn.classList.remove('aktif-pilih');
+            function isDalamMingguIni(tglStr) {
+                if(!tglStr) return false;
+                let parts = String(tglStr).split('/');
+                let dateObj;
+                if(parts.length === 3) {
+                    dateObj = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                } else {
+                    dateObj = new Date(tglStr);
                 }
-            });
-            
-            let h = document.getElementById('ortu-pilih-halaqah').value;
-            if(h) renderLeaderboard(h);
-        }
+                if(isNaN(dateObj.getTime())) return true;
+                
+                let now = new Date();
+                let day = now.getDay(); 
+                let diffToMonday = (day === 0 ? -6 : 1 - day); 
+                
+                let monday = new Date(now);
+                monday.setHours(0, 0, 0, 0);
+                monday.setDate(now.getDate() + diffToMonday);
+                
+                let sunday = new Date(monday);
+                sunday.setHours(23, 59, 59, 999);
+                sunday.setDate(monday.getDate() + 6);
+                
+                return dateObj >= monday && dateObj <= sunday;
+            }
 
-        function renderLeaderboard(halaqah) {
-            let lb = document.getElementById('ortu-leaderboard'), list = document.getElementById('leaderboard-list');
-            let teksJudul = document.getElementById('teks-judul-leaderboard'); 
-            let ikonKecil = document.getElementById('ikon-judul-leaderboard');
-            let ikonBesar = document.getElementById('ikon-bg-leaderboard');
-
-            let sameName = (a, b) => a && b && a.toString().trim().toLowerCase() === b.toString().trim().toLowerCase();
-
-            // Gabungkan murid dari dbP[halaqah] dan riwayat kelas ini agar tidak ada murid terlewat
-            let santriSet = new Set((dbP[halaqah] || []).map(s => s ? s.trim() : ''));
-            santriSet.delete('');
-
-            const catatSantriDariRiwayat = (arr) => {
-                arr.forEach(r => {
-                    if (r.halaqah && r.halaqah.trim().toLowerCase() === halaqah.trim().toLowerCase() && r.santri && r.santri.trim()) {
-                        let namaBersih = r.santri.trim();
-                        let ada = Array.from(santriSet).some(s => sameName(s, namaBersih));
-                        if (!ada) santriSet.add(namaBersih);
+            function gantiLeaderboard(modul) {
+                lbModulAktif = modul;
+                
+                ['quran', 'aisar', 'hadits', 'arab', 'doa'].forEach(m => {
+                    let btn = document.getElementById('btn-lb-' + m);
+                    if(btn) {
+                        if(m === modul) btn.classList.add('aktif-pilih');
+                        else btn.classList.remove('aktif-pilih');
                     }
                 });
-            };
-            catatSantriDariRiwayat(dRiw);
-            catatSantriDariRiwayat(dRiwA);
-            catatSantriDariRiwayat(dRiwH);
-            catatSantriDariRiwayat(dRiwD);
-            catatSantriDariRiwayat(dRiwK);
-
-            let santris = Array.from(santriSet);
-
-            let namaModul = "Bintang Hafalan"; let ikon = "🏆";
-            if (lbModulAktif === 'aisar') { namaModul = "Bintang AISAR"; ikon = "📘"; }
-            else if (lbModulAktif === 'hadits') { namaModul = "Bintang Hadis"; ikon = "📜"; }
-            else if (lbModulAktif === 'arab') { namaModul = "Bintang Kosakata"; ikon = "🔤"; }
-            else if (lbModulAktif === 'doa') { namaModul = "Bintang Doa"; ikon = "🤲"; }
-            
-            if(teksJudul) teksJudul.innerText = namaModul + " - " + halaqah;
-            if(ikonKecil) ikonKecil.innerText = ikon;
-            if(ikonBesar) ikonBesar.innerText = ikon;
-            
-            let scores = santris.map(nama => {
-                let poin = 0; let subTeks = ""; let jCount = 0; let maxId = 0; 
-
-                if (lbModulAktif === 'quran') {
-                    let p = getStudentProgress(nama);
-                    jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0;
-                    dRiw.forEach(r => { 
-                        if(sameName(r.santri, nama) && r.status === 'Lanjut') { 
-                            let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); 
-                            poin += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); 
-                            maxId = Math.max(maxId, r.id || 0); 
-                        } 
-                    });
-                    subTeks = jCount > 0 ? `${jCount} Juz` : "-";
-                } 
-                else if (lbModulAktif === 'aisar') {
-                    dRiwA.forEach(r => {
-                        if (sameName(r.santri, nama)) {
-                            let st = r.status ? r.status.toString().toLowerCase() : '';
-                            if (st.includes('ulang') || st.includes('belum')) { 
-                                poin += 2; maxId = Math.max(maxId, r.id || 0); 
-                            } else { 
-                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
-                            }
-                        }
-                    });
-                    subTeks = `${poin} Poin`;
-                }
-                else if (lbModulAktif === 'hadits') {
-                    dRiwH.forEach(r => {
-                        if (sameName(r.santri, nama)) {
-                            let st = r.status ? r.status.toString().toLowerCase() : '';
-                            if (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) { 
-                                poin += 2; maxId = Math.max(maxId, r.id || 0); 
-                            } else if (st.includes('cukup')) { 
-                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
-                            } else { 
-                                poin += 15; maxId = Math.max(maxId, r.id || 0); 
-                            }
-                        }
-                    });
-                    subTeks = `${poin} Poin`;
-                }
-                else if (lbModulAktif === 'doa') {
-                    dRiwD.forEach(r => {
-                        if (sameName(r.santri, nama)) {
-                            let st = r.status ? r.status.toString().toLowerCase() : '';
-                            if (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) { 
-                                poin += 2; maxId = Math.max(maxId, r.id || 0); 
-                            } else if (st.includes('cukup')) { 
-                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
-                            } else { 
-                                poin += 15; maxId = Math.max(maxId, r.id || 0); 
-                            }
-                        }
-                    });
-                    subTeks = `${poin} Poin`;
-                }
-                else if (lbModulAktif === 'arab') {
-                    dRiwK.forEach(r => {
-                        if (sameName(r.santri, nama)) {
-                            let st = r.status ? r.status.toString().toLowerCase() : '';
-                            if (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) { 
-                                poin += 5; maxId = Math.max(maxId, r.id || 0); 
-                            } else { 
-                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
-                            }
-                        }
-                    });
-                    subTeks = `${poin} Poin`;
-                }
-
-                return { nama: nama, jCount: jCount, poin: poin, subTeks: subTeks, maxId: maxId };
-            });
-
-            if (lbModulAktif === 'quran') {
-                scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
-                scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id')); 
-            } else {
-                scores = scores.filter(x => x.poin > 0);
-                scores.sort((a,b) => b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id'));
+                
+                let h = document.getElementById('ortu-pilih-halaqah').value;
+                if(h) renderLeaderboard(h);
             }
 
-            let top10 = scores.slice(0, 10);
-            if(top10.length === 0) { 
-                list.innerHTML = '<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:20px;">Belum ada riwayat capaian di papan peringkat ini.</p>'; 
+            function renderLeaderboard(halaqah) {
+                let lb = document.getElementById('ortu-leaderboard'), list = document.getElementById('leaderboard-list');
+                let teksJudul = document.getElementById('teks-judul-leaderboard'); 
+                let ikonKecil = document.getElementById('ikon-judul-leaderboard');
+                let ikonBesar = document.getElementById('ikon-bg-leaderboard');
+
+                let sameName = (a, b) => a && b && a.toString().trim().toLowerCase() === b.toString().trim().toLowerCase();
+
+                // Saring array data berdasarkan filter periode (Semua Waktu vs Minggu Ini)
+                let fRiw = (lbPeriodeAktif === 'minggu') ? dRiw.filter(r => isDalamMingguIni(r.tgl)) : dRiw;
+                let fRiwA = (lbPeriodeAktif === 'minggu') ? dRiwA.filter(r => isDalamMingguIni(r.tgl)) : dRiwA;
+                let fRiwH = (lbPeriodeAktif === 'minggu') ? dRiwH.filter(r => isDalamMingguIni(r.tgl)) : dRiwH;
+                let fRiwD = (lbPeriodeAktif === 'minggu') ? dRiwD.filter(r => isDalamMingguIni(r.tgl)) : dRiwD;
+                let fRiwK = (lbPeriodeAktif === 'minggu') ? dRiwK.filter(r => isDalamMingguIni(r.tgl)) : dRiwK;
+
+                // Gabungkan murid dari dbP[halaqah] dan riwayat kelas ini agar tidak ada murid terlewat
+                let santriSet = new Set((dbP[halaqah] || []).map(s => s ? s.trim() : ''));
+                santriSet.delete('');
+
+                const catatSantriDariRiwayat = (arr) => {
+                    arr.forEach(r => {
+                        if (r.halaqah && r.halaqah.trim().toLowerCase() === halaqah.trim().toLowerCase() && r.santri && r.santri.trim()) {
+                            let namaBersih = r.santri.trim();
+                            let ada = Array.from(santriSet).some(s => sameName(s, namaBersih));
+                            if (!ada) santriSet.add(namaBersih);
+                        }
+                    });
+                };
+                catatSantriDariRiwayat(fRiw);
+                catatSantriDariRiwayat(fRiwA);
+                catatSantriDariRiwayat(fRiwH);
+                catatSantriDariRiwayat(fRiwD);
+                catatSantriDariRiwayat(fRiwK);
+
+                let santris = Array.from(santriSet);
+
+                let namaModul = "Bintang Hafalan"; let ikon = "🏆";
+                if (lbModulAktif === 'aisar') { namaModul = "Bintang AISAR"; ikon = "📘"; }
+                else if (lbModulAktif === 'hadits') { namaModul = "Bintang Hadis"; ikon = "📜"; }
+                else if (lbModulAktif === 'arab') { namaModul = "Bintang Kosakata"; ikon = "🔤"; }
+                else if (lbModulAktif === 'doa') { namaModul = "Bintang Doa"; ikon = "🤲"; }
+                
+                let labelPeriode = lbPeriodeAktif === 'minggu' ? " (Minggu Ini)" : " (Semua Waktu)";
+                if(teksJudul) teksJudul.innerText = namaModul + " - " + halaqah + labelPeriode;
+                if(ikonKecil) ikonKecil.innerText = ikon;
+                if(ikonBesar) ikonBesar.innerText = ikon;
+                
+                let scores = santris.map(nama => {
+                    let poin = 0; let subTeks = ""; let jCount = 0; let maxId = 0; 
+
+                    if (lbModulAktif === 'quran') {
+                        let p = getStudentProgress(nama);
+                        jCount = (p && p.juz && p.juz !== "-" && p.juz !== "") ? p.juz.split(',').filter(x=>x.trim()!=='').length : 0;
+                        fRiw.forEach(r => { 
+                            if(sameName(r.santri, nama) && r.status === 'Lanjut') { 
+                                let bintang = (parseInt(r.tajwid)||0) + (parseInt(r.lancar)||0) + (parseInt(r.makhraj)||0); 
+                                poin += (r.jenis === 'Murojaah') ? (bintang * 2) : (bintang * 1); 
+                                maxId = Math.max(maxId, r.id || 0); 
+                            } 
+                        });
+                        subTeks = jCount > 0 ? `${jCount} Juz` : "-";
+                    } 
+                    else {
+                        let targetArr = lbModulAktif === 'aisar' ? fRiwA : (lbModulAktif === 'hadits' ? fRiwH : (lbModulAktif === 'doa' ? fRiwD : fRiwK));
+                        
+                        // KELOMPOKKAN MATERI TERBARU PER SUBJEK (NILAI TERBARU PER MATERI MENGGANTIKAN NILAI LAMA)
+                        let latestMateriMap = {};
+                        targetArr.forEach(r => {
+                            if (sameName(r.santri, nama) && r.materi) {
+                                let keyMateri = r.materi.toString().trim().toLowerCase();
+                                if(!latestMateriMap[keyMateri] || (r.id && r.id > (latestMateriMap[keyMateri].id || 0))) {
+                                    latestMateriMap[keyMateri] = r;
+                                }
+                            }
+                        });
+
+                        Object.values(latestMateriMap).forEach(r => {
+                            let st = r.status ? r.status.toString().toLowerCase() : '';
+                            if (lbModulAktif === 'hadits' || lbModulAktif === 'doa') {
+                                if (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) { 
+                                    poin += 2; maxId = Math.max(maxId, r.id || 0); 
+                                } else if (st.includes('cukup')) { 
+                                    poin += 10; maxId = Math.max(maxId, r.id || 0); 
+                                } else { 
+                                    poin += 15; maxId = Math.max(maxId, r.id || 0); 
+                                }
+                            } else if (lbModulAktif === 'aisar') {
+                                if (st.includes('ulang') || st.includes('belum')) { 
+                                    poin += 2; maxId = Math.max(maxId, r.id || 0); 
+                                } else { 
+                                    poin += 10; maxId = Math.max(maxId, r.id || 0); 
+                                }
+                            } else if (lbModulAktif === 'arab') {
+                                if (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) { 
+                                    poin += 5; maxId = Math.max(maxId, r.id || 0); 
+                                } else { 
+                                    poin += 10; maxId = Math.max(maxId, r.id || 0); 
+                                }
+                            }
+                        });
+                        subTeks = `${poin} Poin`;
+                    }
+
+                    return { nama: nama, jCount: jCount, poin: poin, subTeks: subTeks, maxId: maxId };
+                });
+
+                if (lbModulAktif === 'quran') {
+                    scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
+                    scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id')); 
+                } else {
+                    scores = scores.filter(x => x.poin > 0);
+                    scores.sort((a,b) => b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id'));
+                }
+
+                let top10 = scores.slice(0, 10);
+                if(top10.length === 0) { 
+                    list.innerHTML = '<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:20px;">Belum ada riwayat capaian di papan peringkat ini.</p>'; 
+                    lb.style.display = 'block'; 
+                    return; 
+                }
+                
                 lb.style.display = 'block'; 
                 return; 
             }
@@ -2913,9 +3040,10 @@ async function gantiNamaKelas(namaLama) {
                 let bintang = (parseInt(i.tajwid)||0) + (parseInt(i.lancar)||0) + (parseInt(i.makhraj)||0);
                 let poinS = (i.jenis === 'Murojaah') ? (bintang * 2) : bintang;
                 let poinBadge = i.status === 'Lanjut' ? `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poinS} Poin ✨</span>` : '';
-                let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : '';
+                let namaGuruPenilai = dapatkanNamaGuru(i);
+                let guruBadge = `<span style="display:inline-block; font-weight:700; color:#0284C7; background:#E0F2FE; border:1px solid #BAE6FD; padding:2px 6px; border-radius:6px; font-size:11px; margin-left:4px;">👨‍🏫 Guru: ${namaGuruPenilai}</span>`;
 
-                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${badge}${guruMeta}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat}) ${poinBadge}</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div></div>`;
+                h += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} • ${badge} ${guruBadge}</div><div class="list-card-title">📖 ${i.surah} (${i.ayat}) ${poinBadge}</div><div style="font-size:12px; margin-top:5px;">T:${i.tajwid} L:${i.lancar} M:${i.makhraj}</div></div><div style="font-weight:900; color:${i.status==='Lanjut'?'var(--emerald-logo)':'#EF4444'}">${i.status==='Lanjut'?'LULUS':'ULANG'}</div></div>`;
             }); 
             document.getElementById('list-ortu-quran').innerHTML = h || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat setoran.</p></div>';
 
@@ -2932,9 +3060,10 @@ async function gantiNamaKelas(namaLama) {
                         poin = (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) ? 5 : 10;
                     }
                     let poinBadge = `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poin} Poin ✨</span>`;
-                    let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : '';
+                    let namaGuruPenilai = dapatkanNamaGuru(i);
+                    let guruBadge = `<span style="display:inline-block; font-weight:700; color:#0284C7; background:#E0F2FE; border:1px solid #BAE6FD; padding:2px 6px; border-radius:6px; font-size:11px; margin-left:4px;">👨‍🏫 Guru: ${namaGuruPenilai}</span>`;
 
-                    html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl}${guruMeta}</div><div class="list-card-title">${ikon} ${i.materi} ${poinBadge}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan || ''}</div></div><div style="font-weight:900;">${i.status}</div></div>`; 
+                    html += `<div class="list-card"><div style="flex:1"><div class="history-meta">${i.tgl} ${guruBadge}</div><div class="list-card-title">${ikon} ${i.materi} ${poinBadge}</div><div style="font-size:12px; font-style:italic; color:#D97706">${i.catatan || ''}</div></div><div style="font-weight:900;">${i.status}</div></div>`; 
                 });
                 document.getElementById(id).innerHTML = html || '<div class="card" style="text-align:center;"><p style="color:var(--text-mute); font-weight:800;">Belum ada riwayat.</p></div>';
             };
@@ -3351,9 +3480,10 @@ doc.text(`Pada hari ${tglMasehi} bertempat di SDIT Qurratu A'yun Al-Islami`, 148
                     poin = (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) ? 5 : 10;
                 }
                 let poinBadge = `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poin} Poin ✨</span>`;
-                let guruMeta = (i.nama_guru || i.guru) ? ` • 👨‍🏫 Guru: ${i.nama_guru || i.guru}` : (guruAktif ? ` • 👨‍🏫 Guru: ${guruAktif}` : '');
+                let namaGuruPenilai = dapatkanNamaGuru(i);
+                let guruBadge = `<span style="display:inline-block; font-weight:700; color:#0284C7; background:#E0F2FE; border:1px solid #BAE6FD; padding:2px 6px; border-radius:6px; font-size:11px; margin-left:4px;">👨‍🏫 Guru: ${namaGuruPenilai}</span>`;
                 
-                html += `<div class="list-card" style="border-left: 5px solid var(--emerald-logo);"><div style="flex:1"><div class="history-meta">${i.tgl}${guruMeta}</div><div class="list-card-title">${ikon} ${i.materi} ${poinBadge}</div><div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">Catatan: ${i.catatan || '-'}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center;"><div style="font-weight:900; color:var(--emerald-logo);">${i.status}</div><button onclick="hapusRiwayat(${i.id}, '${modul}'); setTimeout(() => tampilkanRiwayatGuruModul('${modul}'), 800);" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; margin-top:5px; box-shadow:none;">🗑️ Batal</button></div></div>`;
+                html += `<div class="list-card" style="border-left: 5px solid var(--emerald-logo);"><div style="flex:1"><div class="history-meta">${i.tgl} ${guruBadge}</div><div class="list-card-title">${ikon} ${i.materi} ${poinBadge}</div><div style="font-size:12px; margin-top:5px; color:var(--text-mute); font-weight:700;">Catatan: ${i.catatan || '-'}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:center;"><div style="font-weight:900; color:var(--emerald-logo);">${i.status}</div><button onclick="hapusRiwayat(${i.id}, '${modul}'); setTimeout(() => tampilkanRiwayatGuruModul('${modul}'), 800);" class="btn-kecil" style="background:#FEE2E2; color:#EF4444; border:1px solid #FCA5A5; font-size:10px; padding:4px 8px; margin-top:5px; box-shadow:none;">🗑️ Batal</button></div></div>`;
             });
             wadah.innerHTML = html || '<p style="text-align:center; color:var(--text-mute); font-size:13px;">Belum ada riwayat untuk murid ini.</p>';
         }
