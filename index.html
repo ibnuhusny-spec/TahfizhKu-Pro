@@ -2708,7 +2708,7 @@ async function gantiNamaKelas(namaLama) {
         }
 
         function dapatkanNamaGuru(i) {
-            if(!i) return 'Ustadz/ah';
+            if(!i) return '';
             let ng = (i.nama_guru || i.guru || i.penguji || '').trim();
             if(ng) return ng;
             
@@ -2717,14 +2717,7 @@ async function gantiNamaKelas(namaLama) {
                 if(m && m[1]) return m[1].trim();
             }
             
-            let h = i.halaqah || i.kelas;
-            if(h && typeof dbKelasGuru !== 'undefined' && dbKelasGuru) {
-                if(dbKelasGuru[h]) return dbKelasGuru[h].trim();
-                let key = Object.keys(dbKelasGuru).find(k => k.trim().toLowerCase() === h.trim().toLowerCase());
-                if(key && dbKelasGuru[key]) return dbKelasGuru[key].trim();
-            }
-            
-            return (window.guruAktif && window.guruAktif.trim()) ? window.guruAktif.trim() : 'Ustadz/ah';
+            return '';
         }
 
         function tampilkanKartuPrestasi() {
@@ -2783,7 +2776,7 @@ async function gantiNamaKelas(namaLama) {
                 let poinS = (i.jenis === 'Murojaah') ? (bintang * 2) : bintang;
                 let poinBadge = i.status === 'Lanjut' ? `<span style="display:inline-block; font-weight:800; font-size:11px; color:#D97706; background:#FEF3C7; padding:2px 6px; border-radius:6px; margin-left:6px;">+${poinS} Poin ✨</span>` : '';
                 let namaGuruPenilai = dapatkanNamaGuru(i);
-                let guruBadge = `<span style="display:inline-block; font-weight:700; color:#0284C7; background:#E0F2FE; border:1px solid #BAE6FD; padding:2px 6px; border-radius:6px; font-size:11px; margin-left:4px;">👨‍🏫 Guru: ${namaGuruPenilai}</span>`;
+                let guruBadge = namaGuruPenilai ? `<span style="display:inline-block; font-weight:700; color:#0284C7; background:#E0F2FE; border:1px solid #BAE6FD; padding:2px 6px; border-radius:6px; font-size:11px; margin-left:4px;">👨‍🏫 Guru: ${namaGuruPenilai}</span>` : '';
 
                 let teksAyat = i.jenis === "Tasmi'" ? "" : ` (Ayat: ${i.ayat})`;
                 let catatanTeks = i.catatan && i.catatan !== "-" ? `<div style="font-size:12px; font-style:italic; color:#D97706; margin-top:4px;">✏️ Catatan: ${i.catatan}</div>` : "";
