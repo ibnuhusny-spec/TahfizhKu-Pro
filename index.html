@@ -2307,13 +2307,26 @@ async function gantiNamaKelas(namaLama) {
         }
 
         async function hapusRiwayat(id, tabel) {
-            if(confirm("Hapus riwayat hafalan ini? Data yang dihapus tidak bisa dikembalikan.")) {
+            if(confirm("Hapus riwayat ini? Data yang dihapus tidak bisa dikembalikan.")) {
                 try {
                     let res = await fetch(`${SUPABASE_URL}/rest/v1/${tabel}?id=eq.${id}`, { method: 'DELETE', headers: REQ_HEADERS });
                     if(!res.ok) throw new Error();
                     
                     await muatUlangDataDiamDiam();
-                    if(tabel === 'setoran') { tampilkanKartuPrestasi(); }
+                    
+                    if(tabel === 'setoran') {
+                        selJuz = [];
+                    }
+                    
+                    // Segarkan seluruh tampilan (Guru Al-Qur'an, Wali Murid, Papan Peringkat/Leaderboard & Modul) secara real-time
+                    tampilkanKartuPrestasi();
+                    tampilkanDataOrtu();
+                    renderLeaderboard();
+                    
+                    let mod = tabel === 'arab' ? 'kosakata' : tabel;
+                    if(mod !== 'setoran') {
+                        tampilkanRiwayatGuruModul(mod);
+                    }
                     
                     alert("✅ Riwayat berhasil dihapus!");
                 } catch(e) {
@@ -2800,7 +2813,9 @@ async function gantiNamaKelas(namaLama) {
                 let btnSertif = `<button onclick="cetakSertifikat('${safeName}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); width:100%; margin-top:15px; font-size:12px; padding:10px; box-shadow:none;">${teksBtn}</button>`;
                 ws.innerHTML = btnSertif;
             } else { 
-                setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "-"; document.getElementById('infoSurah').innerText = "-"; 
+                setJuzUI("", false); document.getElementById('infoTotalJuz').innerText = "0"; document.getElementById('infoSurah').innerText = "-"; 
+                let safeName = s ? s.replace(/'/g, "\\'") : '';
+                ws.innerHTML = `<button onclick="cetakSertifikat('${safeName}', '')" style="background:linear-gradient(135deg, #FBBF24, #D97706); width:100%; margin-top:15px; font-size:12px; padding:10px; box-shadow:none;">🎓 Cetak Sertifikat Hafalan</button>`;
             }
             
             let h = ''; 
@@ -3083,6 +3098,8 @@ async function gantiNamaKelas(namaLama) {
                 ws.innerHTML = `<button onclick="cetakSertifikat('${safeName}', '${teksJuz}')" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">${teksBtnOrtu}</button>`;
             } else { 
                 setJuzUI("", true); document.getElementById('ortu-infoJuz').innerText = "0"; document.getElementById('ortu-infoSurah').innerText = "-"; 
+                let safeName = s ? s.replace(/'/g, "\\'") : '';
+                ws.innerHTML = `<button onclick="cetakSertifikat('${safeName}', '')" style="background:linear-gradient(135deg, #FBBF24, #D97706); margin-top:15px; font-size:14px; padding:12px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">🎓 Cetak Sertifikat Hafalan</button>`;
             }
             
             dRiw.filter(i => i.santri && s && i.santri.trim().toLowerCase() === s.trim().toLowerCase()).forEach(i => {
