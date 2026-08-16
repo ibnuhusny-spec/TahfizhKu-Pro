@@ -1363,18 +1363,18 @@
             }
         }
 
-        async function fetchSemuaData(endpoint) {
+        async function fetchSemuaData(endpoint, maxRowsLimit = 1000) {
             let result = [];
             let pageSize = 1000;
             let page = 0;
-            let maxRows = 100000; // Mendukung hingga range 0-99999 ( total 100.000 baris data )
+            let maxRows = maxRowsLimit; // Dioptimasi dari 100.000 menjadi 1.000 baris terbaru untuk menghemat Egress Bandwidth
             
             // Format endpoint URL
             let sep = endpoint.includes('?') ? '&' : '?';
 
             while (result.length < maxRows) {
                 let from = page * pageSize;
-                let to = Math.min(from + pageSize - 1, 99999);
+                let to = Math.min(from + pageSize - 1, maxRows - 1);
                 let headers = { 
                     ...REQ_HEADERS, 
                     'Range-Unit': 'items',
@@ -1388,7 +1388,7 @@
                     if (!Array.isArray(data) || data.length === 0) break;
                     
                     result = result.concat(data);
-                    if (data.length < pageSize || to >= 99999) break;
+                    if (data.length < pageSize || to >= (maxRows - 1)) break;
                     page++;
                 } catch (e) {
                     console.error(`Gagal tarik data pagination (${endpoint}):`, e);
@@ -1400,9 +1400,9 @@
 
         async function muatUlangDataDiamDiam() {
             try {
-                // PENARIKAN LENGKAP SEMUA DATA HINGGA RANGE 0-99999 AGAR POIN TIDAK HILANG
+                // Dioptimasi: Penarikan data riwayat terbaru maksimal 1000 baris agar Egress tidak membengkak
                 const endpoints = ['setoran?select=*&order=id.desc','aisar?select=*&order=id.desc','hadits?select=*&order=id.desc','kosakata?select=*&order=id.desc', 'doa?select=*&order=id.desc'];
-                const responses = await Promise.all(endpoints.map(ep => fetchSemuaData(ep)));
+                const responses = await Promise.all(endpoints.map(ep => fetchSemuaData(ep, 1000)));
                 
                 const [rS, rA, rH, rKo, rD] = responses;
                 const safe = arr => Array.isArray(arr) ? arr : [];
@@ -1419,20 +1419,20 @@
 
         async function tarikDataServer() {
             try {
-                // PENARIKAN LENGKAP SEMUA DATA HINGGA RANGE 0-99999 AGAR POIN TIDAK HILANG
+                // Dioptimasi: Penarikan data server awal dibatasi 1000 baris per tabel riwayat
                 const fetchSimple = ep => fetch(`${SUPABASE_URL}/rest/v1/${ep}`, {headers: REQ_HEADERS}).then(res => res.ok ? res.json() : []).catch(() => []);
 
                 const responses = await Promise.all([
                     fetchSimple('guru'),
                     fetchSimple('kelas'),
                     fetchSimple('murid'),
-                    fetchSemuaData('setoran?select=*&order=id.desc'),
-                    fetchSemuaData('aisar?select=*&order=id.desc'),
-                    fetchSemuaData('hadits?select=*&order=id.desc'),
-                    fetchSemuaData('kosakata?select=*&order=id.desc'),
+                    fetchSemuaData('setoran?select=*&order=id.desc', 1000),
+                    fetchSemuaData('aisar?select=*&order=id.desc', 1000),
+                    fetchSemuaData('hadits?select=*&order=id.desc', 1000),
+                    fetchSemuaData('kosakata?select=*&order=id.desc', 1000),
                     fetchSimple('pesan?select=*&order=id.asc'),
                     fetchSimple('forum_guru?select=*&order=id.asc'),
-                    fetchSemuaData('doa?select=*&order=id.desc')
+                    fetchSemuaData('doa?select=*&order=id.desc', 1000)
                 ]);
                 
                 const [rG, rK, rM, rS, rA, rH, rKo, rP, rF, rD] = responses;
