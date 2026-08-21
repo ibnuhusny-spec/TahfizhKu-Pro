@@ -2589,11 +2589,6 @@ async function gantiNamaKelas(namaLama) {
 
             renderListHalaqah(prefix, filteredArr);
             toggleListHalaqah(prefix);
-
-            if (val && arrKelas.some(h => h.toLowerCase() === val)) {
-                let matchedClass = arrKelas.find(h => h.toLowerCase() === val);
-                pilihHalaqahCustom(matchedClass, prefix, true);
-            }
         }
 
         function pilihHalaqahCustom(namaKelas, prefix, skipInputValueSet) {
