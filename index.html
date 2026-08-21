@@ -1481,14 +1481,35 @@
 
                 dbP = {}; dbKelasGuru = {};
                 safe(rK).forEach(k => { 
-                    if(k.nama_kelas) {
-                        dbP[k.nama_kelas] = []; 
-                        dbKelasGuru[k.nama_kelas] = k.nama_guru || ''; 
+                    if(k.nama_kelas && k.nama_kelas.trim()) {
+                        let cleanK = k.nama_kelas.trim();
+                        if(!dbP[cleanK]) dbP[cleanK] = [];
+                        dbKelasGuru[cleanK] = k.nama_guru || ''; 
                     }
                 });
                 
                 safe(rM).forEach(m => { 
-                    if(m.kelas && dbP[m.kelas]) dbP[m.kelas].push(m.nama_murid); 
+                    if(m.kelas && m.kelas.trim() && m.nama_murid && m.nama_murid.trim()) {
+                        let cleanK = m.kelas.trim();
+                        let cleanM = m.nama_murid.trim();
+                        if(!dbP[cleanK]) dbP[cleanK] = [];
+                        if(!dbP[cleanK].some(x => normName(x) === normName(cleanM))) {
+                            dbP[cleanK].push(cleanM);
+                        }
+                    }
+                });
+
+                [rS, rA, rH, rKo, rD].forEach(records => {
+                    safe(records).forEach(r => {
+                        let cleanK = (r.kelas || r.halaqah || '').trim();
+                        let cleanM = (r.nama_murid || r.santri || '').trim();
+                        if (cleanK) {
+                            if (!dbP[cleanK]) dbP[cleanK] = [];
+                            if (cleanM && !dbP[cleanK].some(x => normName(x) === normName(cleanM))) {
+                                dbP[cleanK].push(cleanM);
+                            }
+                        }
+                    });
                 });
 
                 dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
@@ -1502,6 +1523,7 @@
 
                 kalkulasiProgress();
                 renderLogins(); 
+                renderHalaqahDropdowns();
                 
                 let loading = document.getElementById('teks-loading');
                 if(loading) loading.innerText = "Selesai Memuat 🚀";
@@ -2511,6 +2533,17 @@ async function gantiNamaKelas(namaLama) {
         // FUNGSI MESIN PENCARI KELAS / HALAQAH (CUSTOM DROPDOWN)
         // ===============================================================
         function toggleListHalaqah(prefix) {
+            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
+            let idsBebas = ['ortu', 'admin', 'laporan'];
+            let arrKelas = Object.keys(dbP).sort((a, b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
+
+            let filteredArr = arrKelas.filter(h => {
+                let gurunya = dbKelasGuru[h] || '';
+                return !isGuru || idsBebas.includes(prefix) || gurunya.includes(guruAktif);
+            });
+
+            renderListHalaqah(prefix, filteredArr);
+
             let dropId = 'dropdown-' + prefix + '-halaqah';
             let dropEl = document.getElementById(dropId);
             if(dropEl) dropEl.classList.remove('hidden');
