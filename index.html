@@ -537,8 +537,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // URL dan Kunci ini HARUS SAMA dengan yang ada di Portal Terpadu
-    const supabaseUrl = 'https://duyxtgpkzebmhlouwofl.supabase.co';
-    const supabaseKey = 'sb_publishable_djX-__X2opNMCa3yRU6BdQ_67lqy2Yq'; 
+    const supabaseUrl = 'https://gquohpkbygzkuybgblmp.supabase.co';
+    const supabaseKey = 'sb_publishable_xcOviXGQvu-Ua3U3sRY_wg_AHlCMYMt'; 
     
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -1136,8 +1136,8 @@
     
     <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 <script>
-        const SUPABASE_URL = 'https://dadggousdyjorcbsgzge.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'sb_publishable_tiSZx3k53-C6KtrgtDYe_A_bId6SF96';
+        const SUPABASE_URL = 'https://duyxtgpkzebmhlouwofl.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_djX-__X2opNMCa3yRU6BdQ_67lqy2Yq';
         let savedToken = getSafeStorage('supabase_token');
         let REQ_HEADERS = { 
             'apikey': SUPABASE_ANON_KEY, 
@@ -3022,14 +3022,15 @@ async function gantiNamaKelas(namaLama) {
             let ikonKecil = document.getElementById('ikon-judul-leaderboard');
             let ikonBesar = document.getElementById('ikon-bg-leaderboard');
 
-            let sameName = (a, b) => a && b && a.toString().trim().toLowerCase() === b.toString().trim().toLowerCase();
+            let sameName = (a, b) => a && b && normName(a) === normName(b);
 
             // Saring array data berdasarkan filter periode (Semua Waktu vs Minggu Ini)
-            let fRiw = (lbPeriodeAktif === 'minggu') ? dRiw.filter(r => isDalamMingguIni(r.tgl)) : dRiw;
-            let fRiwA = (lbPeriodeAktif === 'minggu') ? dRiwA.filter(r => isDalamMingguIni(r.tgl)) : dRiwA;
-            let fRiwH = (lbPeriodeAktif === 'minggu') ? dRiwH.filter(r => isDalamMingguIni(r.tgl)) : dRiwH;
-            let fRiwD = (lbPeriodeAktif === 'minggu') ? dRiwD.filter(r => isDalamMingguIni(r.tgl)) : dRiwD;
-            let fRiwK = (lbPeriodeAktif === 'minggu') ? dRiwK.filter(r => isDalamMingguIni(r.tgl)) : dRiwK;
+            let isMingguan = (lbPeriodeAktif === 'minggu');
+            let fRiw = isMingguan ? dRiw.filter(r => isDalamMingguIni(r.tgl)) : dRiw;
+            let fRiwA = isMingguan ? dRiwA.filter(r => isDalamMingguIni(r.tgl)) : dRiwA;
+            let fRiwH = isMingguan ? dRiwH.filter(r => isDalamMingguIni(r.tgl)) : dRiwH;
+            let fRiwD = isMingguan ? dRiwD.filter(r => isDalamMingguIni(r.tgl)) : dRiwD;
+            let fRiwK = isMingguan ? dRiwK.filter(r => isDalamMingguIni(r.tgl)) : dRiwK;
 
             // Gabungkan murid dari dbP[halaqah] dan riwayat kelas ini agar tidak ada murid terlewat
             let santriSet = new Set((dbP[halaqah] || []).map(s => s ? s.trim() : ''));
@@ -3058,7 +3059,7 @@ async function gantiNamaKelas(namaLama) {
             else if (lbModulAktif === 'arab') { namaModul = "Bintang Kosakata"; ikon = "🔤"; }
             else if (lbModulAktif === 'doa') { namaModul = "Bintang Doa"; ikon = "🤲"; }
             
-            let labelPeriode = lbPeriodeAktif === 'minggu' ? " (Minggu Ini)" : " (Semua Waktu)";
+            let labelPeriode = isMingguan ? " (Minggu Ini)" : " (Semua Waktu)";
             if(teksJudul) teksJudul.innerText = namaModul + " - " + halaqah + labelPeriode;
             if(ikonKecil) ikonKecil.innerText = ikon;
             if(ikonBesar) ikonBesar.innerText = ikon;
@@ -3076,7 +3077,11 @@ async function gantiNamaKelas(namaLama) {
                             maxId = Math.max(maxId, r.id || 0); 
                         } 
                     });
-                    subTeks = jCount > 0 ? `${jCount} Juz` : "-";
+                    if (isMingguan) {
+                        subTeks = `${poin} Poin`;
+                    } else {
+                        subTeks = jCount > 0 ? `${jCount} Juz` : `${poin} Poin`;
+                    }
                 } 
                 else {
                     let targetArr = lbModulAktif === 'aisar' ? fRiwA : (lbModulAktif === 'hadits' ? fRiwH : (lbModulAktif === 'doa' ? fRiwD : fRiwK));
@@ -3123,8 +3128,15 @@ async function gantiNamaKelas(namaLama) {
             });
 
             if (lbModulAktif === 'quran') {
-                scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
-                scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id')); 
+                if (isMingguan) {
+                    // Peringkat Pekanan Murni: Hanya poin setoran minggu ini yang dihitung (tanpa mengikutkan Hafalan Juz lama)
+                    scores = scores.filter(x => x.poin > 0); 
+                    scores.sort((a,b) => b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id')); 
+                } else {
+                    // Peringkat Semua Waktu: Mengurutkan Juz tuntas terlebih dahulu, lalu poin kumulatif
+                    scores = scores.filter(x => x.jCount > 0 || x.poin > 0); 
+                    scores.sort((a,b) => b.jCount - a.jCount || b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id')); 
+                }
             } else {
                 scores = scores.filter(x => x.poin > 0);
                 scores.sort((a,b) => b.poin - a.poin || b.maxId - a.maxId || a.nama.localeCompare(b.nama, 'id'));
@@ -3146,7 +3158,16 @@ async function gantiNamaKelas(namaLama) {
                 else if(index === 2) medali = '🥉'; 
                 else medali = `<span style="display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; font-weight:900; color:var(--white); background:var(--gold-accent); border-radius:50%; font-size:12px;">${index+1}</span>`;
                 
-                let highlightText = lbModulAktif === 'quran' ? `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks}</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div>` : `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks} ✨</div>`;
+                let highlightText = '';
+                if (lbModulAktif === 'quran') {
+                    if (isMingguan) {
+                        highlightText = `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.poin} Poin ✨</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Pekan Ini</div>`;
+                    } else {
+                        highlightText = `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks}</div><div style="font-size:10px; color:#B45309; font-weight:800; text-transform:uppercase;">Poin: ${item.poin} ✨</div>`;
+                    }
+                } else {
+                    highlightText = `<div style="font-weight:900; color:var(--emerald-logo); font-size:15px;">${item.subTeks} ✨</div>`;
+                }
 
                 html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom: 1px dashed #FDE68A;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:24px;">${medali}</span><div style="font-weight:900; font-size:15px;">${item.nama}</div></div><div style="text-align:right;">${highlightText}</div></div>`;
             }); 
