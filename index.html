@@ -2533,20 +2533,10 @@ async function gantiNamaKelas(namaLama) {
         // FUNGSI MESIN PENCARI KELAS / HALAQAH (CUSTOM DROPDOWN)
         // ===============================================================
         function toggleListHalaqah(prefix) {
-            let isGuru = getSafeStorage('sesi_halaman') === 'muhaffiz';
-            let idsBebas = ['ortu', 'admin', 'laporan'];
-            let arrKelas = Object.keys(dbP).sort((a, b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
-
-            let filteredArr = arrKelas.filter(h => {
-                let gurunya = dbKelasGuru[h] || '';
-                return !isGuru || idsBebas.includes(prefix) || gurunya.includes(guruAktif);
-            });
-
-            renderListHalaqah(prefix, filteredArr);
-
             let dropId = 'dropdown-' + prefix + '-halaqah';
             let dropEl = document.getElementById(dropId);
             if(dropEl) dropEl.classList.remove('hidden');
+            filterHalaqah(prefix);
         }
 
         function renderListHalaqah(prefix, arrayKelas) {
@@ -2583,12 +2573,14 @@ async function gantiNamaKelas(namaLama) {
             let filteredArr = arrKelas.filter(h => {
                 let gurunya = dbKelasGuru[h] || '';
                 let passGuru = !isGuru || idsBebas.includes(prefix) || gurunya.includes(guruAktif);
-                let passMatch = h.toLowerCase().includes(val);
+                let passMatch = !val || h.toLowerCase().includes(val);
                 return passGuru && passMatch;
             });
 
             renderListHalaqah(prefix, filteredArr);
-            toggleListHalaqah(prefix);
+            let dropId = 'dropdown-' + prefix + '-halaqah';
+            let dropEl = document.getElementById(dropId);
+            if(dropEl) dropEl.classList.remove('hidden');
         }
 
         function pilihHalaqahCustom(namaKelas, prefix, skipInputValueSet) {
