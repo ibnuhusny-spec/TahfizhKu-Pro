@@ -537,8 +537,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // URL dan Kunci ini HARUS SAMA dengan yang ada di Portal Terpadu
-    const supabaseUrl = 'https://duyxtgpkzebmhlouwofl.supabase.co';
-    const supabaseKey = 'sb_publishable_djX-__X2opNMCa3yRU6BdQ_67lqy2Yq'; 
+    const supabaseUrl = 'https://gquohpkbygzkuybgblmp.supabase.co';
+    const supabaseKey = 'sb_publishable_xcOviXGQvu-Ua3U3sRY_wg_AHlCMYMt'; 
     
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -1594,6 +1594,57 @@
             }
         }
 
+        var kelasSudahDitarikMap = {};
+
+        async function tarikDataLengkapKelas(halaqah) {
+            if (!halaqah || typeof halaqah !== 'string' || !halaqah.trim()) return;
+            let cleanKelas = halaqah.trim();
+            let now = Date.now();
+            
+            // Mencegah re-fetch berlebihan jika kelas baru ditarik kurang dari 30 detik lalu
+            if (kelasSudahDitarikMap[cleanKelas] && (now - kelasSudahDitarikMap[cleanKelas] < 30000)) {
+                return;
+            }
+            
+            let encodedKelas = encodeURIComponent(cleanKelas);
+            
+            try {
+                const fetchModulKelas = (tbl) => 
+                    fetch(`${SUPABASE_URL}/rest/v1/${tbl}?kelas=eq.${encodedKelas}&order=id.desc`, { headers: REQ_HEADERS })
+                    .then(r => r.ok ? r.json() : [])
+                    .catch(() => []);
+                
+                const [rS, rA, rH, rKo, rD] = await Promise.all([
+                    fetchModulKelas('setoran'),
+                    fetchModulKelas('aisar'),
+                    fetchModulKelas('hadits'),
+                    fetchModulKelas('kosakata'),
+                    fetchModulKelas('doa')
+                ]);
+                
+                const mergeData = (targetArr, newItems, mapFn) => {
+                    let existingIds = new Set(targetArr.map(x => x.id));
+                    (newItems || []).forEach(r => {
+                        if (r.id && !existingIds.has(r.id)) {
+                            targetArr.push(mapFn(r));
+                            existingIds.add(r.id);
+                        }
+                    });
+                };
+
+                mergeData(dRiw, rS, r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                mergeData(dRiwA, rA, r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                mergeData(dRiwH, rH, r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                mergeData(dRiwK, rKo, r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                mergeData(dRiwD, rD, r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+
+                kalkulasiProgress();
+                kelasSudahDitarikMap[cleanKelas] = now;
+            } catch (e) {
+                console.error("Gagal tarik data lengkap kelas:", e);
+            }
+        }
+
         // --- SISTEM DROPDOWN ---
         function renderLogins() { 
             let s = document.getElementById('select-muhaffiz'); 
@@ -2414,7 +2465,8 @@ async function gantiNamaKelas(namaLama) {
                     // Segarkan seluruh tampilan (Guru Al-Qur'an, Wali Murid, Papan Peringkat/Leaderboard & Modul) secara real-time
                     tampilkanKartuPrestasi();
                     tampilkanDataOrtu();
-                    renderLeaderboard();
+                    let hAktif = document.getElementById('ortu-pilih-halaqah')?.value || document.getElementById('muhaffiz-pilih-halaqah')?.value;
+                    if(hAktif) renderLeaderboard(hAktif);
                     
                     let mod = tabel === 'arab' ? 'kosakata' : tabel;
                     if(mod !== 'setoran') {
@@ -3036,11 +3088,27 @@ async function gantiNamaKelas(namaLama) {
             if(h) renderLeaderboard(h);
         }
 
-        function renderLeaderboard(halaqah) {
+        async function renderLeaderboard(halaqah) {
+            let elHalaqah = document.getElementById('ortu-pilih-halaqah');
+            if (!halaqah && elHalaqah) halaqah = elHalaqah.value;
+            if (!halaqah) {
+                let elMuhaffiz = document.getElementById('muhaffiz-pilih-halaqah');
+                if (elMuhaffiz) halaqah = elMuhaffiz.value;
+            }
+            if (!halaqah) return;
+
             let lb = document.getElementById('ortu-leaderboard'), list = document.getElementById('leaderboard-list');
             let teksJudul = document.getElementById('teks-judul-leaderboard'); 
             let ikonKecil = document.getElementById('ikon-judul-leaderboard');
             let ikonBesar = document.getElementById('ikon-bg-leaderboard');
+
+            if (lb && list && list.children.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:var(--text-mute); font-size:12px; margin-top:20px;">⏳ Memuat peringkat kelas...</p>';
+                lb.style.display = 'block';
+            }
+
+            // TARIK DATA LENGKAP KELAS SECARA ON-DEMAND (HEMAT EGRESS SUPABASE)
+            await tarikDataLengkapKelas(halaqah);
 
             let sameName = (a, b) => a && b && normName(a) === normName(b);
 
@@ -3106,41 +3174,30 @@ async function gantiNamaKelas(namaLama) {
                 else {
                     let targetArr = lbModulAktif === 'aisar' ? fRiwA : (lbModulAktif === 'hadits' ? fRiwH : (lbModulAktif === 'doa' ? fRiwD : fRiwK));
                     
-                    // KELOMPOKKAN MATERI TERBARU PER SUBJEK (NILAI TERBARU PER MATERI MENGGANTIKAN NILAI LAMA)
-                    let latestMateriMap = {};
+                    // KELOMPOKKAN MATERI PER SUBJEK: Gunakan poin tertinggi per materi agar nilai tidak berkurang saat ada review/evaluasi ulang
+                    let materiPoinMap = {};
                     targetArr.forEach(r => {
                         if (sameName(r.santri, nama) && r.materi) {
                             let keyMateri = r.materi.toString().trim().toLowerCase();
-                            if(!latestMateriMap[keyMateri] || (r.id && r.id > (latestMateriMap[keyMateri].id || 0))) {
-                                latestMateriMap[keyMateri] = r;
+                            let st = r.status ? r.status.toString().toLowerCase() : '';
+                            let itemPoin = 0;
+                            if (lbModulAktif === 'hadits' || lbModulAktif === 'doa') {
+                                if (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) itemPoin = 2;
+                                else if (st.includes('cukup')) itemPoin = 10;
+                                else itemPoin = 15;
+                            } else if (lbModulAktif === 'aisar') {
+                                if (st.includes('ulang') || st.includes('belum')) itemPoin = 2;
+                                else itemPoin = 10;
+                            } else if (lbModulAktif === 'arab') {
+                                if (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) itemPoin = 5;
+                                else itemPoin = 10;
                             }
+                            materiPoinMap[keyMateri] = Math.max(materiPoinMap[keyMateri] || 0, itemPoin);
+                            maxId = Math.max(maxId, r.id || 0);
                         }
                     });
 
-                    Object.values(latestMateriMap).forEach(r => {
-                        let st = r.status ? r.status.toString().toLowerCase() : '';
-                        if (lbModulAktif === 'hadits' || lbModulAktif === 'doa') {
-                            if (st.includes('ulang') || st.includes('perlu') || st.includes('belum')) { 
-                                poin += 2; maxId = Math.max(maxId, r.id || 0); 
-                            } else if (st.includes('cukup')) { 
-                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
-                            } else { 
-                                poin += 15; maxId = Math.max(maxId, r.id || 0); 
-                            }
-                        } else if (lbModulAktif === 'aisar') {
-                            if (st.includes('ulang') || st.includes('belum')) { 
-                                poin += 2; maxId = Math.max(maxId, r.id || 0); 
-                            } else { 
-                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
-                            }
-                        } else if (lbModulAktif === 'arab') {
-                            if (st.includes('sedang') || st.includes('proses') || st.includes('ulang')) { 
-                                poin += 5; maxId = Math.max(maxId, r.id || 0); 
-                            } else { 
-                                poin += 10; maxId = Math.max(maxId, r.id || 0); 
-                            }
-                        }
-                    });
+                    poin = Object.values(materiPoinMap).reduce((a, b) => a + b, 0);
                     subTeks = `${poin} Poin`;
                 }
 
@@ -3722,8 +3779,8 @@ async function gantiNamaKelas(namaLama) {
 
         function kalkulasiProgress() {
             dProg = {};
-            for(let i = dRiw.length-1; i >= 0; i--) {
-                let r = dRiw[i];
+            let sortedRiw = [...dRiw].sort((a, b) => (a.id || 0) - (b.id || 0));
+            sortedRiw.forEach(r => {
                 if(r.status === 'Lanjut' && r.santri) {
                     let cleanName = r.santri.trim();
                     let key = normName(cleanName);
@@ -3740,7 +3797,7 @@ async function gantiNamaKelas(namaLama) {
                         dProg[key].ayat = r.ayat; 
                     }
                 }
-            }
+            });
         }
 
         function getStudentProgress(nama) {
