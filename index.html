@@ -1447,13 +1447,13 @@
                     fetchSimple('guru'),
                     fetchSimple('kelas'),
                     fetchSimple('murid'),
-                    fetchSemuaData('setoran?select=id,waktu,kelas,nama_murid,kehadiran,jenis,juz,surah,ayat,tajwid,lancar,makhraj,status,catatan,nama_guru,guru,penguji&order=id.desc', 1500),
-                    fetchSemuaData('aisar?select=id,waktu,kelas,nama_murid,materi,status,catatan,nama_guru,guru,penguji&order=id.desc', 1500),
-                    fetchSemuaData('hadits?select=id,waktu,kelas,nama_murid,materi,status,catatan,nama_guru,guru,penguji&order=id.desc', 1500),
-                    fetchSemuaData('kosakata?select=id,waktu,kelas,nama_murid,materi,status,catatan,nama_guru,guru,penguji&order=id.desc', 1500),
-                    fetchSimple('pesan?select=id,waktu,kelas,nama_murid,pengirim,isi_pesan&order=id.asc'),
-                    fetchSimple('forum_guru?select=id,waktu,pengirim,isi_pesan&order=id.asc'),
-                    fetchSemuaData('doa?select=id,waktu,kelas,nama_murid,materi,status,catatan,nama_guru,guru,penguji&order=id.desc', 1500)
+                    fetchSemuaData('setoran?select=*&order=id.desc', 1500),
+                    fetchSemuaData('aisar?select=*&order=id.desc', 1500),
+                    fetchSemuaData('hadits?select=*&order=id.desc', 1500),
+                    fetchSemuaData('kosakata?select=*&order=id.desc', 1500),
+                    fetchSimple('pesan?select=*&order=id.asc'),
+                    fetchSimple('forum_guru?select=*&order=id.asc'),
+                    fetchSemuaData('doa?select=*&order=id.desc', 1500)
                 ]);
                 
                 const [rG, rK, rM, rS, rA, rH, rKo, rP, rF, rD] = responses;
