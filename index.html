@@ -536,8 +536,8 @@
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabaseUrl = 'https://vskubgfanhgflunslmgg.supabase.co';
-    const supabaseKey = 'sb_publishable_zVY79zF3ZnfpTcAyHfjLRw_gyLCPyDF'; 
+    const supabaseUrl = 'https://ulswjjrxpqxihmcslhwp.supabase.co';
+    const supabaseKey = 'sb_publishable_B8CYNDrpEDB9w9QYenKxkA_NSuWO59t'; 
     const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
   </script>
 </head>
@@ -1125,8 +1125,8 @@
     
     <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 <script>
-        const SUPABASE_URL = 'https://vskubgfanhgflunslmgg.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'sb_publishable_zVY79zF3ZnfpTcAyHfjLRw_gyLCPyDF';
+        const SUPABASE_URL = 'https://ulswjjrxpqxihmcslhwp.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_B8CYNDrpEDB9w9QYenKxkA_NSuWO59t';
         let savedToken = getSafeStorage('supabase_token');
         let REQ_HEADERS = { 
             'apikey': SUPABASE_ANON_KEY, 
