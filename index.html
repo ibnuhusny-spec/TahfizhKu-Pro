@@ -1462,25 +1462,26 @@
                 window.akunSandiMap = {}; 
                 dAkun = [];
                 safe(rG).forEach(g => { 
-                    if(g.nama_guru) {
-                        dAkun.push(g.nama_guru); 
-                        window.akunSandiMap[g.nama_guru] = g.sandi; 
+                    let namaG = (g.nama_guru || g.guru || g.nama || '').trim();
+                    if(namaG) {
+                        dAkun.push(namaG); 
+                        window.akunSandiMap[namaG] = g.sandi || 'guru123'; 
                     }
                 });
 
                 dbP = {}; dbKelasGuru = {};
                 safe(rK).forEach(k => { 
-                    if(k.nama_kelas && k.nama_kelas.trim()) {
-                        let cleanK = k.nama_kelas.trim();
+                    let cleanK = (k.nama_kelas || k.kelas || k.halaqah || '').trim();
+                    if(cleanK) {
                         if(!dbP[cleanK]) dbP[cleanK] = [];
-                        dbKelasGuru[cleanK] = k.nama_guru || ''; 
+                        dbKelasGuru[cleanK] = k.nama_guru || k.guru || ''; 
                     }
                 });
                 
                 safe(rM).forEach(m => { 
-                    if(m.kelas && m.kelas.trim() && m.nama_murid && m.nama_murid.trim()) {
-                        let cleanK = m.kelas.trim();
-                        let cleanM = m.nama_murid.trim();
+                    let cleanK = (m.kelas || m.nama_kelas || m.halaqah || '').trim();
+                    let cleanM = (m.nama_murid || m.santri || m.nama || '').trim();
+                    if(cleanK && cleanM) {
                         if(!dbP[cleanK]) dbP[cleanK] = [];
                         if(!dbP[cleanK].some(x => normName(x) === normName(cleanM))) {
                             dbP[cleanK].push(cleanM);
@@ -1490,8 +1491,8 @@
 
                 [rS, rA, rH, rKo, rD].forEach(records => {
                     safe(records).forEach(r => {
-                        let cleanK = (r.kelas || r.halaqah || '').trim();
-                        let cleanM = (r.nama_murid || r.santri || '').trim();
+                        let cleanK = (r.kelas || r.nama_kelas || r.halaqah || '').trim();
+                        let cleanM = (r.nama_murid || r.santri || r.nama || '').trim();
                         if (cleanK) {
                             if (!dbP[cleanK]) dbP[cleanK] = [];
                             if (cleanM && !dbP[cleanK].some(x => normName(x) === normName(cleanM))) {
@@ -1501,11 +1502,11 @@
                     });
                 });
 
-                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
-                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
-                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
-                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
-                dRiwD = safe(rD).map(r => ({id: r.id, tgl: r.waktu, halaqah: r.kelas, santri: r.nama_murid, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiw = safe(rS).map(r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwA = safe(rA).map(r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwH = safe(rH).map(r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwK = safe(rKo).map(r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                dRiwD = safe(rD).map(r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
                 
                 dPesan = safe(rP).map(r => ({id: r.id, waktu: r.waktu, kelas: r.kelas, nama_murid: r.nama_murid, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
                 dForum = safe(rF).map(r => ({id: r.id, waktu: r.waktu, pengirim: r.pengirim, isi_pesan: r.isi_pesan}));
