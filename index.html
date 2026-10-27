@@ -1123,7 +1123,7 @@
     </div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 6)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
     
-    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan & Rekap Nilai</div><label>Tanggal Tertulis Laporan</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan / Penanggung Jawab</label><input type="text" id="penanggung-jawab" placeholder="Radiant Fadli, S.Pd." value="Radiant Fadli, S.Pd."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="flex:1; background:linear-gradient(135deg, #EF4444, #DC2626); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(239,68,68,0.2);">📄 Cetak PDF</button><button onclick="prosesCetak('Excel')" style="flex:1; background:linear-gradient(135deg, #059669, #047857); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(5,150,105,0.2);">📊 Ekspor Excel</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
+    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan & Rekap Nilai</div><label>Tanggal Tertulis Laporan</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan / Penanggung Jawab</label><input type="text" id="penanggung-jawab" placeholder="Radiant Fadli, S.Pd." value="Radiant Fadli, S.Pd."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="guru">Filter Per Guru Pembimbing (Evaluasi Kinerja)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-guru-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Guru Pembimbing</label><input type="text" id="pilih-guru-laporan" placeholder="🔍 Cari / Pilih Guru Pembimbing..." onkeyup="filterGuruLaporan()" onclick="toggleListGuruLaporan()" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-guru" class="dropdown-custom hidden"></div></div><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label id="label-halaqah-laporan">Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="flex:1; background:linear-gradient(135deg, #EF4444, #DC2626); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(239,68,68,0.2);">📄 Cetak PDF</button><button onclick="prosesCetak('Excel')" style="flex:1; background:linear-gradient(135deg, #059669, #047857); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(5,150,105,0.2);">📊 Ekspor Excel</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 <script>
         const SUPABASE_URL = 'https://ulswjjrxpqxihmcslhwp.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_B8CYNDrpEDB9w9QYenKxkA_NSuWO59t';
@@ -1348,6 +1348,13 @@
                         dropMat.classList.add('hidden');
                     }
                 });
+
+                // Penutup untuk Dropdown Guru Laporan
+                let inGuruLap = document.getElementById('pilih-guru-laporan');
+                let dropGuruLap = document.getElementById('dropdown-laporan-guru');
+                if(inGuruLap && dropGuruLap && !inGuruLap.contains(e.target) && !dropGuruLap.contains(e.target)) {
+                    dropGuruLap.classList.add('hidden');
+                }
             });
             
             let gM = '', gO = '';
@@ -3667,10 +3674,30 @@ async function gantiNamaKelas(namaLama) {
             if (tglEl && !tglEl.value) tglEl.valueAsDate = new Date(); 
             let pjEl = document.getElementById('penanggung-jawab');
             if (pjEl && !pjEl.value) pjEl.value = "Radiant Fadli, S.Pd.";
+            let guruEl = document.getElementById('pilih-guru-laporan');
+            if (guruEl && !guruEl.value && guruAktif) guruEl.value = guruAktif;
             aturFormLaporan(); 
         }
         function tutupModalLaporan() { document.getElementById('modal-laporan').classList.add('hidden'); }
-        function aturFormLaporan() { let v = document.getElementById('jenis-laporan').value; document.getElementById('opsi-halaqah-laporan').className = v==='halaqah'||v==='santri'?'':'hidden'; document.getElementById('opsi-santri-laporan').className = v==='santri'?'':'hidden'; }
+        function aturFormLaporan() { 
+            let v = document.getElementById('jenis-laporan').value; 
+            let boxGuru = document.getElementById('opsi-guru-laporan');
+            let boxHalaqah = document.getElementById('opsi-halaqah-laporan');
+            let boxSantri = document.getElementById('opsi-santri-laporan');
+            let lblHalaqah = document.getElementById('label-halaqah-laporan');
+            let inHalaqah = document.getElementById('pilih-halaqah-laporan');
+
+            if (boxGuru) boxGuru.className = (v === 'guru') ? '' : 'hidden';
+            if (boxHalaqah) boxHalaqah.className = (v === 'halaqah' || v === 'santri' || v === 'guru') ? '' : 'hidden';
+            if (boxSantri) boxSantri.className = (v === 'santri') ? '' : 'hidden';
+            
+            if (lblHalaqah) {
+                lblHalaqah.innerText = (v === 'guru') ? "Pilih Kelas (Opsional - Kosongkan jika seluruh kelas)" : "Pilih Kelas";
+            }
+            if (inHalaqah) {
+                inHalaqah.placeholder = (v === 'guru') ? "🔍 Pilih Kelas (Opsional)..." : "🔍 Cari / Pilih Kelas...";
+            }
+        }
         
         function updateSantriLaporan() { 
             let h = document.getElementById('pilih-halaqah-laporan').value; 
@@ -3687,6 +3714,75 @@ async function gantiNamaKelas(namaLama) {
                     arrSantri.forEach(n => s.appendChild(new Option(n, n)));
                 }
             }
+        }
+
+        function getDaftarSemuaGuru() {
+            let setGuru = new Set();
+            (dAkun || []).forEach(g => {
+                let clean = bersihkanTeks(g);
+                if (clean && clean.length > 2 && clean !== '-') setGuru.add(clean);
+            });
+            [dRiw, dRiwA, dRiwH, dRiwD, dRiwK].forEach(arr => {
+                (arr || []).forEach(r => {
+                    let direct = (r.nama_guru || r.guru || r.penguji || '').trim();
+                    if (direct && direct.length > 2) {
+                        let clean = bersihkanTeks(direct);
+                        if (clean && clean !== '-') setGuru.add(clean);
+                    }
+                });
+            });
+            return Array.from(setGuru).sort((a,b) => a.localeCompare(b, 'id', { sensitivity: 'base' }));
+        }
+
+        function toggleListGuruLaporan() {
+            let dropEl = document.getElementById('dropdown-laporan-guru');
+            if (dropEl) dropEl.classList.remove('hidden');
+            filterGuruLaporan();
+        }
+
+        function filterGuruLaporan() {
+            let elInput = document.getElementById('pilih-guru-laporan');
+            let dropEl = document.getElementById('dropdown-laporan-guru');
+            if (!elInput || !dropEl) return;
+            
+            let val = elInput.value.trim().toLowerCase();
+            let semuaGuru = getDaftarSemuaGuru();
+            let filtered = semuaGuru.filter(g => !val || g.toLowerCase().includes(val));
+            
+            let html = '';
+            filtered.forEach(g => {
+                let escaped = g.replace(/'/g, "\\'");
+                html += `<div class="dropdown-item" onclick="pilihGuruLaporanCustom('${escaped}')">👨‍🏫 ${g}</div>`;
+            });
+            if (html === '') {
+                html = `<div class="dropdown-item" style="color:var(--text-mute); text-align:center;">Guru tidak ditemukan</div>`;
+            }
+            dropEl.innerHTML = html;
+        }
+
+        function pilihGuruLaporanCustom(namaGuru) {
+            let elInput = document.getElementById('pilih-guru-laporan');
+            if (elInput) elInput.value = namaGuru;
+            let dropEl = document.getElementById('dropdown-laporan-guru');
+            if (dropEl) dropEl.classList.add('hidden');
+        }
+
+        function matchGuru(item, targetGuru) {
+            if (!targetGuru) return true;
+            let target = targetGuru.trim().toLowerCase();
+            let directGuru = (item.nama_guru || item.guru || item.penguji || '').trim().toLowerCase();
+            if (directGuru) {
+                return directGuru.includes(target) || target.includes(directGuru);
+            }
+            if (item.catatan && item.catatan.includes('(Guru:')) {
+                let m = item.catatan.match(/\(Guru:\s*([^)]+)\)/i);
+                if (m && m[1]) {
+                    let noteGuru = m[1].trim().toLowerCase();
+                    if (noteGuru.includes(target) || target.includes(noteGuru)) return true;
+                }
+            }
+            let assigned = dapatkanNamaGuru(item).toLowerCase();
+            return assigned.includes(target);
         }
 
         function dapatkanNamaGuruSign(d, th) {
@@ -3707,17 +3803,40 @@ async function gantiNamaKelas(namaLama) {
         
         async function prosesCetak(t) {
             let j = document.getElementById('jenis-laporan').value, 
-                th = document.getElementById('pilih-halaqah-laporan').value, 
-                ts = document.getElementById('pilih-santri-laporan').value, 
+                tg = (document.getElementById('pilih-guru-laporan') ? document.getElementById('pilih-guru-laporan').value : '').trim(),
+                th = (document.getElementById('pilih-halaqah-laporan').value || '').trim(), 
+                ts = (document.getElementById('pilih-santri-laporan').value || '').trim(), 
                 pj = (document.getElementById('penanggung-jawab').value || "Radiant Fadli, S.Pd.").trim(),
                 kat = document.getElementById('kategori-laporan') ? document.getElementById('kategori-laporan').value : "quran"; 
             let tgl = formatTanggalId(document.getElementById('tanggal-laporan').value);
             
+            if (j === 'guru' && !tg) {
+                return alert("⚠️ Silakan pilih atau ketik nama Guru Pembimbing terlebih dahulu!");
+            }
+            if (j === 'halaqah' && !th) {
+                return alert("⚠️ Silakan pilih Kelas terlebih dahulu!");
+            }
+            if (j === 'santri' && (!th || !ts)) {
+                return alert("⚠️ Silakan pilih Kelas dan Murid terlebih dahulu!");
+            }
+
             if (j === 'santri' && ts) {
                 await tarikDataLengkapMurid(ts);
             }
             
-            const filterFn = (arr) => arr.filter(i => (j === 'halaqah' ? (i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase()) : j === 'santri' ? (i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase() && i.santri && ts && i.santri.trim().toLowerCase() === ts.trim().toLowerCase()) : true));
+            const filterFn = (arr) => arr.filter(i => {
+                if (j === 'guru') {
+                    let passG = matchGuru(i, tg);
+                    let passH = !th || (i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase());
+                    return passG && passH;
+                } else if (j === 'halaqah') {
+                    return i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase();
+                } else if (j === 'santri') {
+                    return i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase() && 
+                           i.santri && ts && i.santri.trim().toLowerCase() === ts.trim().toLowerCase();
+                }
+                return true;
+            });
 
             let titleDoc = "";
             let sheetName = "";
@@ -3851,9 +3970,23 @@ async function gantiNamaKelas(namaLama) {
             let nowDownload = new Date();
             let tglDownloadStr = formatTanggalId(nowDownload);
             let jamDownloadStr = String(nowDownload.getHours()).padStart(2, '0') + ':' + String(nowDownload.getMinutes()).padStart(2, '0');
-            let infoFilter = j === 'halaqah' ? `Kelas: ${th}` : (j === 'santri' ? `Kelas: ${th} | Murid: ${ts}` : "Rekap Seluruh Kelas (Global)");
+            
+            let infoFilter = "";
+            if (j === 'guru') {
+                infoFilter = th ? `Guru: ${tg} | Kelas: ${th}` : `Guru Pembimbing: ${tg} (Semua Kelas)`;
+            } else if (j === 'halaqah') {
+                infoFilter = `Kelas: ${th}`;
+            } else if (j === 'santri') {
+                infoFilter = `Kelas: ${th} | Murid: ${ts}`;
+            } else {
+                infoFilter = "Rekap Seluruh Kelas (Global)";
+            }
+
             let curDataList = kat === 'quran' ? filterFn(dRiw) : (kat === 'hadits' ? filterFn(dRiwH) : (kat === 'doa' ? filterFn(dRiwD) : (kat === 'aisar' ? filterFn(dRiwA) : (kat === 'kosakata' ? filterFn(dRiwK) : filterFn(dRiw)))));
-            let namaGuruCetak = dapatkanNamaGuruSign(curDataList, th);
+            let namaGuruCetak = (j === 'guru' && tg) ? tg : dapatkanNamaGuruSign(curDataList, th);
+            let fileSuffix = (j === 'guru' && tg) 
+                ? `_Guru_${tg.replace(/[\s\.\,\|\/]+/g, '_')}${th ? '_' + th.replace(/[\s\.\,\|\/]+/g, '_') : ''}` 
+                : (j === 'halaqah' && th ? `_${th.replace(/[\s\.\,\|\/]+/g, '_')}` : (j === 'santri' && ts ? `_${ts.replace(/[\s\.\,\|\/]+/g, '_')}` : ''));
 
             if (t === 'Excel') { 
                 let wb = XLSX.utils.book_new(); 
@@ -3908,7 +4041,7 @@ async function gantiNamaKelas(namaLama) {
                 ];
                 
                 XLSX.utils.book_append_sheet(wb, ws, sheetName); 
-                XLSX.writeFile(wb, `${sheetName}_${tgl.replace(/\//g, '-')}.xlsx`); 
+                XLSX.writeFile(wb, `${sheetName}${fileSuffix}_${tgl.replace(/\//g, '-')}.xlsx`); 
             } else { 
                 const { jsPDF } = window.jspdf; 
                 let doc = new jsPDF('l', 'mm', 'a4'); 
@@ -4042,7 +4175,7 @@ async function gantiNamaKelas(namaLama) {
 
                 // Tanda Tangan Gambar (jika tersimpan di localStorage)
                 let fotoTTDKepsek = getSafeStorage('ttd_kepsek');
-                let guruSignatureKey = (guruAktif ? 'ttd_' + guruAktif : '');
+                let guruSignatureKey = (j === 'guru' && tg) ? 'ttd_' + tg : (guruAktif ? 'ttd_' + guruAktif : '');
                 let fotoTTDGuru = guruSignatureKey ? getSafeStorage(guruSignatureKey) : null;
 
                 if (fotoTTDKepsek) {
@@ -4089,7 +4222,7 @@ async function gantiNamaKelas(namaLama) {
                     doc.text(`Halaman ${p} dari ${pageCount}`, pageWidth - marginX, 205, { align: "right" });
                 }
 
-                doc.save(`${sheetName}_${tgl.replace(/\//g, '-')}.pdf`); 
+                doc.save(`${sheetName}${fileSuffix}_${tgl.replace(/\//g, '-')}.pdf`); 
             }
             tutupModalLaporan();
         }
