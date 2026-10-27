@@ -1123,7 +1123,73 @@
     </div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 6)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
     
-    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan & Rekap Nilai</div><label>Tanggal Tertulis Laporan</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan / Penanggung Jawab</label><input type="text" id="penanggung-jawab" placeholder="Radiant Fadli, S.Pd." value="Radiant Fadli, S.Pd."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="guru">Filter Per Guru Pembimbing (Evaluasi Kinerja)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-guru-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Guru Pembimbing</label><input type="text" id="pilih-guru-laporan" placeholder="🔍 Cari / Pilih Guru Pembimbing..." onkeyup="filterGuruLaporan()" onclick="toggleListGuruLaporan()" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-guru" class="dropdown-custom hidden"></div></div><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label id="label-halaqah-laporan">Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="flex:1; background:linear-gradient(135deg, #EF4444, #DC2626); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(239,68,68,0.2);">📄 Cetak PDF</button><button onclick="prosesCetak('Excel')" style="flex:1; background:linear-gradient(135deg, #059669, #047857); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(5,150,105,0.2);">📊 Ekspor Excel</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
+    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan & Rekap Nilai</div>
+        <label>Tanggal Tertulis Laporan</label>
+        <input type="date" id="tanggal-laporan">
+        <label>Nama Penandatangan / Penanggung Jawab</label>
+        <input type="text" id="penanggung-jawab" placeholder="Radiant Fadli, S.Pd." value="Radiant Fadli, S.Pd.">
+        <label>Kategori Laporan</label>
+        <select id="kategori-laporan">
+            <option value="quran">Al-Qur'an</option>
+            <option value="hadits">Hadis</option>
+            <option value="doa">Doa Harian</option>
+            <option value="aisar">Aisar</option>
+            <option value="kosakata">Bahasa Arab (Kosakata)</option>
+            <option value="semua">Semua Modul (Gabungan)</option>
+        </select>
+        <label style="font-weight: 700; color: var(--emerald-logo); margin-top: 10px; display: block;">📅 Periode Laporan (Bulan & Tahun)</label>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <select id="filter-bulan-laporan" style="flex: 2; margin: 0; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border-color); font-weight: 600;">
+                <option value="ini" selected>📌 Bulan Ini (Bulan Berjalan)</option>
+                <option value="semua">-- Semua Bulan (Keseluruhan Riwayat) --</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+            </select>
+            <select id="filter-tahun-laporan" style="flex: 1; margin: 0; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border-color); font-weight: 600;">
+                <option value="2026" selected>2026</option>
+                <option value="2025">2025</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+        </div>
+        <label>Mode Cetak</label>
+        <select id="jenis-laporan" onchange="aturFormLaporan()">
+            <option value="semua">Rekap Seluruh Kelas (Global)</option>
+            <option value="guru">Filter Per Guru Pembimbing (Evaluasi Kinerja)</option>
+            <option value="halaqah">Filter Per Kelas Saja</option>
+            <option value="santri">Filter Per Murid Saja</option>
+        </select>
+        <div id="opsi-guru-laporan" class="hidden" style="position: relative; margin-top:10px;">
+            <label>Pilih Guru Pembimbing</label>
+            <input type="text" id="pilih-guru-laporan" placeholder="🔍 Cari / Pilih Guru Pembimbing..." onkeyup="filterGuruLaporan()" onclick="toggleListGuruLaporan()" autocomplete="off" style="margin:0;">
+            <div id="dropdown-laporan-guru" class="dropdown-custom hidden"></div>
+        </div>
+        <div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;">
+            <label id="label-halaqah-laporan">Pilih Kelas</label>
+            <input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;">
+            <div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div>
+        </div>
+        <div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;">
+            <label>Pilih Murid</label>
+            <input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;">
+            <div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="prosesCetak('PDF')" class="btn-danger" style="flex:1; background:linear-gradient(135deg, #EF4444, #DC2626); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(239,68,68,0.2);">📄 Cetak PDF</button>
+            <button onclick="prosesCetak('Excel')" style="flex:1; background:linear-gradient(135deg, #059669, #047857); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(5,150,105,0.2);">📊 Ekspor Excel</button>
+        </div>
+        <button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button>
+    </div></div>
 <script>
         const SUPABASE_URL = 'https://ulswjjrxpqxihmcslhwp.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_B8CYNDrpEDB9w9QYenKxkA_NSuWO59t';
@@ -1143,6 +1209,49 @@
         surahStr.split(',').forEach(s => { let p = s.split(':'); dataSurahLengkap[p[0]] = parseInt(p[1]); });
 
         // FUNGSI UTILITIES
+        const NAMA_BULAN = [
+            "", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        function ambilBulanTahun(tglStr) {
+            if (!tglStr) return null;
+            let s = String(tglStr).trim();
+            if (s.includes('/')) {
+                let p = s.split('/');
+                if (p.length === 3) {
+                    let m = null, y = null;
+                    if (p[2].length >= 4) {
+                        m = parseInt(p[1], 10);
+                        y = parseInt(p[2].substring(0, 4), 10);
+                    } else if (p[0].length >= 4) {
+                        y = parseInt(p[0], 10);
+                        m = parseInt(p[1], 10);
+                    }
+                    if (m && y && !isNaN(m) && !isNaN(y)) return { bulan: m, tahun: y };
+                }
+            }
+            if (s.includes('-')) {
+                let p = s.split('T')[0].split('-');
+                if (p.length === 3) {
+                    let m = null, y = null;
+                    if (p[0].length === 4) {
+                        y = parseInt(p[0], 10);
+                        m = parseInt(p[1], 10);
+                    } else if (p[2].length >= 4) {
+                        m = parseInt(p[1], 10);
+                        y = parseInt(p[2].substring(0, 4), 10);
+                    }
+                    if (m && y && !isNaN(m) && !isNaN(y)) return { bulan: m, tahun: y };
+                }
+            }
+            let d = new Date(tglStr);
+            if (!isNaN(d.getTime())) {
+                return { bulan: d.getMonth() + 1, tahun: d.getFullYear() };
+            }
+            return null;
+        }
+
         function normName(str) {
             if (!str) return "";
             return String(str).trim().replace(/\s+/g, ' ').toLowerCase();
@@ -1639,6 +1748,82 @@
                 kelasSudahDitarikMap[cleanKelas] = now;
             } catch (e) {
                 console.error("Gagal tarik data lengkap kelas:", e);
+            }
+        }
+
+        var bulanSudahDitarikMap = {};
+
+        async function tarikDataBulanJikaPerlu(targetBulan, targetTahun, kat, j, th, tg, ts) {
+            // Jika filter per murid, gunakan tarikDataLengkapMurid (sangat hemat)
+            if (j === 'santri' && ts) {
+                await tarikDataLengkapMurid(ts);
+                return;
+            }
+            // Jika filter per kelas, gunakan tarikDataLengkapKelas (sangat hemat)
+            if (j === 'halaqah' && th) {
+                await tarikDataLengkapKelas(th);
+                return;
+            }
+            // Jika filter per guru dan kelas dipilih
+            if (j === 'guru' && th) {
+                await tarikDataLengkapKelas(th);
+                return;
+            }
+
+            // Jika rekap global atau guru semua kelas, cek apakah bulan ini sudah ada di cache
+            if (targetBulan === null) return;
+
+            let tabelList = [];
+            if (kat === 'quran') tabelList = ['setoran'];
+            else if (kat === 'aisar') tabelList = ['aisar'];
+            else if (kat === 'hadits') tabelList = ['hadits'];
+            else if (kat === 'doa') tabelList = ['doa'];
+            else if (kat === 'kosakata') tabelList = ['kosakata'];
+            else if (kat === 'semua') tabelList = ['setoran', 'aisar', 'hadits', 'doa', 'kosakata'];
+
+            let tablesToFetch = tabelList.filter(tbl => {
+                let cacheKey = `${tbl}_${targetBulan}_${targetTahun}`;
+                return !bulanSudahDitarikMap[cacheKey];
+            });
+
+            if (tablesToFetch.length === 0) return;
+
+            // Query filter waktu yang presisi
+            let queryWaktu = (targetBulan < 10) 
+                ? `or=(waktu.like.*%2F${targetBulan}%2F${targetTahun}*,waktu.like.*%2F0${targetBulan}%2F${targetTahun}*)`
+                : `waktu=like.*%2F${targetBulan}%2F${targetTahun}*`;
+
+            const mergeData = (targetArr, newItems, mapFn) => {
+                let existingIds = new Set(targetArr.map(x => x.id));
+                (newItems || []).forEach(r => {
+                    if (r.id && !existingIds.has(r.id)) {
+                        targetArr.push(mapFn(r));
+                        existingIds.add(r.id);
+                    }
+                });
+            };
+
+            for (let tbl of tablesToFetch) {
+                try {
+                    let ep = `${tbl}?${queryWaktu}&order=id.desc`;
+                    let data = await fetchSemuaData(ep, 3000);
+                    
+                    if (tbl === 'setoran') {
+                        mergeData(dRiw, data, r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, kehadiran: r.kehadiran, jenis: r.jenis, juz: r.juz, surah: r.surah, ayat: r.ayat, tajwid: r.tajwid, lancar: r.lancar, makhraj: r.makhraj, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                    } else if (tbl === 'aisar') {
+                        mergeData(dRiwA, data, r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                    } else if (tbl === 'hadits') {
+                        mergeData(dRiwH, data, r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                    } else if (tbl === 'doa') {
+                        mergeData(dRiwD, data, r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                    } else if (tbl === 'kosakata') {
+                        mergeData(dRiwK, data, r => ({id: r.id, tgl: r.waktu || r.tgl, halaqah: r.kelas || r.nama_kelas || r.halaqah, santri: r.nama_murid || r.santri || r.nama, materi: r.materi, status: r.status, catatan: r.catatan, nama_guru: r.nama_guru || r.guru || r.penguji || ''}));
+                    }
+
+                    bulanSudahDitarikMap[`${tbl}_${targetBulan}_${targetTahun}`] = true;
+                } catch (e) {
+                    console.error(`Gagal tarik data bulan ${targetBulan}/${targetTahun} untuk tabel ${tbl}:`, e);
+                }
             }
         }
 
@@ -3676,6 +3861,10 @@ async function gantiNamaKelas(namaLama) {
             if (pjEl && !pjEl.value) pjEl.value = "Radiant Fadli, S.Pd.";
             let guruEl = document.getElementById('pilih-guru-laporan');
             if (guruEl && !guruEl.value && guruAktif) guruEl.value = guruAktif;
+            let blnEl = document.getElementById('filter-bulan-laporan');
+            if (blnEl) blnEl.value = 'ini';
+            let thnEl = document.getElementById('filter-tahun-laporan');
+            if (thnEl) thnEl.value = String(new Date().getFullYear());
             aturFormLaporan(); 
         }
         function tutupModalLaporan() { document.getElementById('modal-laporan').classList.add('hidden'); }
@@ -3809,6 +3998,23 @@ async function gantiNamaKelas(namaLama) {
                 pj = (document.getElementById('penanggung-jawab').value || "Radiant Fadli, S.Pd.").trim(),
                 kat = document.getElementById('kategori-laporan') ? document.getElementById('kategori-laporan').value : "quran"; 
             let tgl = formatTanggalId(document.getElementById('tanggal-laporan').value);
+
+            let selBulan = document.getElementById('filter-bulan-laporan') ? document.getElementById('filter-bulan-laporan').value : 'ini';
+            let selTahun = document.getElementById('filter-tahun-laporan') ? parseInt(document.getElementById('filter-tahun-laporan').value, 10) : new Date().getFullYear();
+            
+            let targetBulan = null;
+            let targetTahun = selTahun;
+            let teksPeriode = "Semua Riwayat";
+
+            if (selBulan === 'ini') {
+                let now = new Date();
+                targetBulan = now.getMonth() + 1;
+                targetTahun = now.getFullYear();
+                teksPeriode = `${NAMA_BULAN[targetBulan]} ${targetTahun}`;
+            } else if (selBulan !== 'semua') {
+                targetBulan = parseInt(selBulan, 10);
+                teksPeriode = `${NAMA_BULAN[targetBulan]} ${targetTahun}`;
+            }
             
             if (j === 'guru' && !tg) {
                 return alert("⚠️ Silakan pilih atau ketik nama Guru Pembimbing terlebih dahulu!");
@@ -3820,23 +4026,51 @@ async function gantiNamaKelas(namaLama) {
                 return alert("⚠️ Silakan pilih Kelas dan Murid terlebih dahulu!");
             }
 
-            if (j === 'santri' && ts) {
-                await tarikDataLengkapMurid(ts);
+            let btnPdf = document.querySelector("#modal-laporan button[onclick*='PDF']");
+            let btnExcel = document.querySelector("#modal-laporan button[onclick*='Excel']");
+            let activeBtn = t === 'PDF' ? btnPdf : btnExcel;
+            let origBtnText = activeBtn ? activeBtn.innerText : '';
+            if (activeBtn) {
+                activeBtn.innerText = "⏳ Menyiapkan...";
+                activeBtn.disabled = true;
             }
-            
-            const filterFn = (arr) => arr.filter(i => {
-                if (j === 'guru') {
-                    let passG = matchGuru(i, tg);
-                    let passH = !th || (i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase());
-                    return passG && passH;
-                } else if (j === 'halaqah') {
-                    return i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase();
-                } else if (j === 'santri') {
-                    return i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase() && 
-                           i.santri && ts && i.santri.trim().toLowerCase() === ts.trim().toLowerCase();
+
+            try {
+                // Tarik data on-demand yang aman kuota jika diperlukan
+                if (targetBulan !== null) {
+                    await tarikDataBulanJikaPerlu(targetBulan, targetTahun, kat, j, th, tg, ts);
+                } else {
+                    if (j === 'santri' && ts) {
+                        await tarikDataLengkapMurid(ts);
+                    } else if (j === 'halaqah' && th) {
+                        await tarikDataLengkapKelas(th);
+                    } else if (j === 'guru' && th) {
+                        await tarikDataLengkapKelas(th);
+                    }
                 }
-                return true;
-            });
+                
+                const filterFn = (arr) => arr.filter(i => {
+                    // 1. Filter Periode / Bulan
+                    if (targetBulan !== null) {
+                        let bt = ambilBulanTahun(i.tgl);
+                        if (!bt || bt.bulan !== targetBulan || bt.tahun !== targetTahun) {
+                            return false;
+                        }
+                    }
+
+                    // 2. Filter Guru / Kelas / Santri
+                    if (j === 'guru') {
+                        let passG = matchGuru(i, tg);
+                        let passH = !th || (i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase());
+                        return passG && passH;
+                    } else if (j === 'halaqah') {
+                        return i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase();
+                    } else if (j === 'santri') {
+                        return i.halaqah && th && i.halaqah.trim().toLowerCase() === th.trim().toLowerCase() && 
+                               i.santri && ts && i.santri.trim().toLowerCase() === ts.trim().toLowerCase();
+                    }
+                    return true;
+                });
 
             let titleDoc = "";
             let sheetName = "";
@@ -3849,7 +4083,7 @@ async function gantiNamaKelas(namaLama) {
                 titleDoc = "LAPORAN CAPAIAN TAHFIZH AL-QUR'AN";
                 sheetName = "Laporan_Quran";
                 let d = filterFn(dRiw);
-                if (d.length === 0) return alert("Tidak ada data Al-Qur'an untuk dicetak!");
+                if (d.length === 0) return alert(`Tidak ada data Al-Qur'an untuk dicetak pada periode ${teksPeriode}!`);
                 h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Jenis", "Juz", "Surah / Ayat", "Nilai (T,L,M)", "Status", "Catatan"]];
                 b = d.map((i, idx) => [
                     idx + 1,
@@ -3870,7 +4104,7 @@ async function gantiNamaKelas(namaLama) {
                 titleDoc = "LAPORAN CAPAIAN HAFALAN HADIS";
                 sheetName = "Laporan_Hadis";
                 let d = filterFn(dRiwH);
-                if (d.length === 0) return alert("Tidak ada data Hadis untuk dicetak!");
+                if (d.length === 0) return alert(`Tidak ada data Hadis untuk dicetak pada periode ${teksPeriode}!`);
                 h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Nama Hadits", "Status", "Catatan"]];
                 b = d.map((i, idx) => [
                     idx + 1,
@@ -3888,7 +4122,7 @@ async function gantiNamaKelas(namaLama) {
                 titleDoc = "LAPORAN CAPAIAN HAFALAN DOA HARIAN";
                 sheetName = "Laporan_Doa";
                 let d = filterFn(dRiwD);
-                if (d.length === 0) return alert("Tidak ada data Doa Harian untuk dicetak!");
+                if (d.length === 0) return alert(`Tidak ada data Doa Harian untuk dicetak pada periode ${teksPeriode}!`);
                 h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Nama Doa", "Status", "Catatan"]];
                 b = d.map((i, idx) => [
                     idx + 1,
@@ -3906,7 +4140,7 @@ async function gantiNamaKelas(namaLama) {
                 titleDoc = "LAPORAN CAPAIAN BACAAN AISAR";
                 sheetName = "Laporan_Aisar";
                 let d = filterFn(dRiwA);
-                if (d.length === 0) return alert("Tidak ada data Aisar untuk dicetak!");
+                if (d.length === 0) return alert(`Tidak ada data Aisar untuk dicetak pada periode ${teksPeriode}!`);
                 h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Halaman / Materi", "Status", "Catatan"]];
                 b = d.map((i, idx) => [
                     idx + 1,
@@ -3924,7 +4158,7 @@ async function gantiNamaKelas(namaLama) {
                 titleDoc = "LAPORAN CAPAIAN KOSAKATA BAHASA ARAB";
                 sheetName = "Laporan_Arab";
                 let d = filterFn(dRiwK);
-                if (d.length === 0) return alert("Tidak ada data Bahasa Arab untuk dicetak!");
+                if (d.length === 0) return alert(`Tidak ada data Bahasa Arab untuk dicetak pada periode ${teksPeriode}!`);
                 h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Kosakata / Materi", "Status", "Catatan"]];
                 b = d.map((i, idx) => [
                     idx + 1,
@@ -3949,7 +4183,7 @@ async function gantiNamaKelas(namaLama) {
                 filterFn(dRiwA).forEach(i => combined.push({ modul: "Aisar", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, guru: dapatkanNamaGuru(i), detail: i.materi, status: i.status, catatan: bersihkanCatatan(i.catatan) }));
                 filterFn(dRiwK).forEach(i => combined.push({ modul: "Bahasa Arab", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, guru: dapatkanNamaGuru(i), detail: i.materi, status: i.status, catatan: bersihkanCatatan(i.catatan) }));
 
-                if (combined.length === 0) return alert("Tidak ada data untuk dicetak!");
+                if (combined.length === 0) return alert(`Tidak ada data gabungan untuk dicetak pada periode ${teksPeriode}!`);
                 
                 h = [["No", "Kategori Modul", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Detail / Materi", "Status", "Catatan"]];
                 b = combined.map((i, idx) => [
@@ -3987,6 +4221,7 @@ async function gantiNamaKelas(namaLama) {
             let fileSuffix = (j === 'guru' && tg) 
                 ? `_Guru_${tg.replace(/[\s\.\,\|\/]+/g, '_')}${th ? '_' + th.replace(/[\s\.\,\|\/]+/g, '_') : ''}` 
                 : (j === 'halaqah' && th ? `_${th.replace(/[\s\.\,\|\/]+/g, '_')}` : (j === 'santri' && ts ? `_${ts.replace(/[\s\.\,\|\/]+/g, '_')}` : ''));
+            let periodeSuffix = targetBulan !== null ? `_${NAMA_BULAN[targetBulan]}_${targetTahun}` : '';
 
             if (t === 'Excel') { 
                 let wb = XLSX.utils.book_new(); 
@@ -3994,7 +4229,7 @@ async function gantiNamaKelas(namaLama) {
                 let finalData = [
                     ["SDIT QURRATU A'YUN AL-ISLAMI MAROS"],
                     [titleDoc],
-                    ["Filter:", infoFilter, "", "", "Total Data:", `${b.length} Baris`],
+                    ["Filter:", infoFilter, "", "Periode:", teksPeriode, "", "Total Data:", `${b.length} Baris`],
                     ["Tanggal Laporan:", tgl, "", "Penanggung Jawab:", pj, "", "Tanggal Download:", `${tglDownloadStr} ${jamDownloadStr} WITA`],
                     [] // Baris kosong pembatas
                 ];
@@ -4041,7 +4276,7 @@ async function gantiNamaKelas(namaLama) {
                 ];
                 
                 XLSX.utils.book_append_sheet(wb, ws, sheetName); 
-                XLSX.writeFile(wb, `${sheetName}${fileSuffix}_${tgl.replace(/\//g, '-')}.xlsx`); 
+                XLSX.writeFile(wb, `${sheetName}${fileSuffix}${periodeSuffix}_${tgl.replace(/\//g, '-')}.xlsx`); 
             } else { 
                 const { jsPDF } = window.jspdf; 
                 let doc = new jsPDF('l', 'mm', 'a4'); 
@@ -4068,7 +4303,7 @@ async function gantiNamaKelas(namaLama) {
                 doc.setFont("helvetica", "normal"); 
                 doc.setFontSize(8); 
                 doc.setTextColor(100, 116, 139); 
-                doc.text(`Tanggal Laporan: ${tgl}   |   Penanggung Jawab: ${pj}`, pageWidth - marginX, 18, { align: "right" }); 
+                doc.text(`Periode: ${teksPeriode}   |   Tanggal Laporan: ${tgl}   |   Penanggung Jawab: ${pj}`, pageWidth - marginX, 18, { align: "right" }); 
                 doc.text(`Filter: ${infoFilter}   |   Total: ${b.length} Data`, pageWidth - marginX, 23.5, { align: "right" }); 
 
                 doc.setDrawColor(226, 232, 240);
@@ -4222,10 +4457,19 @@ async function gantiNamaKelas(namaLama) {
                     doc.text(`Halaman ${p} dari ${pageCount}`, pageWidth - marginX, 205, { align: "right" });
                 }
 
-                doc.save(`${sheetName}${fileSuffix}_${tgl.replace(/\//g, '-')}.pdf`); 
+                doc.save(`${sheetName}${fileSuffix}${periodeSuffix}_${tgl.replace(/\//g, '-')}.pdf`); 
             }
             tutupModalLaporan();
+        } catch (err) {
+            console.error("Gagal cetak laporan:", err);
+            alert("Terjadi kendala saat memproses laporan: " + (err.message || err));
+        } finally {
+            if (activeBtn) {
+                activeBtn.innerText = origBtnText;
+                activeBtn.disabled = false;
+            }
         }
+    }
 
         function getV(n) { 
             let r = document.querySelector(`input[name="${n}"]:checked`); 
