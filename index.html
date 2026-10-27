@@ -1123,7 +1123,7 @@
     </div></div>
     <div id="modal-ganti-sandi" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Ganti Sandi</div><input type="password" id="input-sandi-lama" placeholder="Sandi Saat Ini"><input type="password" id="input-sandi-baru" placeholder="Sandi Baru (Min. 6)"><input type="password" id="input-sandi-konfirmasi" placeholder="Tulis Ulang"><div style="display:flex; gap:10px; margin-top:20px;"><button class="btn-danger" onclick="tutupModalGantiSandi()">Batal</button><button id="btn-proses-sandi" onclick="prosesGantiSandi()">Simpan</button></div></div></div>
     
-    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan</div><label>Tanggal Tertulis</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan</label><input type="text" id="penanggung-jawab" placeholder="Admin Pusat..."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="background:#EF4444; border:none; color:white;">📄 PDF</button><button onclick="prosesCetak('Excel')">📊 EXCEL</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
+    <div id="modal-laporan" class="modal-overlay hidden"><div class="modal-content"><div class="section-title">Pusat Laporan & Rekap Nilai</div><label>Tanggal Tertulis Laporan</label><input type="date" id="tanggal-laporan"><label>Nama Penandatangan / Penanggung Jawab</label><input type="text" id="penanggung-jawab" placeholder="Radiant Fadli, S.Pd." value="Radiant Fadli, S.Pd."><label>Kategori Laporan</label><select id="kategori-laporan"><option value="quran">Al-Qur'an</option><option value="hadits">Hadis</option><option value="doa">Doa Harian</option><option value="aisar">Aisar</option><option value="kosakata">Bahasa Arab (Kosakata)</option><option value="semua">Semua Modul (Gabungan)</option></select><label>Mode Cetak</label><select id="jenis-laporan" onchange="aturFormLaporan()"><option value="semua">Rekap Seluruh Kelas (Global)</option><option value="halaqah">Filter Per Kelas Saja</option><option value="santri">Filter Per Murid Saja</option></select><div id="opsi-halaqah-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Kelas</label><input type="text" id="pilih-halaqah-laporan" placeholder="🔍 Cari / Pilih Kelas..." onkeyup="filterHalaqah('laporan')" onclick="toggleListHalaqah('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-halaqah" class="dropdown-custom hidden"></div></div><div id="opsi-santri-laporan" class="hidden" style="position: relative; margin-top:10px;"><label>Pilih Murid</label><input type="text" id="pilih-santri-laporan" placeholder="🔍 Cari / Pilih Murid..." onkeyup="filterSantri('laporan')" onclick="toggleListSantri('laporan')" autocomplete="off" style="margin:0;"><div id="dropdown-laporan-santri" class="dropdown-custom hidden"></div></div><div style="display:flex; gap:10px; margin-top:20px;"><button onclick="prosesCetak('PDF')" class="btn-danger" style="flex:1; background:linear-gradient(135deg, #EF4444, #DC2626); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(239,68,68,0.2);">📄 Cetak PDF</button><button onclick="prosesCetak('Excel')" style="flex:1; background:linear-gradient(135deg, #059669, #047857); border:none; color:white; font-weight:800; padding:12px; border-radius:10px; box-shadow:0 4px 6px -1px rgba(5,150,105,0.2);">📊 Ekspor Excel</button></div><button type="button" style="background:#E2E8F0; color:var(--text-dark); border:none; font-weight:900; margin-top:10px;" onclick="tutupModalLaporan()">TUTUP</button></div></div>
 <script>
         const SUPABASE_URL = 'https://ulswjjrxpqxihmcslhwp.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_B8CYNDrpEDB9w9QYenKxkA_NSuWO59t';
@@ -2753,14 +2753,61 @@ async function gantiNamaKelas(namaLama) {
         }
 
         // ===============================================================
+        // FUNGSI PEMBERSIH TEKS, CATATAN & IDENTIFIKASI GURU (ANTI-MOJIBAKE / EMOJI)
+        // ===============================================================
+        function bersihkanTeks(str) {
+            if (str === null || str === undefined) return "";
+            let s = String(str);
+            // Hapus karakter mojibake yang muncul di PDF akibat decode karakter multi-byte / emoji
+            s = s.replace(/Ø=ÜØ?/g, '');
+            s = s.replace(/ðŸ[^\s]*/g, '');
+            // Hapus Unicode Surrogate Pairs (emoji seperti 📘, 📜, 🤲, 🔤, 🚀, dll)
+            s = s.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '');
+            s = s.replace(/[\u2600-\u27BF]/g, '');
+            s = s.replace(/[\uFE00-\uFE0F]/g, '');
+            s = s.replace(/[\u200D]/g, '');
+            // Pertahankan karakter standard Latin, spasi, tanda baca umum, dan karakter hijaiyah/arab
+            s = s.replace(/[^\x20-\x7E\u00A0-\u024F\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/g, '');
+            // Rapikan spasi ganda
+            s = s.replace(/[ \t]+/g, ' ').trim();
+            return s;
+        }
+
+        function bersihkanCatatan(catatan) {
+            if (!catatan) return "-";
+            let c = String(catatan).replace(/\(Guru:\s*[^)]+\)/g, '').trim();
+            c = bersihkanTeks(c);
+            return c || "-";
+        }
+
+        function dapatkanNamaGuru(i) {
+            if(!i) return '-';
+            let ng = (i.nama_guru || i.guru || i.penguji || '').trim();
+            if(ng) return bersihkanTeks(ng);
+            
+            if(i.catatan && i.catatan.includes('(Guru:')) {
+                let m = i.catatan.match(/\(Guru:\s*([^)]+)\)/);
+                if(m && m[1]) return bersihkanTeks(m[1].trim());
+            }
+            
+            if(i.halaqah && typeof dbKelasGuru !== 'undefined' && dbKelasGuru[i.halaqah]) {
+                let kGuru = dbKelasGuru[i.halaqah].trim();
+                if(kGuru) return bersihkanTeks(kGuru);
+            }
+            
+            return '-';
+        }
+
+        // ===============================================================
         // FUNGSI MESIN PENCARI MATERI / HADITS / DOA (CUSTOM DROPDOWN)
         // ===============================================================
         function getDaftarMateriUnik(modul) {
             let arr = modul === 'aisar' ? dRiwA : (modul === 'hadits' ? dRiwH : (modul === 'doa' ? dRiwD : dRiwK));
             let setMateri = new Set();
             arr.forEach(r => {
-                if(r.materi && r.materi !== "-" && r.materi.trim() !== "") {
-                    setMateri.add(r.materi.trim());
+                let mClean = bersihkanTeks(r.materi);
+                if(mClean && mClean !== "-" && mClean.trim() !== "") {
+                    setMateri.add(mClean.trim());
                 }
             });
             return Array.from(setMateri).sort((a,b) => a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' }));
@@ -2802,7 +2849,7 @@ async function gantiNamaKelas(namaLama) {
             let inputId = 'in-' + modul;
             let dropId = 'dropdown-' + modul + '-materi';
             let elInput = document.getElementById(inputId);
-            if(elInput) elInput.value = namaMateri;
+            if(elInput) elInput.value = bersihkanTeks(namaMateri);
             let dropEl = document.getElementById(dropId);
             if(dropEl) dropEl.classList.add('hidden');
         }
@@ -2931,7 +2978,9 @@ async function gantiNamaKelas(namaLama) {
             
             try {
                 let dateVal = document.getElementById('tgl-'+modul).value;
-                let pay = { waktu: formatTanggalId(dateVal), kelas: h, nama_murid: s, materi: document.getElementById('in-'+modul).value || "-", status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-", nama_guru: guruAktif };
+                let rawMat = document.getElementById('in-'+modul).value || "-";
+                let cleanMat = bersihkanTeks(rawMat) || "-";
+                let pay = { waktu: formatTanggalId(dateVal), kelas: h, nama_murid: s, materi: cleanMat, status: document.getElementById('stat-'+modul).value, catatan: document.getElementById('cat-'+modul).value || "-", nama_guru: guruAktif };
                 let reqHeaders = { ...REQ_HEADERS, 'Prefer': 'return=representation' };
                 let res = await fetch(`${SUPABASE_URL}/rest/v1/${modul}`, { method: 'POST', headers: reqHeaders, body: JSON.stringify(pay) });
                 let insertedData = null;
@@ -2958,7 +3007,7 @@ async function gantiNamaKelas(namaLama) {
                     tgl: pay.waktu,
                     halaqah: pay.kelas,
                     santri: pay.nama_murid,
-                    materi: pay.materi,
+                    materi: cleanMat,
                     status: pay.status,
                     catatan: pay.catatan,
                     nama_guru: guruAktif
@@ -2981,19 +3030,6 @@ async function gantiNamaKelas(namaLama) {
             } finally { 
                 if(btn) { btn.innerText = old; btn.disabled = false; } 
             }
-        }
-
-        function dapatkanNamaGuru(i) {
-            if(!i) return '';
-            let ng = (i.nama_guru || i.guru || i.penguji || '').trim();
-            if(ng) return ng;
-            
-            if(i.catatan && i.catatan.includes('(Guru:')) {
-                let m = i.catatan.match(/\(Guru:\s*([^)]+)\)/);
-                if(m && m[1]) return m[1].trim();
-            }
-            
-            return '';
         }
 
         async function tampilkanKartuPrestasi() {
@@ -3625,7 +3661,14 @@ async function gantiNamaKelas(namaLama) {
             }; r.readAsArrayBuffer(f);
         }
 
-        function bukaModalLaporan() { document.getElementById('modal-laporan').classList.remove('hidden'); document.getElementById('tanggal-laporan').valueAsDate = new Date(); aturFormLaporan(); }
+        function bukaModalLaporan() { 
+            document.getElementById('modal-laporan').classList.remove('hidden'); 
+            let tglEl = document.getElementById('tanggal-laporan');
+            if (tglEl && !tglEl.value) tglEl.valueAsDate = new Date(); 
+            let pjEl = document.getElementById('penanggung-jawab');
+            if (pjEl && !pjEl.value) pjEl.value = "Radiant Fadli, S.Pd.";
+            aturFormLaporan(); 
+        }
         function tutupModalLaporan() { document.getElementById('modal-laporan').classList.add('hidden'); }
         function aturFormLaporan() { let v = document.getElementById('jenis-laporan').value; document.getElementById('opsi-halaqah-laporan').className = v==='halaqah'||v==='santri'?'':'hidden'; document.getElementById('opsi-santri-laporan').className = v==='santri'?'':'hidden'; }
         
@@ -3645,12 +3688,28 @@ async function gantiNamaKelas(namaLama) {
                 }
             }
         }
+
+        function dapatkanNamaGuruSign(d, th) {
+            if (guruAktif) return guruAktif;
+            let guruInRecords = (d || []).map(x => dapatkanNamaGuru(x)).filter(g => g && g !== "-" && g.trim() !== "");
+            if (guruInRecords.length > 0) {
+                let counts = {};
+                guruInRecords.forEach(g => { counts[g] = (counts[g] || 0) + 1; });
+                let topGuru = Object.keys(counts).sort((a,b) => counts[b] - counts[a])[0];
+                if (topGuru) return topGuru;
+            }
+            if (th && typeof dbKelasGuru !== 'undefined' && dbKelasGuru[th]) {
+                let firstGuru = dbKelasGuru[th].split(/[|,]/)[0].trim();
+                return firstGuru || dbKelasGuru[th];
+            }
+            return "Guru Pengajar / Muhaffiz";
+        }
         
         async function prosesCetak(t) {
             let j = document.getElementById('jenis-laporan').value, 
                 th = document.getElementById('pilih-halaqah-laporan').value, 
                 ts = document.getElementById('pilih-santri-laporan').value, 
-                pj = document.getElementById('penanggung-jawab').value || "Admin Pusat",
+                pj = (document.getElementById('penanggung-jawab').value || "Radiant Fadli, S.Pd.").trim(),
                 kat = document.getElementById('kategori-laporan') ? document.getElementById('kategori-laporan').value : "quran"; 
             let tgl = formatTanggalId(document.getElementById('tanggal-laporan').value);
             
@@ -3664,91 +3723,372 @@ async function gantiNamaKelas(namaLama) {
             let sheetName = "";
             let h = [];
             let b = [];
-            let colWidths = [];
+            let colWidthsExcel = [];
+            let colWidthsPdf = [];
 
             if (kat === 'quran') {
                 titleDoc = "LAPORAN CAPAIAN TAHFIZH AL-QUR'AN";
                 sheetName = "Laporan_Quran";
                 let d = filterFn(dRiw);
                 if (d.length === 0) return alert("Tidak ada data Al-Qur'an untuk dicetak!");
-                h = [["No", "Waktu", "Kelas", "Nama Murid", "Jenis", "Juz", "Surah/Ayat", "Nilai(T,L,M)", "Status"]];
-                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.jenis, i.juz, `${i.surah}:${i.ayat}`, `T:${i.tajwid},L:${i.lancar},M:${i.makhraj}`, i.status]);
-                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 15}, {wch: 10}, {wch: 25}, {wch: 18}, {wch: 12}];
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Jenis", "Juz", "Surah / Ayat", "Nilai (T,L,M)", "Status", "Catatan"]];
+                b = d.map((i, idx) => [
+                    idx + 1,
+                    bersihkanTeks(i.tgl),
+                    bersihkanTeks(i.halaqah),
+                    bersihkanTeks(i.santri),
+                    dapatkanNamaGuru(i),
+                    bersihkanTeks(i.jenis),
+                    bersihkanTeks(i.juz),
+                    bersihkanTeks(`${i.surah}:${i.ayat}`),
+                    `T:${i.tajwid}, L:${i.lancar}, M:${i.makhraj}`,
+                    bersihkanTeks(i.status),
+                    bersihkanCatatan(i.catatan)
+                ]);
+                colWidthsExcel = [{wch: 6}, {wch: 14}, {wch: 20}, {wch: 32}, {wch: 25}, {wch: 14}, {wch: 10}, {wch: 25}, {wch: 20}, {wch: 14}, {wch: 45}];
+                colWidthsPdf = [10, 18, 24, 38, 32, 18, 12, 30, 22, 17, 48];
             } else if (kat === 'hadits') {
                 titleDoc = "LAPORAN CAPAIAN HAFALAN HADIS";
                 sheetName = "Laporan_Hadis";
                 let d = filterFn(dRiwH);
                 if (d.length === 0) return alert("Tidak ada data Hadis untuk dicetak!");
-                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Hadits", "Status", "Catatan"]];
-                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
-                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Nama Hadits", "Status", "Catatan"]];
+                b = d.map((i, idx) => [
+                    idx + 1,
+                    bersihkanTeks(i.tgl),
+                    bersihkanTeks(i.halaqah),
+                    bersihkanTeks(i.santri),
+                    dapatkanNamaGuru(i),
+                    bersihkanTeks(i.materi),
+                    bersihkanTeks(i.status),
+                    bersihkanCatatan(i.catatan)
+                ]);
+                colWidthsExcel = [{wch: 6}, {wch: 14}, {wch: 20}, {wch: 32}, {wch: 25}, {wch: 38}, {wch: 14}, {wch: 45}];
+                colWidthsPdf = [10, 20, 28, 42, 35, 45, 18, 71];
             } else if (kat === 'doa') {
                 titleDoc = "LAPORAN CAPAIAN HAFALAN DOA HARIAN";
                 sheetName = "Laporan_Doa";
                 let d = filterFn(dRiwD);
                 if (d.length === 0) return alert("Tidak ada data Doa Harian untuk dicetak!");
-                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Doa", "Status", "Catatan"]];
-                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
-                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Nama Doa", "Status", "Catatan"]];
+                b = d.map((i, idx) => [
+                    idx + 1,
+                    bersihkanTeks(i.tgl),
+                    bersihkanTeks(i.halaqah),
+                    bersihkanTeks(i.santri),
+                    dapatkanNamaGuru(i),
+                    bersihkanTeks(i.materi),
+                    bersihkanTeks(i.status),
+                    bersihkanCatatan(i.catatan)
+                ]);
+                colWidthsExcel = [{wch: 6}, {wch: 14}, {wch: 20}, {wch: 32}, {wch: 25}, {wch: 38}, {wch: 14}, {wch: 45}];
+                colWidthsPdf = [10, 20, 28, 42, 35, 45, 18, 71];
             } else if (kat === 'aisar') {
                 titleDoc = "LAPORAN CAPAIAN BACAAN AISAR";
                 sheetName = "Laporan_Aisar";
                 let d = filterFn(dRiwA);
                 if (d.length === 0) return alert("Tidak ada data Aisar untuk dicetak!");
-                h = [["No", "Waktu", "Kelas", "Nama Murid", "Halaman / Materi", "Status", "Catatan"]];
-                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
-                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Halaman / Materi", "Status", "Catatan"]];
+                b = d.map((i, idx) => [
+                    idx + 1,
+                    bersihkanTeks(i.tgl),
+                    bersihkanTeks(i.halaqah),
+                    bersihkanTeks(i.santri),
+                    dapatkanNamaGuru(i),
+                    bersihkanTeks(i.materi),
+                    bersihkanTeks(i.status),
+                    bersihkanCatatan(i.catatan)
+                ]);
+                colWidthsExcel = [{wch: 6}, {wch: 14}, {wch: 20}, {wch: 32}, {wch: 25}, {wch: 35}, {wch: 14}, {wch: 45}];
+                colWidthsPdf = [10, 20, 28, 42, 35, 42, 18, 74];
             } else if (kat === 'kosakata') {
                 titleDoc = "LAPORAN CAPAIAN KOSAKATA BAHASA ARAB";
                 sheetName = "Laporan_Arab";
                 let d = filterFn(dRiwK);
                 if (d.length === 0) return alert("Tidak ada data Bahasa Arab untuk dicetak!");
-                h = [["No", "Waktu", "Kelas", "Nama Murid", "Kosakata / Materi", "Status", "Catatan"]];
-                b = d.map((i, idx) => [idx + 1, i.tgl, i.halaqah, i.santri, i.materi, i.status, i.catatan || "-"]);
-                colWidths = [{wch: 5}, {wch: 15}, {wch: 25}, {wch: 25}, {wch: 30}, {wch: 15}, {wch: 30}];
+                h = [["No", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Kosakata / Materi", "Status", "Catatan"]];
+                b = d.map((i, idx) => [
+                    idx + 1,
+                    bersihkanTeks(i.tgl),
+                    bersihkanTeks(i.halaqah),
+                    bersihkanTeks(i.santri),
+                    dapatkanNamaGuru(i),
+                    bersihkanTeks(i.materi),
+                    bersihkanTeks(i.status),
+                    bersihkanCatatan(i.catatan)
+                ]);
+                colWidthsExcel = [{wch: 6}, {wch: 14}, {wch: 20}, {wch: 32}, {wch: 25}, {wch: 35}, {wch: 14}, {wch: 45}];
+                colWidthsPdf = [10, 20, 28, 42, 35, 45, 18, 71];
             } else if (kat === 'semua') {
                 titleDoc = "LAPORAN GABUNGAN CAPAIAN SANTRI";
                 sheetName = "Laporan_Gabungan";
                 
                 let combined = [];
-                filterFn(dRiw).forEach(i => combined.push({ modul: "Al-Qur'an", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: `${i.jenis} - Juz ${i.juz} (${i.surah}:${i.ayat}) [T:${i.tajwid},L:${i.lancar},M:${i.makhraj}]`, status: i.status, catatan: i.catatan || "-" }));
-                filterFn(dRiwH).forEach(i => combined.push({ modul: "Hadis", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
-                filterFn(dRiwD).forEach(i => combined.push({ modul: "Doa Harian", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
-                filterFn(dRiwA).forEach(i => combined.push({ modul: "Aisar", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
-                filterFn(dRiwK).forEach(i => combined.push({ modul: "Bahasa Arab", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, detail: i.materi, status: i.status, catatan: i.catatan || "-" }));
+                filterFn(dRiw).forEach(i => combined.push({ modul: "Al-Qur'an", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, guru: dapatkanNamaGuru(i), detail: `${i.jenis} - Juz ${i.juz} (${i.surah}:${i.ayat}) [T:${i.tajwid},L:${i.lancar},M:${i.makhraj}]`, status: i.status, catatan: bersihkanCatatan(i.catatan) }));
+                filterFn(dRiwH).forEach(i => combined.push({ modul: "Hadis", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, guru: dapatkanNamaGuru(i), detail: i.materi, status: i.status, catatan: bersihkanCatatan(i.catatan) }));
+                filterFn(dRiwD).forEach(i => combined.push({ modul: "Doa Harian", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, guru: dapatkanNamaGuru(i), detail: i.materi, status: i.status, catatan: bersihkanCatatan(i.catatan) }));
+                filterFn(dRiwA).forEach(i => combined.push({ modul: "Aisar", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, guru: dapatkanNamaGuru(i), detail: i.materi, status: i.status, catatan: bersihkanCatatan(i.catatan) }));
+                filterFn(dRiwK).forEach(i => combined.push({ modul: "Bahasa Arab", tgl: i.tgl, halaqah: i.halaqah, santri: i.santri, guru: dapatkanNamaGuru(i), detail: i.materi, status: i.status, catatan: bersihkanCatatan(i.catatan) }));
 
                 if (combined.length === 0) return alert("Tidak ada data untuk dicetak!");
                 
-                h = [["No", "Kategori Modul", "Waktu", "Kelas", "Nama Murid", "Detail / Materi", "Status", "Catatan"]];
-                b = combined.map((i, idx) => [idx + 1, i.modul, i.tgl, i.halaqah, i.santri, i.detail, i.status, i.catatan]);
-                colWidths = [{wch: 5}, {wch: 15}, {wch: 15}, {wch: 22}, {wch: 22}, {wch: 35}, {wch: 12}, {wch: 25}];
+                h = [["No", "Kategori Modul", "Waktu", "Kelas", "Nama Murid", "Nama Pengajar", "Detail / Materi", "Status", "Catatan"]];
+                b = combined.map((i, idx) => [
+                    idx + 1,
+                    bersihkanTeks(i.modul),
+                    bersihkanTeks(i.tgl),
+                    bersihkanTeks(i.halaqah),
+                    bersihkanTeks(i.santri),
+                    bersihkanTeks(i.guru),
+                    bersihkanTeks(i.detail),
+                    bersihkanTeks(i.status),
+                    bersihkanCatatan(i.catatan)
+                ]);
+                colWidthsExcel = [{wch: 6}, {wch: 16}, {wch: 14}, {wch: 20}, {wch: 32}, {wch: 25}, {wch: 40}, {wch: 14}, {wch: 45}];
+                colWidthsPdf = [10, 22, 18, 24, 36, 30, 45, 16, 68];
             }
             
+            let nowDownload = new Date();
+            let tglDownloadStr = formatTanggalId(nowDownload);
+            let jamDownloadStr = String(nowDownload.getHours()).padStart(2, '0') + ':' + String(nowDownload.getMinutes()).padStart(2, '0');
+            let infoFilter = j === 'halaqah' ? `Kelas: ${th}` : (j === 'santri' ? `Kelas: ${th} | Murid: ${ts}` : "Rekap Seluruh Kelas (Global)");
+            let curDataList = kat === 'quran' ? filterFn(dRiw) : (kat === 'hadits' ? filterFn(dRiwH) : (kat === 'doa' ? filterFn(dRiwD) : (kat === 'aisar' ? filterFn(dRiwA) : (kat === 'kosakata' ? filterFn(dRiwK) : filterFn(dRiw)))));
+            let namaGuruCetak = dapatkanNamaGuruSign(curDataList, th);
+
             if (t === 'Excel') { 
                 let wb = XLSX.utils.book_new(); 
+                let numCols = h[0].length;
                 let finalData = [
                     ["SDIT QURRATU A'YUN AL-ISLAMI MAROS"],
                     [titleDoc],
-                    ["Tanggal Cetak:", tgl, "", "Penanggung Jawab:", pj],
-                    [] 
+                    ["Filter:", infoFilter, "", "", "Total Data:", `${b.length} Baris`],
+                    ["Tanggal Laporan:", tgl, "", "Penanggung Jawab:", pj, "", "Tanggal Download:", `${tglDownloadStr} ${jamDownloadStr} WITA`],
+                    [] // Baris kosong pembatas
                 ];
-                finalData = finalData.concat([h[0]], b);
-                let ws = XLSX.utils.aoa_to_sheet(finalData); 
                 
-                ws['!cols'] = colWidths;
+                finalData.push(h[0]);
+                finalData = finalData.concat(b);
+                finalData.push([]);
+                finalData.push([]);
+
+                let signRow1 = new Array(numCols).fill("");
+                signRow1[1] = "Mengetahui,";
+                signRow1[Math.max(2, numCols - 2)] = `Maros, ${tgl}`;
+                finalData.push(signRow1);
+
+                let signRow2 = new Array(numCols).fill("");
+                signRow2[1] = "Penanggung Jawab / Kepala Sekolah";
+                signRow2[Math.max(2, numCols - 2)] = "Guru Pengajar / Muhaffiz";
+                finalData.push(signRow2);
+
+                finalData.push(new Array(numCols).fill(""));
+                finalData.push(new Array(numCols).fill(""));
+                finalData.push(new Array(numCols).fill(""));
+
+                let signRow3 = new Array(numCols).fill("");
+                signRow3[1] = `( ${pj} )`;
+                signRow3[Math.max(2, numCols - 2)] = `( ${namaGuruCetak} )`;
+                finalData.push(signRow3);
+
+                let signRow4 = new Array(numCols).fill("");
+                signRow4[1] = "Kepala SDIT Qurratu A'yun";
+                signRow4[Math.max(2, numCols - 2)] = "Pengajar Tahfizh & Al-Qur'an";
+                finalData.push(signRow4);
+
+                finalData.push([]);
+                let signRow5 = new Array(numCols).fill("");
+                signRow5[0] = `* Dokumen resmi diunduh otomatis dari Sistem TahfizhKu Pro pada ${tglDownloadStr} pukul ${jamDownloadStr} WITA`;
+                finalData.push(signRow5);
+
+                let ws = XLSX.utils.aoa_to_sheet(finalData); 
+                ws['!cols'] = colWidthsExcel;
+                ws['!merges'] = [
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: numCols - 1 } },
+                    { s: { r: 1, c: 0 }, e: { r: 1, c: numCols - 1 } }
+                ];
                 
                 XLSX.utils.book_append_sheet(wb, ws, sheetName); 
                 XLSX.writeFile(wb, `${sheetName}_${tgl.replace(/\//g, '-')}.xlsx`); 
             } else { 
                 const { jsPDF } = window.jspdf; 
-                let doc = new jsPDF('l'); 
-                doc.setFontSize(15); 
+                let doc = new jsPDF('l', 'mm', 'a4'); 
+                let pageWidth = 297;
+                let marginX = 14;
+                let printWidth = pageWidth - (marginX * 2);
+
+                // Header & Kop Laporan Menarik
+                doc.setFillColor(4, 120, 87); // Emerald (#047857)
+                doc.rect(marginX, 9, printWidth, 2, 'F');
+                doc.setFillColor(217, 119, 6); // Gold Accent (#D97706)
+                doc.rect(marginX, 11.2, printWidth, 0.8, 'F');
+
+                doc.setFont("helvetica", "bold"); 
+                doc.setFontSize(13); 
                 doc.setTextColor(4, 120, 87); 
-                doc.text(`${titleDoc} - SDIT Qurratu A'yun`, 14, 15); 
-                doc.setFontSize(10); 
+                doc.text("SDIT QURRATU A'YUN AL-ISLAMI MAROS", marginX, 18); 
+
+                doc.setFont("helvetica", "bold"); 
+                doc.setFontSize(10.5); 
+                doc.setTextColor(30, 41, 59); 
+                doc.text(titleDoc, marginX, 23.5); 
+
+                doc.setFont("helvetica", "normal"); 
+                doc.setFontSize(8); 
                 doc.setTextColor(100, 116, 139); 
-                doc.text(`Tanggal: ${tgl} | Penanggung Jawab: ${pj}`, 14, 22); 
-                doc.autoTable({ head: h, body: b, startY: 26, theme: 'grid', headStyles: { fillColor: [4, 120, 87] } }); 
+                doc.text(`Tanggal Laporan: ${tgl}   |   Penanggung Jawab: ${pj}`, pageWidth - marginX, 18, { align: "right" }); 
+                doc.text(`Filter: ${infoFilter}   |   Total: ${b.length} Data`, pageWidth - marginX, 23.5, { align: "right" }); 
+
+                doc.setDrawColor(226, 232, 240);
+                doc.setLineWidth(0.3);
+                doc.line(marginX, 26, pageWidth - marginX, 26);
+
+                // AutoTable Konfigurasi Lengkap
+                let statusColIndex = h[0].indexOf("Status");
+                let colStylesConfig = {};
+                colWidthsPdf.forEach((w, idx) => {
+                    colStylesConfig[idx] = { cellWidth: w };
+                });
+                colStylesConfig[0] = { ...colStylesConfig[0], halign: 'center' };
+                colStylesConfig[1] = { ...colStylesConfig[1], halign: 'center' };
+                if (h[0].indexOf("Nilai (T,L,M)") !== -1) {
+                    colStylesConfig[h[0].indexOf("Nilai (T,L,M)")] = { ...colStylesConfig[h[0].indexOf("Nilai (T,L,M)")], halign: 'center' };
+                }
+                if (h[0].indexOf("Jenis") !== -1) {
+                    colStylesConfig[h[0].indexOf("Jenis")] = { ...colStylesConfig[h[0].indexOf("Jenis")], halign: 'center' };
+                }
+                if (h[0].indexOf("Juz") !== -1) {
+                    colStylesConfig[h[0].indexOf("Juz")] = { ...colStylesConfig[h[0].indexOf("Juz")], halign: 'center' };
+                }
+                if (statusColIndex !== -1) {
+                    colStylesConfig[statusColIndex] = { ...colStylesConfig[statusColIndex], halign: 'center', fontStyle: 'bold' };
+                }
+                let namaMuridIdx = h[0].indexOf("Nama Murid");
+                if (namaMuridIdx !== -1) {
+                    colStylesConfig[namaMuridIdx] = { ...colStylesConfig[namaMuridIdx], fontStyle: 'bold' };
+                }
+
+                doc.autoTable({ 
+                    head: h, 
+                    body: b, 
+                    startY: 28, 
+                    theme: 'grid', 
+                    styles: { 
+                        font: 'helvetica',
+                        fontSize: 7.5,
+                        cellPadding: { top: 2.2, bottom: 2.2, left: 2, right: 2 },
+                        lineColor: [226, 232, 240],
+                        lineWidth: 0.15,
+                        valign: 'middle',
+                        overflow: 'linebreak'
+                    }, 
+                    headStyles: { 
+                        fillColor: [4, 120, 87],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: 8,
+                        halign: 'center',
+                        valign: 'middle',
+                        cellPadding: 2.8
+                    },
+                    alternateRowStyles: { 
+                        fillColor: [248, 250, 252] 
+                    },
+                    columnStyles: colStylesConfig,
+                    didParseCell: function(data) {
+                        if (data.section === 'body' && data.column.index === statusColIndex) {
+                            let val = String(data.cell.raw).trim().toLowerCase();
+                            if (val.includes('lanjut')) {
+                                data.cell.styles.textColor = [4, 120, 87];
+                                data.cell.styles.fontStyle = 'bold';
+                            } else if (val.includes('ulang')) {
+                                data.cell.styles.textColor = [220, 38, 38];
+                                data.cell.styles.fontStyle = 'bold';
+                            }
+                        }
+                    },
+                    margin: { left: marginX, right: marginX, bottom: 16 }
+                }); 
+
+                // Bagian Bawah: Tanggal Download, Nama Penanggung Jawab, Kolom Tanda Tangan
+                let finalY = doc.lastAutoTable.finalY || 35;
+                if (finalY + 45 > 192) {
+                    doc.addPage();
+                    finalY = 20;
+                }
+
+                let signY = finalY + 7;
+                doc.setFont("helvetica", "italic");
+                doc.setFontSize(7.5);
+                doc.setTextColor(100, 116, 139);
+                doc.text(`* Diunduh secara resmi dari Sistem TahfizhKu Pro pada: ${tglDownloadStr} pukul ${jamDownloadStr} WITA`, marginX, signY);
+
+                let col1X = marginX + 45;
+                let col2X = pageWidth - marginX - 45;
+                let textSignY = signY + 6;
+
+                // Kiri: Penanggung Jawab
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8.5);
+                doc.setTextColor(30, 41, 59);
+                doc.text("Mengetahui,", col1X, textSignY, { align: "center" });
+                doc.setFont("helvetica", "bold");
+                doc.text("Penanggung Jawab / Kepala Sekolah", col1X, textSignY + 4.5, { align: "center" });
+
+                // Kanan: Guru Pengajar
+                doc.setFont("helvetica", "normal");
+                doc.text(`Maros, ${tgl}`, col2X, textSignY, { align: "center" });
+                doc.setFont("helvetica", "bold");
+                doc.text("Guru Pengajar / Muhaffiz", col2X, textSignY + 4.5, { align: "center" });
+
+                // Tanda Tangan Gambar (jika tersimpan di localStorage)
+                let fotoTTDKepsek = getSafeStorage('ttd_kepsek');
+                let guruSignatureKey = (guruAktif ? 'ttd_' + guruAktif : '');
+                let fotoTTDGuru = guruSignatureKey ? getSafeStorage(guruSignatureKey) : null;
+
+                if (fotoTTDKepsek) {
+                    try { doc.addImage(fotoTTDKepsek, 'PNG', col1X - 20, textSignY + 6, 40, 15); } catch(e) {}
+                }
+                if (fotoTTDGuru) {
+                    try { doc.addImage(fotoTTDGuru, 'PNG', col2X - 20, textSignY + 6, 40, 15); } catch(e) {}
+                }
+
+                let nameY = textSignY + 24;
+
+                // Nama Penanggung Jawab
+                doc.setFont("times", "bold");
+                doc.setFontSize(9.5);
+                doc.setTextColor(15, 23, 42);
+                doc.text(`( ${pj} )`, col1X, nameY, { align: "center" });
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(7.5);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Kepala SDIT Qurratu A'yun", col1X, nameY + 4, { align: "center" });
+
+                // Nama Guru Pengajar
+                doc.setFont("times", "bold");
+                doc.setFontSize(9.5);
+                doc.setTextColor(15, 23, 42);
+                doc.text(`( ${namaGuruCetak} )`, col2X, nameY, { align: "center" });
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(7.5);
+                doc.setTextColor(100, 116, 139);
+                doc.text("Pengajar Tahfizh & Al-Qur'an", col2X, nameY + 4, { align: "center" });
+
+                // Footer Nomor Halaman di setiap lembar
+                let pageCount = doc.internal.getNumberOfPages();
+                for (let p = 1; p <= pageCount; p++) {
+                    doc.setPage(p);
+                    doc.setDrawColor(226, 232, 240);
+                    doc.setLineWidth(0.3);
+                    doc.line(marginX, 201, pageWidth - marginX, 201);
+                    
+                    doc.setFont("helvetica", "normal");
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(148, 163, 184);
+                    doc.text("TahfizhKu Pro v2.0 • SDIT Qurratu A'yun Al-Islami Maros", marginX, 205);
+                    doc.text(`Halaman ${p} dari ${pageCount}`, pageWidth - marginX, 205, { align: "right" });
+                }
+
                 doc.save(`${sheetName}_${tgl.replace(/\//g, '-')}.pdf`); 
             }
             tutupModalLaporan();
